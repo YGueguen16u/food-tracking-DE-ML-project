@@ -1,0 +1,8 @@
+env/
+steps
+DB/
+model_and _weight/
+web_site/
+key
+key.pub
+bfg-1.14.0.jar

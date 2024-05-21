@@ -1,0 +1,15 @@
+
+
+* Reception texte client
+
+* Préprocess Data
+
+* Autocorrect
+
+* Tagging word (NER)
+
+	* Reconnaissance variation d'entités, celles en plusieurs mots
+
+* Normalisation unité
+
+* Computation macro and micro

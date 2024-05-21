@@ -1,0 +1,90 @@
+<div class="row list-row ">
+<ul class="col-sm-6 list-primary list-circle-big">
+<li>
+<div class="list-item-image-wrapper">
+<picture data-alt="Alcools forts et spiritueux" data-default-src="https://images.yazio.com/hardliquor.jpg?w=80&amp;h=80&amp;cf&amp;q=90">
+<source srcset="https://images.yazio.com/hardliquor.jpg?w=80&amp;h=80&amp;cf&amp;q=90,
+                                    https://images.yazio.com/hardliquor.jpg?w=160&amp;h=160&amp;cf&amp;q=90 2x">
+<img src="" alt="Alcools forts et spiritueux" title="Alcools forts et spiritueux" class="list-item-image img-circle" width="80" height="80">
+</picture>
+</div>
+<div class="list-item-group">
+<div class="list-item-table table">
+<div class="list-item-block table-cell vertical-middle">
+<a href="https://www.yazio.com/fr/aliments/alcools-forts-spiritueux" class="link ">
+Alcools forts et spiritueux </a>
+<p class="list-item-description">
+contient 5 aliments.
+</p>
+</div>
+<span class="list-item-text table-cell vertical-middle icon icon-yz_20-001-right-open"></span>
+</div>
+</div>
+</li>
+<li>
+<div class="list-item-image-wrapper">
+<picture data-alt="Bière" data-default-src="https://images.yazio.com/beer.jpg?w=80&amp;h=80&amp;cf&amp;q=90">
+<source srcset="https://images.yazio.com/beer.jpg?w=80&amp;h=80&amp;cf&amp;q=90,
+                                    https://images.yazio.com/beer.jpg?w=160&amp;h=160&amp;cf&amp;q=90 2x">
+<img src="" alt="Bière" title="Bière" class="list-item-image img-circle" width="80" height="80">
+</picture>
+</div>
+<div class="list-item-group">
+<div class="list-item-table table">
+<div class="list-item-block table-cell vertical-middle">
+<a href="https://www.yazio.com/fr/aliments/biere" class="link ">
+Bière </a>
+<p class="list-item-description">
+contient 7 aliments.
+</p>
+</div>
+<span class="list-item-text table-cell vertical-middle icon icon-yz_20-001-right-open"></span>
+</div>
+</div>
+</li>
+</ul>
+<ul class="col-sm-6 list-primary list-circle-big">
+<li>
+<div class="list-item-image-wrapper">
+<picture data-alt="Cocktails" data-default-src="https://images.yazio.com/cocktails.jpg?w=80&amp;h=80&amp;cf&amp;q=90">
+<source srcset="https://images.yazio.com/cocktails.jpg?w=80&amp;h=80&amp;cf&amp;q=90,
+                                    https://images.yazio.com/cocktails.jpg?w=160&amp;h=160&amp;cf&amp;q=90 2x">
+<img src="" alt="Cocktails" title="Cocktails" class="list-item-image img-circle" width="80" height="80">
+</picture>
+</div>
+<div class="list-item-group">
+<div class="list-item-table table">
+<div class="list-item-block table-cell vertical-middle">
+<a href="https://www.yazio.com/fr/aliments/cocktails" class="link ">
+Cocktails </a>
+<p class="list-item-description">
+contient 5 aliments.
+</p>
+</div>
+<span class="list-item-text table-cell vertical-middle icon icon-yz_20-001-right-open"></span>
+</div>
+</div>
+</li>
+<li>
+<div class="list-item-image-wrapper">
+<picture data-alt="Vin" data-default-src="https://images.yazio.com/wine.jpg?w=80&amp;h=80&amp;cf&amp;q=90">
+<source srcset="https://images.yazio.com/wine.jpg?w=80&amp;h=80&amp;cf&amp;q=90,
+                                    https://images.yazio.com/wine.jpg?w=160&amp;h=160&amp;cf&amp;q=90 2x">
+<img src="" alt="Vin" title="Vin" class="list-item-image img-circle" width="80" height="80">
+</picture>
+</div>
+<div class="list-item-group">
+<div class="list-item-table table">
+<div class="list-item-block table-cell vertical-middle">
+<a href="https://www.yazio.com/fr/aliments/vin" class="link ">
+Vin </a>
+<p class="list-item-description">
+contient 36 aliments.
+</p>
+</div>
+<span class="list-item-text table-cell vertical-middle icon icon-yz_20-001-right-open"></span>
+</div>
+</div>
+</li>
+</ul>
+</div>

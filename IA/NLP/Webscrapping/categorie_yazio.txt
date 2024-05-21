@@ -1,0 +1,316 @@
+<div class="col-12 pl-0 pr-0 mt-8">
+<div class="d-flex flex-wrap justify-content-center justify-content-lg-start">
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/boissons-alcoolisees" title="Boissons alcoolisées">
+<picture data-alt="Boissons alcoolisées" data-default-src="https://images.yazio.com/drinksalcoholic.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/drinksalcoholic.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/drinksalcoholic.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/drinksalcoholic.jpg?w=312&amp;h=176&amp;cf" alt="Boissons alcoolisées" title="Boissons alcoolisées" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Boissons alcoolisées</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/boissons-non-alcoolisees" title="Boissons non-alcoolisées">
+<picture data-alt="Boissons non-alcoolisées" data-default-src="https://images.yazio.com/drinksnonalcoholic.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/drinksnonalcoholic.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/drinksnonalcoholic.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/drinksnonalcoholic.jpg?w=312&amp;h=176&amp;cf" alt="Boissons non-alcoolisées" title="Boissons non-alcoolisées" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Boissons non-alcoolisées</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/divers" title="Divers">
+<picture data-alt="Divers" data-default-src="https://images.yazio.com/miscellaneous.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/miscellaneous.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/miscellaneous.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/miscellaneous.jpg?w=312&amp;h=176&amp;cf" alt="Divers" title="Divers" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Divers</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/fast-food" title="Fast food">
+<picture data-alt="Fast food" data-default-src="https://images.yazio.com/fastfood.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/fastfood.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/fastfood.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/fastfood.jpg?w=312&amp;h=176&amp;cf" alt="Fast food" title="Fast food" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Fast food</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/fines-herbes-epices" title="Fines herbes et épices">
+<picture data-alt="Fines herbes et épices" data-default-src="https://images.yazio.com/spices.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/spices.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/spices.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/spices.jpg?w=312&amp;h=176&amp;cf" alt="Fines herbes et épices" title="Fines herbes et épices" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Fines herbes et épices</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/friandises" title="Friandises">
+<picture data-alt="Friandises" data-default-src="https://images.yazio.com/candy.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/candy.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/candy.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/candy.jpg?w=312&amp;h=176&amp;cf" alt="Friandises" title="Friandises" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Friandises</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/fromage" title="Fromage">
+<picture data-alt="Fromage" data-default-src="https://images.yazio.com/cheese.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/cheese.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/cheese.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/cheese.jpg?w=312&amp;h=176&amp;cf" alt="Fromage" title="Fromage" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Fromage</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/fruits" title="Fruits">
+<picture data-alt="Fruits" data-default-src="https://images.yazio.com/fruits.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/fruits.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/fruits.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/fruits.jpg?w=312&amp;h=176&amp;cf" alt="Fruits" title="Fruits" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Fruits</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/gateaux-tartes" title="Gâteaux et tartes">
+<picture data-alt="Gâteaux et tartes" data-default-src="https://images.yazio.com/pies.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/pies.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/pies.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/pies.jpg?w=312&amp;h=176&amp;cf" alt="Gâteaux et tartes" title="Gâteaux et tartes" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Gâteaux et tartes</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/huiles-matieres-grasses" title="Huiles et matières grasses">
+<picture data-alt="Huiles et matières grasses" data-default-src="https://images.yazio.com/oils.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/oils.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/oils.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/oils.jpg?w=312&amp;h=176&amp;cf" alt="Huiles et matières grasses" title="Huiles et matières grasses" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Huiles et matières grasses</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/ingredients-patisserie" title="Ingrédients pour la pâtisserie">
+<picture data-alt="Ingrédients pour la pâtisserie" data-default-src="https://images.yazio.com/bakingingredients.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/bakingingredients.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/bakingingredients.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/bakingingredients.jpg?w=312&amp;h=176&amp;cf" alt="Ingrédients pour la pâtisserie" title="Ingrédients pour la pâtisserie" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Ingrédients pour la pâtisserie</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/lait-produits-laitiers" title="Lait et produits laitiers">
+<picture data-alt="Lait et produits laitiers" data-default-src="https://images.yazio.com/milk.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/milk.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/milk.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/milk.jpg?w=312&amp;h=176&amp;cf" alt="Lait et produits laitiers" title="Lait et produits laitiers" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Lait et produits laitiers</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/legumes" title="Légumes">
+<picture data-alt="Légumes" data-default-src="https://images.yazio.com/vegetables.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/vegetables.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/vegetables.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/vegetables.jpg?w=312&amp;h=176&amp;cf" alt="Légumes" title="Légumes" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Légumes</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/legumineuses" title="Légumineuses">
+<picture data-alt="Légumineuses" data-default-src="https://images.yazio.com/legumes.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/legumes.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/legumes.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/legumes.jpg?w=312&amp;h=176&amp;cf" alt="Légumineuses" title="Légumineuses" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Légumineuses</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/muesli-flocons-davoine-cereales" title="Muesli, flocons d'avoine et céréales">
+<picture data-alt="Muesli, flocons d'avoine et céréales" data-default-src="https://images.yazio.com/cornflakes.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/cornflakes.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/cornflakes.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/cornflakes.jpg?w=312&amp;h=176&amp;cf" alt="Muesli, flocons d'avoine et céréales" title="Muesli, flocons d'avoine et céréales" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Muesli, flocons d'avoine et céréales</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/noix-graines" title="Noix et graines">
+<picture data-alt="Noix et graines" data-default-src="https://images.yazio.com/seeds.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/seeds.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/seeds.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/seeds.jpg?w=312&amp;h=176&amp;cf" alt="Noix et graines" title="Noix et graines" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Noix et graines</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/pate-tartiner-confiture" title="Pâte à tartiner et confiture">
+<picture data-alt="Pâte à tartiner et confiture" data-default-src="https://images.yazio.com/spreads.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/spreads.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/spreads.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/spreads.jpg?w=312&amp;h=176&amp;cf" alt="Pâte à tartiner et confiture" title="Pâte à tartiner et confiture" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Pâte à tartiner et confiture</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/pates-nouilles" title="Pâtes et nouilles">
+<picture data-alt="Pâtes et nouilles" data-default-src="https://images.yazio.com/noodles.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/noodles.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/noodles.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/noodles.jpg?w=312&amp;h=176&amp;cf" alt="Pâtes et nouilles" title="Pâtes et nouilles" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Pâtes et nouilles</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/patisseries-viennoiseries" title="Pâtisseries et viennoiseries">
+<picture data-alt="Pâtisseries et viennoiseries" data-default-src="https://images.yazio.com/bakedgoods.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/bakedgoods.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/bakedgoods.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/bakedgoods.jpg?w=312&amp;h=176&amp;cf" alt="Pâtisseries et viennoiseries" title="Pâtisseries et viennoiseries" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Pâtisseries et viennoiseries</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/plats" title="Plats">
+<picture data-alt="Plats" data-default-src="https://images.yazio.com/dishes.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/dishes.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/dishes.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/dishes.jpg?w=312&amp;h=176&amp;cf" alt="Plats" title="Plats" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Plats</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/poisson" title="Poisson">
+<picture data-alt="Poisson" data-default-src="https://images.yazio.com/fish.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/fish.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/fish.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/fish.jpg?w=312&amp;h=176&amp;cf" alt="Poisson" title="Poisson" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Poisson</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/produits-base-soja" title="Produits à base de soja">
+<picture data-alt="Produits à base de soja" data-default-src="https://images.yazio.com/soyproducts.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/soyproducts.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/soyproducts.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/soyproducts.jpg?w=312&amp;h=176&amp;cf" alt="Produits à base de soja" title="Produits à base de soja" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Produits à base de soja</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/produits-cerealiers" title="Produits céréaliers">
+<picture data-alt="Produits céréaliers" data-default-src="https://images.yazio.com/cerealproducts.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/cerealproducts.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/cerealproducts.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/cerealproducts.jpg?w=312&amp;h=176&amp;cf" alt="Produits céréaliers" title="Produits céréaliers" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Produits céréaliers</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/produits-pommes-terre" title="Produits de pommes de terre">
+<picture data-alt="Produits de pommes de terre" data-default-src="https://images.yazio.com/potatoproducts.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/potatoproducts.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/potatoproducts.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/potatoproducts.jpg?w=312&amp;h=176&amp;cf" alt="Produits de pommes de terre" title="Produits de pommes de terre" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Produits de pommes de terre</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/sauces-vinaigrettes" title="Sauces et vinaigrettes">
+<picture data-alt="Sauces et vinaigrettes" data-default-src="https://images.yazio.com/sauces.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/sauces.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/sauces.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/sauces.jpg?w=312&amp;h=176&amp;cf" alt="Sauces et vinaigrettes" title="Sauces et vinaigrettes" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Sauces et vinaigrettes</span>
+</div>
+</a>
+</div>
+<div class="img-title-wrapper d-flex flex-column justify-content-center mt-16 align-self-start">
+<a class="position-relative text-decoration-none" href="https://www.yazio.com/fr/aliments/viande" title="Viande">
+<picture data-alt="Viande" data-default-src="https://images.yazio.com/meat.jpg?w=156&amp;h=88&amp;cf">
+<source srcset="https://images.yazio.com/meat.jpg?w=156&amp;h=88&amp;cf,
+                                https://images.yazio.com/meat.jpg?w=312&amp;h=176&amp;cf 2x">
+<img src="https://images.yazio.com/meat.jpg?w=312&amp;h=176&amp;cf" alt="Viande" title="Viande" class="br-12">
+</picture>
+<div class="mt-8 text-left">
+<span class="textlink light">Viande</span>
+</div>
+</a>
+</div>
+</div>
+</div>
