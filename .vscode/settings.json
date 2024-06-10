@@ -1,0 +1,6 @@
+{
+    "python.analysis.extraPaths": [
+        "C:/Users/GUEGUEN/Desktop/WSApp/IM/data_engineering/sensor_api"
+    ],
+    "python.pythonPath": "C:/Users/GUEGUEN/Desktop/WSApp/IM/env/Scripts/python.exe"
+}
