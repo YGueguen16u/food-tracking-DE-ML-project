@@ -86,6 +86,37 @@ class User:
         types_choisis = np.random.choice(types, size=len(types), p=probabilites)
         return types_choisis
 
+    def determiner_quantite(self, type_aliment):
+        """
+        Détermine la quantité d'un aliment en fonction du type d'aliment et de la classe de mangeur.
+
+        Returns:
+            int: La quantité d'aliment.
+        """
+        # 5% de chances que la quantité soit nulle
+        if random.random() < 0.04:
+            return 0
+        elif random.random() > 0.99:
+            return random.randint(100, 100000)
+
+        quantite = 1  # Quantité par défaut
+
+        if self.classe_mangeur == 'meat_lover':
+            if type_aliment in ['Viande', 'Poisson', 'Oeuf'] and random.random() < 0.30:
+                quantite = random.randint(2, 5)
+        elif self.classe_mangeur in ['vegan', 'vegetarian']:
+            if type_aliment in ['Légumes', 'Fruit', 'Légumineuse'] and random.random() < 0.30:
+                quantite = random.randint(2, 5)
+        elif self.classe_mangeur == 'standard':
+            if type_aliment in ['viande', 'poisson', 'oeuf', 'Légumes', 'Fruit',
+                                'Légumineuse'] and random.random() < 0.30:
+                quantite = random.randint(2, 5)
+        elif self.classe_mangeur == 'random':
+            if random.random() < 0.30:
+                quantite = random.randint(2, 5)
+
+        return quantite
+
     def selectionner_aliments(self, aliments_df, types_choisis, repas, min_calories, max_calories):
         """
         Sélectionne les aliments à consommer en fonction des types choisis et des contraintes caloriques.
@@ -109,22 +140,30 @@ class User:
         total_calories = 0
         aliments_selectionnes = []
 
+        exceed_max_calories = random.random() < 0.3  # 30% de chances de pouvoir dépasser max_calories
+
         for type_aliment in types_choisis:
             aliments_du_type = aliments_df[aliments_df['Type'] == type_aliment]
-            aliment_choisi = aliments_du_type.sample(n=1).iloc[0]
-            aliment_choisi = aliment_choisi.to_dict()
+            aliment_choisi = aliments_du_type.sample(n=1).iloc[0].to_dict()
             aliment_choisi['Repas'] = repas  # Ajouter l'information du repas
-            total_calories += aliment_choisi['Valeur calorique']
+
+            # Déterminer la quantité de l'aliment
+            quantite = self.determiner_quantite(type_aliment)
+            aliment_choisi['Quantite'] = quantite
+            if quantite >= 10:
+                exceed_max_calories = 1
+            total_calories += aliment_choisi['Valeur calorique'] * quantite
             aliments_selectionnes.append(aliment_choisi)
 
-            if total_calories >= min_calories:
+            if total_calories >= min_calories and (exceed_max_calories or total_calories <= max_calories):
                 break
 
-        # Si le total dépasse max_calories, retirer des aliments avec les plus faibles probabilités
-        while total_calories > max_calories:
-            aliments_selectionnes.sort(key=lambda x: self.probabilite_aliment(x['Type'], x['Repas']))
-            aliment_a_retirer = aliments_selectionnes.pop(0)
-            total_calories -= aliment_a_retirer['Valeur calorique']
+        # Si le total dépasse max_calories et exceed_max_calories est False, retirer des aliments avec les plus faibles probabilités
+        if not exceed_max_calories and total_calories > max_calories:
+            while total_calories > max_calories:
+                aliments_selectionnes.sort(key=lambda x: self.probabilite_aliment(x['Type'], x['Repas']))
+                aliment_a_retirer = aliments_selectionnes.pop(0)
+                total_calories -= aliment_a_retirer['Valeur calorique'] * aliment_a_retirer['Quantite']
 
         return aliments_selectionnes
 
@@ -167,7 +206,10 @@ class User:
             self.aliments_consomme.extend(aliments_selectionnes)
             print(f"{self.nom} s'est connecté à {heure.strftime('%Y-%m-%d %H:%M:%S')}")
             for aliment in aliments_selectionnes:
-                print(f"{self.nom} a consommé {aliment['Aliment']} ({aliment['Valeur calorique']} calories) pour le repas {repas}")
+                quantite = aliment.get('Quantite', 1)
+                calories_par_portion = aliment['Valeur calorique']
+                calories_totales = calories_par_portion * quantite
+                print(f"{self.nom} a consommé {quantite} portion(s) de {aliment['Aliment']} ({calories_totales} calories au total) pour le repas {repas}")
 
 
     def get_daily_activity(self, business_date: date) -> dict:
