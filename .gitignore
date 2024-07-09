@@ -6,3 +6,6 @@ web_site/
 key
 key.pub
 bfg-1.14.0.jar
+
+# Ignorer le répertoire sensor_data
+sensor_api/
