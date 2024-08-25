@@ -9,3 +9,7 @@ bfg-1.14.0.jar
 
 # Ignorer le répertoire sensor_data
 sensor_api/
+
+# Ignorer les xlsx de transform data
+IM/data_engineering/Transform_data/*.xlsx
+

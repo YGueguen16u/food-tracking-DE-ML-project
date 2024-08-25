@@ -151,7 +151,7 @@ class User:
         total_calories = 0
         aliments_selectionnes = []
 
-        exceed_max_calories = random.random() < 0.3  # 30% de chances de pouvoir dépasser max_calories
+        exceed_max_calories = random.random() < 0.2  # 30% de chances de pouvoir dépasser max_calories
 
         for type_aliment in types_choisis:
             aliments_du_type = aliments_df[aliments_df['Type'] == type_aliment]

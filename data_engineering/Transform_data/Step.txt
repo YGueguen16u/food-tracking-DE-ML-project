@@ -13,4 +13,44 @@ Créer un script qui lit l’ensemble des CSV dans data/raw
 (il devrait y en avoir un par mois de donnée récupéré) et affiche la table / dataframe.
 
 
-3. 
+3. Regrouper la donnée par jour (voin si le group by on le fait sur les jours ou autre chose)
+
+Faire un GroupBy + Sum pour avoir le traffic journalier
+(l’intérêt de générer de la donnée par heure, c’était de pouvoir faire ce regroupement)
+
+
+4. Filtrer les nulls et les valeurs inattendues
+
+Virer les unités improbables, les valeurs nulles
+Attention: ne pas détecter les quantités aberrantes pour l’instant.
+Si votre donnée contient une unité “litre” ou “kWh” alors que vous attendez des “Kgs” on supprime la ligne.
+On supprime aussi les valeurs nulles/manquantes.
+
+Mais on ne supprime pas pour l’instant les valeurs dont on pense qu’elles sont trop faibles ou fortes
+
+
+5. Faire une window function
+
+Faire une window function
+(partition by “day_of_week”, “id_lieu”, “capteur_id” order by “date”)
+
+qui fait la moyenne sur les 4 derniers même jours de la semaine, par exemple les 4 derniers Jeudis si la ligne concerne la donnée pour un Jeudi)
+
+et stocker le résultat dans une nouvelle colonne.
+
+
+6. Créer une colonne “percentage_change”
+
+Créer une nouvelle colonne “pct_change” qui mesure le pourcentage d’écart entre votre ligne et la moyenne des 4 lignes précédentes pour le même DayOfWeek (cette moyenne est calculée dans le ticket précédent)
+
+
+7. Stocker la donnée au format parquet dans /data/processed
+
+Stocker la donnée au format .parquet dans filtered
+C’est l’occasion pour vous de vous renseigner sur le format .parquet.
+
+
+Pour le app steamlit +duckdb : capteurs = utilisateurs et on affichera pour chaque la courbe des cal, prot, glu, ....
+
+
+

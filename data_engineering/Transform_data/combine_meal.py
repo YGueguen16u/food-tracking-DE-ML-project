@@ -17,13 +17,17 @@ for filename in os.listdir(directory_path):
 # Concatenate all DataFrames
 combined_df = pd.concat(dataframes, ignore_index=True)
 
-# Generate a unique meal_record_id for each meal (meal_id, user_id, date, heure)
-combined_df['meal_record_id'] = combined_df.groupby(['user_id', 'meal_id', 'date', 'heure']).ngroup()
-
 # Sort the DataFrame by date and heure
 combined_df['date'] = pd.to_datetime(combined_df['date'])
 combined_df['heure'] = pd.to_datetime(combined_df['heure'], format='%H:%M:%S').dt.time
 combined_df = combined_df.sort_values(by=['date', 'heure'])
+
+# Generate a unique meal_record_id for each row starting from 1
+combined_df['meal_record_id'] = range(1, len(combined_df) + 1)
+
+# Move meal_record_id to the first column
+cols = ['meal_record_id'] + [col for col in combined_df.columns if col != 'meal_record_id']
+combined_df = combined_df[cols]
 
 # Load aliment reference table
 # Assuming the aliment reference table is named 'aliment_table.csv' and has the columns:
@@ -31,7 +35,7 @@ combined_df = combined_df.sort_values(by=['date', 'heure'])
 
 # Load aliment reference table (aliments.xlsx) with only the necessary columns
 aliment_table = pd.read_excel(
-    r'C:\Users\GUEGUEN\Desktop\WSApp\IM\DB\raw_food_data\aliments.xlsx',
+    r'C:\Users\GUEGUEN\Desktop\WSApp\IM\DB\raw_food_data\food_processed.xlsx',
     usecols=['id', 'Aliment', 'Valeur calorique', 'Lipides', 'Glucides', 'Protein']
 )
 
@@ -50,5 +54,5 @@ merged_df['total_protein'] = merged_df['Protein'] * merged_df['quantity']
 # Reorder columns to have meal_record_id at the beginning
 final_df = merged_df[['meal_record_id'] + [col for col in merged_df.columns if col != 'meal_record_id']]
 
-# Save the final DataFrame to a CSV file
-final_df.to_csv('combined_meal_data.csv', index=False)
+# Save the final DataFrame to an Excel file
+final_df.to_excel('combined_meal_data.xlsx', index=False)

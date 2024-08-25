@@ -8,6 +8,9 @@ import time
 # import boto3
 # from botocore.exceptions import NoCredentialsError
 
+# Set the seed for reproducibility
+random.seed(42)
+
 def is_valid_date(date_str):
     try:
         datetime.strptime(date_str, "%Y-%m-%d")
@@ -50,7 +53,7 @@ def generate_csv(all_data, year, month, user_id):
         for data in all_data:
             for i in range(len(data["user_id"])):
                 # Ajouter de la donnée non fiable
-                aliment_id = data["aliment_id"][i] if random.random() > 0.05 else None
+                aliment_id = data["aliment_id"][i] if random.random() > 0.01 else None
                 writer.writerow([
                     data["user_id"][i],
                     data["meal_id"][i],
