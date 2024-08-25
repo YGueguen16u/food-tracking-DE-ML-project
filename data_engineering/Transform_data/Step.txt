@@ -1,0 +1,16 @@
+1. Tout unifier dans un df avec calories et macro
+
+Dans un même df, en affichant par date et heure, toutes les entrées des csv.
+On rajoute les colonnes aliments, calories, macro à la suite puis on fait des join avec les id d'aliment et leurs infos 
+Attention certains ont des id null
+
+
+2. Lire les données stockées dans data/raw
+
+Au choix avec Pandas / DuckDB ou Spark:
+
+Créer un script qui lit l’ensemble des CSV dans data/raw 
+(il devrait y en avoir un par mois de donnée récupéré) et affiche la table / dataframe.
+
+
+3. 

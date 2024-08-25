@@ -5,7 +5,8 @@ import csv
 import os
 import random
 import time
-
+# import boto3
+# from botocore.exceptions import NoCredentialsError
 
 def is_valid_date(date_str):
     try:
@@ -38,47 +39,60 @@ def request_our_api(user_id, year, month, day):
         return None
 
 
-def generate_csv(data, year, month, user_id):
+def generate_csv(all_data, year, month, user_id):
     if not os.path.exists('data/raw'):
         os.makedirs('data/raw')
 
-    filename = f"data/raw/{year}_{month:02d}_{day}_user_{user_id}.csv"
+    filename = f"data/raw/{year}_{month:02d}_user_{user_id}.csv"
     with open(filename, mode='w', newline='') as file:
         writer = csv.writer(file)
         writer.writerow(["user_id", "meal_id", "date", "heure", "aliment_id", "quantity"])
-        for i in range(len(data["user_id"])):
-            # Ajouter de la donnée non fiable
-            aliment_id = data["aliment_id"][i] if random.random() > 0.1 else None
-            writer.writerow([
-                data["user_id"][i],
-                data["meal_id"][i],
-                data["heure_repas"][i].split(" ")[0],
-                data["heure_repas"][i].split(" ")[1],
-                aliment_id,
-                data["quantity"][i]
-            ])
+        for data in all_data:
+            for i in range(len(data["user_id"])):
+                # Ajouter de la donnée non fiable
+                aliment_id = data["aliment_id"][i] if random.random() > 0.05 else None
+                writer.writerow([
+                    data["user_id"][i],
+                    data["meal_id"][i],
+                    data["heure_repas"][i].split(" ")[0],
+                    data["heure_repas"][i].split(" ")[1],
+                    aliment_id,
+                    data["quantity"][i]
+                ])
 
 
-user_ids = [i for i in range(20)]  # Liste des user_id à itérer
+user_ids = [i for i in range(1, 20)]  # Liste des user_id à itérer
 start_date = datetime.strptime(date_param, "%Y-%m-%d")
 end_date = datetime.today()
 current_date = start_date
 
-while current_date <= end_date:
-    year = current_date.year
-    month = current_date.month
-    day = current_date.day
+for user_id in user_ids:
+    current_date = start_date
+    monthly_data = {}
+    while current_date <= end_date:
+        year = current_date.year
+        month = current_date.month
+        day = current_date.day
 
-    for user_id in user_ids:
         start_time = time.time()  # Démarrer le timer
         data = request_our_api(user_id, year, month, day)
-        end_time = time.time()
-        diff = end_time - start_time
-        print(f"{user_id}: {diff}")
-        if data:
-            generate_csv(data, year, month, user_id)
+        end_time = time.time()  # Arrêter le timer
+        elapsed_time = end_time - start_time
+        print(f"User ID {user_id} on {current_date.strftime('%Y-%m-%d')} took {elapsed_time:.2f} seconds")
 
-    current_date += timedelta(days=1)
+        if data:
+            month_key = f"{year}_{month:02d}"
+            if month_key not in monthly_data:
+                monthly_data[month_key] = []
+            monthly_data[month_key].append(data)
+
+        current_date += timedelta(days=1)
+
+    for month_key, data_list in monthly_data.items():
+        year, month = map(int, month_key.split('_'))
+        generate_csv(data_list, year, month, user_id)
+
+
 """
 {
 "user_id":[9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9],
