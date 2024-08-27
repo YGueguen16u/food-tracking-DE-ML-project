@@ -54,5 +54,10 @@ merged_df['total_protein'] = merged_df['Protein'] * merged_df['quantity']
 # Reorder columns to have meal_record_id at the beginning
 final_df = merged_df[['meal_record_id'] + [col for col in merged_df.columns if col != 'meal_record_id']]
 
-# Save the final DataFrame to an Excel file
-final_df.to_excel('combined_meal_data.xlsx', index=False)
+# Vérifier si le dossier 'data' existe, sinon le créer
+output_directory = 'data'
+if not os.path.exists(output_directory):
+    os.makedirs(output_directory)
+
+# Sauvegarder le DataFrame final dans un fichier Excel
+final_df.to_excel(os.path.join(output_directory, 'combined_meal_data.xlsx'), index=False)

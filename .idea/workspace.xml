@@ -5,14 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e5d5be8c-2629-45a1-ad57-aebe2a0a6250" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/data_engineering/Transform_data/02_read_data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data_engineering/Transform_data/03_group_data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data_engineering/Transform_data/04_filter_data.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data_engineering/Transform_data/05_windows_function.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data_engineering/Transform_data/06_calculate_pct_change.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/data_engineering/Transform_data/07_store_parquet.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/other.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data_engineering/Transform_data/cleaned_data.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data_engineering/Transform_data/combined_meal_data_filtered.xlsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data_engineering/Transform_data/comparison_results.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data_engineering/Transform_data/deleted_rows_log.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data_engineering/Transform_data/display_results.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_engineering/Transform_data/combine_meal.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_engineering/Transform_data/01_combine_meal.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_engineering/Transform_data/02_read_data_pandas.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_engineering/Transform_data/02_read_data_pandas.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_engineering/Transform_data/03_group_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_engineering/Transform_data/03_group_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_engineering/Transform_data/04_filter_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_engineering/Transform_data/04_filter_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_engineering/Transform_data/combined_meal_data.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/data_engineering/Transform_data/combined_meal_data.xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data_engineering/sensor_api/fake_data/sensor.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_engineering/sensor_api/fake_data/sensor.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -46,13 +49,19 @@
   &quot;keyToString&quot;: {
     &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
     &quot;Python tests.pytest in combine_meal_data_test.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python.02_read_data_duckdb.executor&quot;: &quot;Run&quot;,
+    &quot;Python.02_read_data_pandas.executor&quot;: &quot;Run&quot;,
+    &quot;Python.03_group_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.04_filter_data.executor&quot;: &quot;Run&quot;,
     &quot;Python.__init__.executor&quot;: &quot;Run&quot;,
     &quot;Python.combine_meal.executor&quot;: &quot;Run&quot;,
     &quot;Python.connexion_test_S3.executor&quot;: &quot;Run&quot;,
     &quot;Python.data_engineering.sensor_api.fake_data.__init__.executor&quot;: &quot;Run&quot;,
     &quot;Python.extract_data.executor&quot;: &quot;Run&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;C:/Users/GUEGUEN/Desktop/WSApp/IM&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -63,7 +72,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Python.data_engineering.sensor_api.fake_data.__init__">
+  <component name="RunManager">
     <configuration name="__init__" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="IM" />
       <option name="ENV_FILES" value="" />
@@ -145,7 +154,10 @@
       <workItem from="1724421718880" duration="9296000" />
       <workItem from="1724534082246" duration="2546000" />
       <workItem from="1724593324703" duration="12498000" />
-      <workItem from="1724710844402" duration="647000" />
+      <workItem from="1724710844402" duration="969000" />
+      <workItem from="1724767733115" duration="13045000" />
+      <workItem from="1724796002484" duration="1691000" />
+      <workItem from="1724797736219" duration="115000" />
     </task>
     <servers />
   </component>
@@ -156,13 +168,17 @@
     <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/__init___py$04_filter_data.coverage" NAME="04_filter_data Coverage Results" MODIFIED="1724797791605" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_engineering/Transform_data" />
     <SUITE FILE_PATH="coverage/__init___py$combine_meal.coverage" NAME="combine_meal Coverage Results" MODIFIED="1724620672484" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_engineering/Transform_data" />
     <SUITE FILE_PATH="coverage/__init___py$extract_data.coverage" NAME="extract_data Coverage Results" MODIFIED="1724620668076" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_engineering/Extract_data" />
     <SUITE FILE_PATH="coverage/__init___py$pytest_in_combine_meal_data_test_py.coverage" NAME="pytest in combine_meal_data_test.py Coverage Results" MODIFIED="1724622060306" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_engineering/test" />
+    <SUITE FILE_PATH="coverage/__init___py$__init__.coverage" NAME="__init__ Coverage Results" MODIFIED="1722370944238" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_engineering/sensor_api/fake_data" />
+    <SUITE FILE_PATH="coverage/__init___py$02_read_data_pandas.coverage" NAME="02_read_data_pandas Coverage Results" MODIFIED="1724772036494" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_engineering/Transform_data" />
     <SUITE FILE_PATH="coverage/IM$__init__.coverage" NAME="__init__ Coverage Results" MODIFIED="1721344028978" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_engineering/sensor_api/fake_data" />
     <SUITE FILE_PATH="coverage/__init___py$connexion_test_S3.coverage" NAME="connexion_test_S3 Coverage Results" MODIFIED="1724438572680" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_engineering/Extract_data/data" />
+    <SUITE FILE_PATH="coverage/__init___py$02_read_data_duckdb.coverage" NAME="02_read_data_duckdb Coverage Results" MODIFIED="1724771221795" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_engineering/Transform_data" />
+    <SUITE FILE_PATH="coverage/__init___py$03_group_data.coverage" NAME="03_group_data Coverage Results" MODIFIED="1724790291242" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_engineering/Transform_data" />
     <SUITE FILE_PATH="coverage/IM$data_engineering_sensor_api_fake_data___init__.coverage" NAME="data_engineering.sensor_api.fake_data.__init__ Coverage Results" MODIFIED="1718107245792" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\GUEGUEN\Desktop\WSApp\IM " />
-    <SUITE FILE_PATH="coverage/__init___py$__init__.coverage" NAME="__init__ Coverage Results" MODIFIED="1722370944238" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_engineering/sensor_api/fake_data" />
-    <SUITE FILE_PATH="coverage/__init___py$data_engineering_sensor_api_fake_data___init__.coverage" NAME="data_engineering.sensor_api.fake_data.__init__ Coverage Results" MODIFIED="1724597647346" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\GUEGUEN\Desktop\WSApp\IM " />
+    <SUITE FILE_PATH="coverage/__init___py$data_engineering_sensor_api_fake_data___init__.coverage" NAME="data_engineering.sensor_api.fake_data.__init__ Coverage Results" MODIFIED="1724797744611" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="C:\Users\GUEGUEN\Desktop\WSApp\IM " />
   </component>
 </project>
