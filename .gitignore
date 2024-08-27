@@ -12,4 +12,5 @@ sensor_api/
 
 # Ignorer les xlsx de transform data
 IM/data_engineering/Transform_data/*.xlsx
+IM/data_engineering/Transform_data/*.txt
 
