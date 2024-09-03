@@ -1,7 +1,8 @@
+import os
 import pandas as pd
 
 # Chargement des données (remplace 'combined_meal_data.xlsx' par le chemin vers ton fichier)
-df = pd.read_excel('combined_meal_data.xlsx')
+df = pd.read_excel('data/combined_meal_data.xlsx')
 
 # Journal pour les lignes supprimées
 log_deleted_rows = []
@@ -40,8 +41,13 @@ deleted_rows.to_csv('deleted_rows_log.csv', index=False)
 # 6. Vérification des doublons après nettoyage
 df_cleaned = df_cleaned.drop_duplicates()
 
+# Vérifier si le dossier 'data' existe, sinon le créer
+output_directory = 'data'
+if not os.path.exists(output_directory):
+    os.makedirs(output_directory)
+
 # Sauvegarde des données nettoyées
-df_cleaned.to_excel('filtered/combined_meal_data_filtered.xlsx', index=False)
+df_cleaned.to_excel(os.path.join(output_directory,'combined_meal_data_filtered.xlsx'), index=False)
 
 # Affichage des analyses
 print("Nombre de valeurs nulles par utilisateur :")

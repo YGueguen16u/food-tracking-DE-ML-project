@@ -42,7 +42,7 @@ Differences found:
 [19 rows x 11 columns]
 
 Temps d'exécution :
-Pandas : 4.2266 secondes
-DuckDB : 3.5523 secondes
+Pandas : 4.6650 secondes
+DuckDB : 3.6736 secondes
 
 DuckDB est plus rapide.

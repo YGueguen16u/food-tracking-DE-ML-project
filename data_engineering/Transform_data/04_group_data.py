@@ -8,7 +8,7 @@ def pandas_group_data():
     start_time = time.time()
 
     # Charger les données
-    df = pd.read_excel('combined_meal_data.xlsx')
+    df = pd.read_excel('data/combined_meal_data_filtered.xlsx')
 
     # Convertir la colonne 'date' en format datetime
     df['date'] = pd.to_datetime(df['date'])
@@ -66,6 +66,13 @@ def pandas_group_data():
 
     elapsed_time = time.time() - start_time
 
+    # Sauvegarder les résultats dans un fichier Excel
+    with pd.ExcelWriter('data/pandas_aggregation_results.xlsx') as writer:
+        daily_aggregation.to_excel(writer, sheet_name='Daily Aggregation', index=False)
+        user_daily_aggregation.to_excel(writer, sheet_name='User Daily Aggregation', index=False)
+        daily_mean_per_food.to_excel(writer, sheet_name='Daily Mean Per Food', index=False)
+        user_food_grouping.to_excel(writer, sheet_name='User Food Grouping', index=False)
+
     return {
         'daily_aggregation': daily_aggregation,
         'user_daily_aggregation': user_daily_aggregation,
@@ -80,7 +87,7 @@ def duckdb_group_data():
     start_time = time.time()
 
     # Charger les données
-    df = pd.read_excel('combined_meal_data.xlsx')
+    df = pd.read_excel('data/combined_meal_data.xlsx')
 
     # Créer une connexion DuckDB en mémoire
     conn = duckdb.connect(database=':memory:')
@@ -146,6 +153,13 @@ def duckdb_group_data():
 
     elapsed_time = time.time() - start_time
 
+    # Sauvegarder les résultats dans un fichier Excel
+    with pd.ExcelWriter('data/duckdb_aggregation_results.xlsx') as writer:
+        daily_aggregation.to_excel(writer, sheet_name='Daily Aggregation', index=False)
+        user_daily_aggregation.to_excel(writer, sheet_name='User Daily Aggregation', index=False)
+        daily_mean_per_food.to_excel(writer, sheet_name='Daily Mean Per Food', index=False)
+        user_food_grouping.to_excel(writer, sheet_name='User Food Grouping', index=False)
+
     return {
         'daily_aggregation': daily_aggregation,
         'user_daily_aggregation': user_daily_aggregation,
@@ -171,7 +185,7 @@ def compare_results():
     pandas_results = pandas_group_data()
     duckdb_results = duckdb_group_data()
 
-    with open("comparison_results.txt", "w") as f:
+    with open("data/comparison_results.txt", "w") as f:
         # Comparaison pour `daily_aggregation`
         merged_df = pandas_results['daily_aggregation'].merge(
             duckdb_results['daily_aggregation'],
@@ -217,6 +231,7 @@ def compare_results():
             indicator=True
         )
         differences = merged_df[merged_df['_merge'] != 'both']
+        differences.to_csv("data/differences_daily_mean_per_food.csv", index=False)
 
         if differences.empty:
             result = "Les résultats pour daily_mean_per_food sont identiques.\n"
@@ -225,6 +240,7 @@ def compare_results():
             result += f"Differences found:\n{differences}\n"
         print(result)
         f.write(result)
+        # Sauvegarde des différences pour `daily_mean_per_food`
 
         # Comparaison pour `user_food_grouping`
         merged_df = pandas_results['user_food_grouping'].merge(
@@ -235,6 +251,7 @@ def compare_results():
             indicator=True
         )
         differences = merged_df[merged_df['_merge'] != 'both']
+        differences.to_csv("data/differences_food_grouping.csv", index=False)
 
         if differences.empty:
             result = "Les résultats pour user_food_grouping sont identiques.\n"
@@ -273,7 +290,7 @@ def display_result():
     pandas_results = pandas_group_data()
     duckdb_results = duckdb_group_data()
 
-    with open("display_results.txt", "w") as f:
+    with open("data/display_results.txt", "w") as f:
         pandas_str = f"Pandas Results:\n{pandas_results}\n\n"
         duckdb_str = f"DuckDB Results:\n{duckdb_results}\n\n"
 
