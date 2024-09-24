@@ -129,6 +129,7 @@ def duckdb_group_data():
                AVG(total_carbs) AS avg_carbs,
                AVG(total_protein) AS avg_protein
         FROM df
+        WHERE Aliment IS NOT NULL  -- Filter out NULL Aliment values
         GROUP BY date, Aliment
     """).df()
 
@@ -148,6 +149,7 @@ def duckdb_group_data():
                SUM(total_carbs) AS total_carbs,
                SUM(total_protein) AS total_protein
         FROM df
+        WHERE Aliment IS NOT NULL  -- Filter out NULL Aliment values
         GROUP BY user_id, Aliment
     """).df()
 
