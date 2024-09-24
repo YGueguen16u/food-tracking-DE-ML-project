@@ -41,7 +41,6 @@ deleted_rows.to_csv('deleted_rows_log.csv', index=False)
 # 6. Vérification des doublons après nettoyage
 df_cleaned = df_cleaned.drop_duplicates()
 
-# Vérifier si le dossier 'data' existe, sinon le créer
 output_directory = 'data'
 if not os.path.exists(output_directory):
     os.makedirs(output_directory)

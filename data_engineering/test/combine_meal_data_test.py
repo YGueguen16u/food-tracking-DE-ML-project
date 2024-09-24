@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 
 # Define the path to the Excel file
-FILE_PATH = r'C:\Users\GUEGUEN\Desktop\WSApp\IM\data_engineering\Transform_data\combined_meal_data.xlsx'
+FILE_PATH = r'C:\Users\GUEGUEN\Desktop\WSApp\IM\data_engineering\Transform_data\data\combined_meal_data.xlsx'
 
 
 @pytest.fixture
