@@ -8,14 +8,11 @@ def load_and_prepare_data(pandas_file, duckdb_file):
     df_pandas = pd.read_excel(pandas_file)
     df_duckdb = pd.read_excel(duckdb_file)
 
-    # Mapper les noms des jours de la semaine (en Pandas) à leurs valeurs numériques (en DuckDB)
-    day_of_week_mapping = {
-        'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4,
-        'Friday': 5, 'Saturday': 6, 'Sunday': 7
-    }
+    # Convertir les colonnes 'date' en datetime dans Pandas
+    df_pandas['date'] = pd.to_datetime(df_pandas['date'])
 
-    # Convertir les jours de la semaine en valeurs numériques dans le DataFrame pandas
-    df_pandas['day_of_week'] = df_pandas['day_of_week'].map(day_of_week_mapping)
+    # Utiliser dt.weekday pour obtenir les jours de la semaine en valeurs numériques (Lundi = 1, Dimanche = 7)
+    df_pandas['day_of_week'] = df_pandas['date'].dt.weekday + 1  # Lundi = 1, ..., Dimanche = 7
 
     # Remplacer les valeurs booléennes dans pandas par des 0 (False) et 1 (True)
     df_pandas.replace({True: 1, False: 0}, inplace=True)
@@ -27,21 +24,42 @@ def load_and_prepare_data(pandas_file, duckdb_file):
 
     return df_pandas, df_duckdb
 
-# Les autres fonctions pour la comparaison et l'enregistrement
+
+# Fonction pour comparer les DataFrames
 def compare_dataframes(df_pandas, df_duckdb):
     merged_df = pd.merge(df_pandas, df_duckdb, on=['date', 'user_id'], suffixes=('_pandas', '_duckdb'))
 
     comparison_columns = [col for col in df_pandas.columns if col not in ['date', 'user_id']]
 
     for col in comparison_columns:
+        if pd.api.types.is_numeric_dtype(merged_df[f'{col}_pandas']):
+            # Afficher les différences dans les colonnes d'origine avant de comparer les différences
+            if col == 'total_lipids':
+                non_matching = merged_df[merged_df[f'{col}_pandas'] != merged_df[f'{col}_duckdb']]
+                if not non_matching.empty:
+                    print(f"\nDifférences dans la colonne '{col}' (avant calcul des diff) :")
+                    print(non_matching[['date', 'user_id', f'{col}_pandas', f'{col}_duckdb']])
+
+            # Arrondir à 3 décimales avant de comparer
+            merged_df[f'{col}_pandas'] = merged_df[f'{col}_pandas'].round(3)
+            merged_df[f'{col}_duckdb'] = merged_df[f'{col}_duckdb'].round(3)
         merged_df[f'{col}_comparison'] = merged_df[f'{col}_pandas'] == merged_df[f'{col}_duckdb']
 
     return merged_df
 
+
+
+# Fonction pour sauvegarder les résultats de la comparaison
 def save_comparison_to_excel(merged_df, output_file):
     comparison_columns = [col for col in merged_df.columns if '_comparison' in col]
     output_df = merged_df[['date', 'user_id'] + comparison_columns]
+
+    # Enregistrer également les valeurs de total_carbs pour voir les écarts exacts
+    output_df['total_carbs_pandas'] = merged_df['total_carbs_pandas']
+    output_df['total_carbs_duckdb'] = merged_df['total_carbs_duckdb']
+
     output_df.to_excel(output_file, index=False)
+
 
 # Test unitaire avec la fonction directement incluse
 class TestDataComparison(unittest.TestCase):
@@ -77,6 +95,15 @@ class TestDataComparison(unittest.TestCase):
         comparison_columns = [col for col in self.df_pandas.columns if col not in ['date', 'user_id']]
         for col in comparison_columns:
             self.assertIn(f'{col}_comparison', merged_df.columns, f"La colonne de comparaison '{col}_comparison' n'a pas été créée.")
+
+        # Afficher les différences dans la colonne qui échoue
+        for col in comparison_columns:
+            non_matching = merged_df[merged_df[f'{col}_comparison'] == False]
+            if not non_matching.empty:
+                print(f"\nDifférences dans la colonne '{col}':")
+                print(non_matching[['date', 'user_id', f'{col}_pandas', f'{col}_duckdb']])
+            comparison_result = merged_df[f'{col}_comparison'].all()
+            self.assertTrue(comparison_result, f"Les données de la colonne '{col}' ne correspondent pas pour certaines lignes.")
 
     def test_save_comparison_to_excel(self):
         # Comparer les DataFrames
