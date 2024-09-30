@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np
 import duckdb
-
+import os
 def pandas_percentage_change():
     # Charger les données à partir du fichier Excel
     df = pd.read_excel('data/pandas_window_function_results.xlsx')
@@ -18,9 +18,13 @@ def pandas_percentage_change():
     df['carbs_alert'] = np.abs(df['pct_change_carbs']) > 20
     df['protein_alert'] = np.abs(df['pct_change_protein']) > 20
 
-    # Sauvegarder les résultats dans un fichier Excel
-    df.to_excel('data/pandas_percentage_change_results.xlsx', index=False)
+    # Vérifier et créer le répertoire si nécessaire
+    output_dir = 'data/'
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
+    # Sauvegarder les résultats dans un fichier Excel
+    df.to_excel(output_dir + 'pandas_percentage_change_results.xlsx', index=False)
     return df
 
 
@@ -57,8 +61,16 @@ def duckdb_percentage_change():
 
     # Exécuter la requête et récupérer les résultats
     result_df = conn.execute(query).df()
+    # Vérifier et créer le répertoire si nécessaire
+    output_dir = 'data/'
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
     # Sauvegarder les résultats dans un fichier Excel
-    result_df.to_excel('data/duckdb_percentage_change_results.xlsx', index=False)
+    result_df.to_excel(output_dir + 'duckdb_percentage_change_results.xlsx', index=False)
 
     return result_df
+
+if __name__ == "__main__":
+    pandas_percentage_change()
+    duckdb_percentage_change()
