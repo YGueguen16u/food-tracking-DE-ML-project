@@ -58,4 +58,8 @@ Essaye de stocker les données récupéré dans un bucket S3
 ## 2. Transform Data
 
 
+DevOps : 
+Black pour le refactoring
+unittest
+fichier .yaml
 
