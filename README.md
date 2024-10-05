@@ -22,6 +22,7 @@ Continuous Integration/Continuous Deployment (CI/CD)processes.
 
 ## 1. Fake User Creation and Food Consumption Data Generation via API and Extraction 
 
+```non_corrected
 ### 1.1 Essaye pratique 
 
 Yo can access the project by following this link : https://github.com/YGueguen16u/sensor_api
@@ -60,6 +61,17 @@ Essaye de stocker les données récupéré dans un bucket S3
 
 DevOps : 
 Black pour le refactoring
+- black data_engineering\Transform_data\combine_meal.py   
+pylint (black amélioré ex docstring d'une fonction manquante uniquement par pylint 
+ou bien l'ordre des libs importées ainsi que la détection 
+des constantes (variables non modifiées dans le code) )
+- pylint data_engineering\Transform_data\combine_meal.py
+
+isort : clean vos imports de librairies pour respecter la PEP8
+- isort data_engineering\Transform_data\combine_meal.py 
+
 unittest
-fichier .yaml
+
+CI/CD 
+- .github/workflows/check.yaml
 

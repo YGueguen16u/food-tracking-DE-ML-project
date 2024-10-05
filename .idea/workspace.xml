@@ -5,6 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e5d5be8c-2629-45a1-ad57-aebe2a0a6250" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_engineering/Transform_data/combine_meal.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_engineering/Transform_data/combine_meal.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_engineering/Transform_data/data/combined_meal_data.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/data_engineering/Transform_data/data/combined_meal_data.xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data_engineering/sensor_api/fake_data/sensor.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_engineering/sensor_api/fake_data/sensor.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -166,7 +170,7 @@
       <workItem from="1727299214804" duration="4516000" />
       <workItem from="1727369969840" duration="2481000" />
       <workItem from="1727728490262" duration="4742000" />
-      <workItem from="1728131438641" duration="6862000" />
+      <workItem from="1728131438641" duration="8952000" />
     </task>
     <servers />
   </component>
@@ -178,7 +182,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/__init___py$04_filter_data.coverage" NAME="04_filter_data Coverage Results" MODIFIED="1724840337549" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_engineering/Transform_data" />
-    <SUITE FILE_PATH="coverage/__init___py$combine_meal.coverage" NAME="combine_meal Coverage Results" MODIFIED="1728132995643" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_engineering/Transform_data" />
+    <SUITE FILE_PATH="coverage/__init___py$combine_meal.coverage" NAME="combine_meal Coverage Results" MODIFIED="1728140886693" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_engineering/Transform_data" />
     <SUITE FILE_PATH="coverage/__init___py$05_comparison.coverage" NAME="05_comparison Coverage Results" MODIFIED="1727215710451" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_engineering/Transform_data" />
     <SUITE FILE_PATH="coverage/__init___py$extract_data.coverage" NAME="extract_data Coverage Results" MODIFIED="1727732166359" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_engineering/Extract_data" />
     <SUITE FILE_PATH="coverage/__init___py$pytest_in_combine_meal_data_test_py.coverage" NAME="pytest in combine_meal_data_test.py Coverage Results" MODIFIED="1728134329200" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_engineering/test" />

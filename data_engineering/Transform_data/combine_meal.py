@@ -1,8 +1,9 @@
 import os
+
 import pandas as pd
 
 # Path to the directory containing the CSV files
-directory_path = (
+DIRECTORY_PATH = (
     r"C:\Users\GUEGUEN\Desktop\WSApp\IM\data_engineering\Extract_data\data\raw"
 )
 
@@ -10,9 +11,9 @@ directory_path = (
 dataframes = []
 
 # Load all CSV files into a single DataFrame
-for filename in os.listdir(directory_path):
+for filename in os.listdir(DIRECTORY_PATH):
     if filename.endswith(".csv"):
-        file_path = os.path.join(directory_path, filename)
+        file_path = os.path.join(DIRECTORY_PATH, filename)
         df = pd.read_csv(file_path)
         dataframes.append(df)
 
@@ -61,11 +62,11 @@ final_df = merged_df[
 ]
 
 # Vérifier si le dossier 'data' existe, sinon le créer
-output_directory = "data"
-if not os.path.exists(output_directory):
-    os.makedirs(output_directory)
+OUTPUT_DIRECTORY = "data"
+if not os.path.exists(OUTPUT_DIRECTORY):
+    os.makedirs(OUTPUT_DIRECTORY)
 
 # Sauvegarder le DataFrame final dans un fichier Excel
 final_df.to_excel(
-    os.path.join(output_directory, "combined_meal_data.xlsx"), index=False
+    os.path.join(OUTPUT_DIRECTORY, "combined_meal_data.xlsx"), index=False
 )
