@@ -5,7 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e5d5be8c-2629-45a1-ad57-aebe2a0a6250" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/data_engineering/Webscrapping/Webscrapping.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data_engineering/Webscrapping/categorie_yazio.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data_engineering/Webscrapping/html_header_yazio.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data_engineering/Webscrapping/sub_categori_yazio.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/IA/NLP/Webscrapping/Rayon.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/IA/NLP/Webscrapping/Webscrapping.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/IA/NLP/Webscrapping/categorie_yazio.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/IA/NLP/Webscrapping/html_header_yazio.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/IA/NLP/Webscrapping/sub_categori_yazio.txt" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data_engineering/sensor_api/fake_data/sensor.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_engineering/sensor_api/fake_data/sensor.py" afterDir="false" />
     </list>
@@ -168,7 +177,7 @@
       <workItem from="1727299214804" duration="4516000" />
       <workItem from="1727369969840" duration="2481000" />
       <workItem from="1727728490262" duration="4742000" />
-      <workItem from="1728131438641" duration="4101000" />
+      <workItem from="1728131438641" duration="6527000" />
     </task>
     <servers />
   </component>
