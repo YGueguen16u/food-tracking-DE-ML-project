@@ -1,0 +1,18 @@
+
+
+## Transform
+
+1. Combine meal
+
+2. Read_data
+
+3. Filter_data
+
+4. group_data
+
+5. Windows_function
+
+6. Calculate_pct_change
+
+7. Store_parquet
+
