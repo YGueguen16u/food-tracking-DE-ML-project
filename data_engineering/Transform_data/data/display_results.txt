@@ -51,7 +51,7 @@ Pandas Results:
 6367       19                             Œuf cru  ...         10.4          182.0
 6368       19                      Œuf à la coque  ...         24.5          262.5
 
-[6369 rows x 6 columns], 'elapsed_time': 3.798585891723633}
+[6369 rows x 6 columns], 'elapsed_time': 4.165741443634033}
 
 DuckDB Results:
 {'daily_aggregation':          date  avg_calories_per_user  ...  avg_carbs_per_user  avg_protein_per_user
@@ -68,37 +68,37 @@ DuckDB Results:
 62 2024-09-30           3.952461e+06  ...        6.818374e+05         159828.284211
 
 [63 rows x 5 columns], 'user_daily_aggregation':            date  user_id  ...  total_carbs  total_protein
-0    2024-06-26       16  ...        277.5          110.7
-1    2024-06-26       11  ...        316.3          110.9
-2    2024-06-26       15  ...        576.4          190.0
-3    2024-06-27        2  ...        321.4           29.9
-4    2024-06-27       18  ...        214.3           85.0
+0    2024-06-25       19  ...        127.1          193.1
+1    2024-06-25        7  ...        142.7           68.3
+2    2024-06-25        8  ...        190.3          196.4
+3    2024-06-25       13  ...     375070.4        10021.1
+4    2024-06-26        4  ...        252.2           88.7
 ...         ...      ...  ...          ...            ...
-1192 2024-08-25        4  ...        156.0           44.9
-1193 2024-09-30       19  ...        536.2           80.7
-1194 2024-09-30       13  ...       2027.8         1672.7
-1195 2024-09-30        8  ...        242.6          298.1
-1196 2024-09-30        7  ...      10719.8          377.9
+1192 2024-08-25       14  ...        213.1          102.5
+1193 2024-08-25        5  ...      27914.5        13831.5
+1194 2024-09-30       18  ...        245.1           75.2
+1195 2024-09-30        2  ...        283.8           45.7
+1196 2024-09-30       10  ...    1010335.1       188380.6
 
-[1197 rows x 6 columns], 'daily_mean_per_food':             date                             Aliment  ...  avg_carbs  avg_protein
-0     2024-06-25                      Eau pétillante  ...        0.0          0.0
-1     2024-06-25   Mozzarella, sans matières grasses  ...        4.0         35.8
-2     2024-06-25           Pain à la farine d'avoine  ...       13.1          2.3
-3     2024-06-25                            Lait, 0%  ...        9.9          6.7
-4     2024-06-25                  Pêche, en conserve  ...       28.9          1.6
-...          ...                                 ...  ...        ...          ...
-12836 2024-09-30                      Matière grasse  ...        0.0          0.0
-12837 2024-09-30                   Maïs, en conserve  ...       11.1          1.6
-12838 2024-09-30                          Bulot, cru  ...        0.0          0.0
-12839 2024-09-30  Petits pois & oignons, en conserve  ...       10.3          3.9
-12840 2024-09-30                            Lasagnes  ...       18.9          9.0
+[1197 rows x 6 columns], 'daily_mean_per_food':             date                    Aliment  ...  avg_carbs  avg_protein
+0     2024-06-25       Jus orange et ananas  ...       12.2          0.4
+1     2024-06-25              Pomme, séchée  ...       39.1          0.6
+2     2024-06-25                    Truffes  ...        5.4          0.7
+3     2024-06-25          Velouté de céleri  ...       17.7          3.3
+4     2024-06-25                     Avoine  ...       39.8         10.1
+...          ...                        ...  ...        ...          ...
+12836 2024-09-30      Carottes, en conserve  ...       13.2          1.5
+12837 2024-09-30           Steak haché, cru  ...        0.0          0.0
+12838 2024-09-30               Laitue rouge  ...        0.6          0.4
+12839 2024-09-30  Salade de pommes de terre  ...       10.6          2.5
+12840 2024-09-30            Artichaut, cuit  ...       14.3          3.5
 
 [12841 rows x 6 columns], 'user_food_grouping':       user_id  ... total_protein
-0           1  ...         200.8
-1          18  ...          60.9
-2          12  ...           0.0
-3           8  ...           7.8
-4           5  ...           7.0
+0          16  ...           6.8
+1          16  ...           2.5
+2           8  ...          31.0
+3           4  ...           0.0
+4           2  ...           4.0
 ...       ...  ...           ...
 6364        5  ...           0.8
 6365        9  ...           0.6
@@ -106,5 +106,5 @@ DuckDB Results:
 6367       18  ...          43.1
 6368        7  ...          14.2
 
-[6369 rows x 6 columns], 'elapsed_time': 4.261937618255615}
+[6369 rows x 6 columns], 'elapsed_time': 3.998962640762329}
 
