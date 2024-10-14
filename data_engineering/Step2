@@ -18,8 +18,15 @@
 
 
 - Combine meal
-    test --> note pylint 8.28 on ne peut pas aller plus haut
+    note pylint 10/10
+- Filtered data
+    note pylint 10/10
+- group_data
+    note pylint 10/10
 
 Faire tous les test
-- done : combine meal
+- done :
+    - combine meal : pylint : 8.97/10 on ne peut pas aller plus haut
+    - filter_data : pylint 10/10
+    - group_data : pylint 10/10
 - staying all others

@@ -1,0 +1,10 @@
+Les résultats pour daily_aggregation sont identiques.
+Les résultats pour user_daily_aggregation sont identiques.
+Les résultats pour daily_mean_per_food sont identiques.
+Les résultats pour user_food_grouping sont identiques.
+
+Temps d'exécution :
+Pandas : 5.2716 secondes
+DuckDB : 7.7181 secondes
+
+Pandas est plus rapide.

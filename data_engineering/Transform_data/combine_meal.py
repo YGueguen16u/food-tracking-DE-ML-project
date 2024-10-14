@@ -1,3 +1,9 @@
+"""
+This module processes and combines multiple CSV files containing meal data,
+merges them with a reference aliment table, and calculates total nutritional
+values before saving the final dataset as an Excel file.
+"""
+
 import os
 
 import pandas as pd
@@ -17,8 +23,13 @@ for filename in os.listdir(DIRECTORY_PATH):
         try:
             df = pd.read_csv(file_path)
             dataframes.append(df)
-        except Exception as e:
-            print(f"Error loading {filename}: {e}")
+        except pd.errors.EmptyDataError:
+            print(f"Empty data in {filename}, skipping.")
+        except pd.errors.ParserError:
+            print(f"Parsing error in {filename}, skipping.")
+        except FileNotFoundError:
+            print(f"File not found: {filename}, skipping.")
+
 
 # Concatenate all DataFrames
 combined_df = pd.concat(dataframes, ignore_index=True)
