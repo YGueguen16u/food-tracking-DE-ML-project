@@ -1,0 +1,3 @@
+meal_record_id,user_id,meal_id,date,heure,aliment_id,quantity,Valeur calorique,Lipides,Glucides,Protein,total_calories,total_lipids,total_carbs,total_protein
+1,19,1,2024-06-25,07:02:00,,1,93.0,6.4,0.7,7.5,93.0,6.4,0.7,7.5
+4,19,1,2024-06-25,07:02:00,,1,,,,,,,,
