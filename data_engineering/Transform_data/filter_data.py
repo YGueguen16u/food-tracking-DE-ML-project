@@ -8,7 +8,7 @@ import pandas as pd
 
 
 def clean_meal_data(
-        input_file, output_file, threshold_calories_high=5000, threshold_quantity_high=100):
+        input_file, output_file, threshold_calories_high=5000, threshold_quantity_high=50):
     """
     Nettoie les données de repas en supprimant les valeurs nulles et les unités aberrantes.
     Enregistre les lignes supprimées et les doublons.

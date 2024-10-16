@@ -23,6 +23,8 @@
     note pylint 10/10
 - group_data
     note pylint 10/10
+- windows function
+    note pylint
 
 Faire tous les test
 - done :
