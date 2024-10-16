@@ -1,12 +1,18 @@
-import pandas as pd
+"""
+This module contains tests for validating calculated nutritional values
+and ensuring the integrity of meal data stored in an Excel file.
+"""
+
 import numpy as np
+import pandas as pd
 import pytest
 
-# This module contains tests for validating calculated nutritional values
-# and ensuring the integrity of meal data stored in an Excel file.
-
 # Define the path to the Excel file
-FILE_PATH = r"C:\Users\GUEGUEN\Desktop\WSApp\IM\data_engineering\Transform_data\data\combined_meal_data.xlsx"
+# Define the path to the Excel file
+FILE_PATH = (
+    r"C:/Users/GUEGUEN/Desktop/WSApp/IM/data_engineering/Transform_data/data/"
+    "combined_meal_data.xlsx"
+)
 
 
 @pytest.fixture
@@ -95,4 +101,6 @@ def test_file_integrity():
     """Test that the saved Excel file is readable and contains the expected number of rows."""
     loaded_df = pd.read_excel(FILE_PATH)
     expected_rows = len(loaded_df)
-    assert len(loaded_df) == expected_rows, "File does not contain the expected number of rows!"
+    assert (
+        len(loaded_df) == expected_rows
+    ), "File does not contain the expected number of rows!"

@@ -44,6 +44,7 @@ def request_our_api(user_id, year, month, day):
 
 def generate_csv(all_data, year, month, user_id):
     if not os.path.exists('data/raw'):
+        print("Création du répertoire 'data/raw'")
         os.makedirs('data/raw')
 
     filename = f"data/raw/{year}_{month:02d}_user_{user_id}.csv"
@@ -51,18 +52,20 @@ def generate_csv(all_data, year, month, user_id):
         writer = csv.writer(file)
         writer.writerow(["user_id", "meal_id", "date", "heure", "aliment_id", "quantity"])
         for data in all_data:
-            for i in range(len(data["user_id"])):
-                # Ajouter de la donnée non fiable
-                aliment_id = data["aliment_id"][i] if random.random() > 0.01 else None
-                writer.writerow([
-                    data["user_id"][i],
-                    data["meal_id"][i],
-                    data["heure_repas"][i].split(" ")[0],
-                    data["heure_repas"][i].split(" ")[1],
-                    aliment_id,
-                    data["quantity"][i]
-                ])
-
+            if "user_id" in data and "meal_id" in data and "heure_repas" in data and "aliment_id" in data and "quantity" in data:
+                print(f"Structure correcte des données pour user_id {user_id} à la date {year}-{month}")
+                for i in range(len(data["user_id"])):
+                    aliment_id = data["aliment_id"][i] if random.random() > 0.01 else None
+                    writer.writerow([
+                        data["user_id"][i],
+                        data["meal_id"][i],
+                        data["heure_repas"][i].split(" ")[0],
+                        data["heure_repas"][i].split(" ")[1],
+                        aliment_id,
+                        data["quantity"][i]
+                    ])
+            else:
+                print(f"Structure incorrecte pour user_id {user_id} à la date {year}-{month}")
 
 user_ids = [i for i in range(1, 20)]  # Liste des user_id à itérer
 start_date = datetime.strptime(date_param, "%Y-%m-%d")
@@ -84,6 +87,7 @@ for user_id in user_ids:
         print(f"User ID {user_id} on {current_date.strftime('%Y-%m-%d')} took {elapsed_time:.2f} seconds")
 
         if data:
+            print(f"Data reçue pour l'utilisateur {user_id} à la date {current_date}: {data}")
             month_key = f"{year}_{month:02d}"
             if month_key not in monthly_data:
                 monthly_data[month_key] = []
@@ -93,6 +97,8 @@ for user_id in user_ids:
 
     for month_key, data_list in monthly_data.items():
         year, month = map(int, month_key.split('_'))
+        # Ajout d'une confirmation avant de générer le CSV
+        print(f"Création du fichier CSV pour l'utilisateur {user_id} pour le mois {month}/{year}")
         generate_csv(data_list, year, month, user_id)
 
 
