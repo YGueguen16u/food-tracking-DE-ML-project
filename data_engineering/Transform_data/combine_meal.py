@@ -10,7 +10,7 @@ import pandas as pd
 
 # Path to the directory containing the CSV files
 DIRECTORY_PATH = (
-    r"C:\Users\GUEGUEN\Desktop\WSApp\IM\data_engineering\Extract_data\data\raw"
+    r"C:\Users\GUEGUEN\Desktop\WSApp\IM\data\raw"
 )
 
 # Initialize an empty list to store DataFrames
