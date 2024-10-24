@@ -58,8 +58,8 @@ def pandas_window_function():
         Q1 = df[col].quantile(0.25)
         Q3 = df[col].quantile(0.75)
         IQR = Q3 - Q1
-        lower_bound = Q1 - 1.5 * IQR
-        upper_bound = Q3 + 1.5 * IQR
+        lower_bound = Q1 - 2 * IQR
+        upper_bound = Q3 + 2 * IQR
         df[f"{col}_outlier"] = (df[col] < lower_bound) | (df[col] > upper_bound)
 
     # Arrondir les résultats à 3 décimales pour éviter les différences de précision
@@ -92,6 +92,7 @@ def duckdb_window_function():
         """
     CREATE TABLE df_with_day_of_week AS
     SELECT *,
+
         CASE 
             WHEN STRFTIME('%w', date) = '0' THEN 7  -- Dimanche devient 7
             ELSE CAST(STRFTIME('%w', date) AS INTEGER)
@@ -100,7 +101,7 @@ def duckdb_window_function():
     """
     )
 
-    # Exécuter la requête pour calculer les fenêtres
+    # Exécuter la requête pour calculer les fenêtres et les quartiles
     query = """
     WITH RankedData AS (
         SELECT 
@@ -123,33 +124,52 @@ def duckdb_window_function():
             AVG(total_protein) OVER(PARTITION BY user_id, day_of_week ORDER BY rn ROWS BETWEEN 3 PRECEDING AND CURRENT ROW) AS avg_last_4_protein
         FROM RankedData
     ),
-    Differences AS (
-        SELECT
-            *,
-            total_calories - avg_last_4_calories AS calories_diff,
-            total_lipids - avg_last_4_lipids AS lipids_diff,
-            total_carbs - avg_last_4_carbs AS carbs_diff,
-            total_protein - avg_last_4_protein AS protein_diff,
-            STDDEV_POP(total_calories) OVER(PARTITION BY user_id, day_of_week ORDER BY rn ROWS BETWEEN 3 PRECEDING AND CURRENT ROW) AS calories_std_dev,
-            STDDEV_POP(total_lipids) OVER(PARTITION BY user_id, day_of_week ORDER BY rn ROWS BETWEEN 3 PRECEDING AND CURRENT ROW) AS lipids_std_dev,
-            STDDEV_POP(total_carbs) OVER(PARTITION BY user_id, day_of_week ORDER BY rn ROWS BETWEEN 3 PRECEDING AND CURRENT ROW) AS carbs_std_dev,
-            STDDEV_POP(total_protein) OVER(PARTITION BY user_id, day_of_week ORDER BY rn ROWS BETWEEN 3 PRECEDING AND CURRENT ROW) AS protein_std_dev
-        FROM WindowedAverages
+    Quartiles AS (
+        SELECT 
+            user_id, 
+            day_of_week, 
+            PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY total_calories) AS Q1_calories,
+            PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY total_calories) AS Q3_calories,
+            PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY total_lipids) AS Q1_lipids,
+            PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY total_lipids) AS Q3_lipids,
+            PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY total_carbs) AS Q1_carbs,
+            PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY total_carbs) AS Q3_carbs,
+            PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY total_protein) AS Q1_protein,
+            PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY total_protein) AS Q3_protein
+        FROM df_with_day_of_week
+        GROUP BY user_id, day_of_week
     )
-    SELECT *,
-
-        CASE WHEN ABS(calories_diff) > 2 * calories_std_dev THEN 1 ELSE 0 END AS calories_outlier,
-        CASE WHEN ABS(lipids_diff) > 2 * lipids_std_dev THEN 1 ELSE 0 END AS lipids_outlier,
-        CASE WHEN ABS(carbs_diff) > 2 * carbs_std_dev THEN 1 ELSE 0 END AS carbs_outlier,
-        CASE WHEN ABS(protein_diff) > 2 * protein_std_dev THEN 1 ELSE 0 END AS protein_outlier
-    FROM Differences
+    SELECT WindowedAverages.*,
+           Quartiles.Q1_calories, Quartiles.Q3_calories, 
+           Quartiles.Q1_lipids, Quartiles.Q3_lipids, 
+           Quartiles.Q1_carbs, Quartiles.Q3_carbs, 
+           Quartiles.Q1_protein, Quartiles.Q3_protein,
+           (Quartiles.Q3_calories - Quartiles.Q1_calories) AS IQR_calories,
+           (Quartiles.Q3_lipids - Quartiles.Q1_lipids) AS IQR_lipids,
+           (Quartiles.Q3_carbs - Quartiles.Q1_carbs) AS IQR_carbs,
+           (Quartiles.Q3_protein - Quartiles.Q1_protein) AS IQR_protein,
+           CASE WHEN total_calories < Quartiles.Q1_calories - 2 * (Quartiles.Q3_calories - Quartiles.Q1_calories) OR 
+                     total_calories > Quartiles.Q3_calories + 2 * (Quartiles.Q3_calories - Quartiles.Q1_calories) 
+                THEN 1 ELSE 0 END AS calories_outlier,
+           CASE WHEN total_lipids < Quartiles.Q1_lipids - 2 * (Quartiles.Q3_lipids - Quartiles.Q1_lipids) OR 
+                     total_lipids > Quartiles.Q3_lipids + 2 * (Quartiles.Q3_lipids - Quartiles.Q1_lipids) 
+                THEN 1 ELSE 0 END AS lipids_outlier,
+           CASE WHEN total_carbs < Quartiles.Q1_carbs - 2 * (Quartiles.Q3_carbs - Quartiles.Q1_carbs) OR 
+                     total_carbs > Quartiles.Q3_carbs + 2 * (Quartiles.Q3_carbs - Quartiles.Q1_carbs) 
+                THEN 1 ELSE 0 END AS carbs_outlier,
+           CASE WHEN total_protein < Quartiles.Q1_protein - 2 * (Quartiles.Q3_protein - Quartiles.Q1_protein) OR 
+                     total_protein > Quartiles.Q3_protein + 2 * (Quartiles.Q3_protein - Quartiles.Q1_protein) 
+                THEN 1 ELSE 0 END AS protein_outlier
+    FROM WindowedAverages
+    JOIN Quartiles ON WindowedAverages.user_id = Quartiles.user_id
+                    AND WindowedAverages.day_of_week = Quartiles.day_of_week
     """
 
     # Exécuter la requête et récupérer les résultats
     result_df = conn.execute(query).df()
 
     # Sauvegarder les résultats dans un fichier Excel
-    result_df.to_excel("data/duckdb_window_function_results.xlsx", index=False)
+    result_df.to_excel("data/duckdb_window_function_results_iqr.xlsx", index=False)
 
     return result_df
 
