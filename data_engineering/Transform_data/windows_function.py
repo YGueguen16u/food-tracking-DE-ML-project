@@ -1,59 +1,72 @@
-import pandas as pd
-import numpy as np
 import duckdb
+import numpy as np
+import pandas as pd
 
 
 # Fonction Pandas
 def pandas_window_function():
     # Charger les données à partir du fichier Excel
-    df = pd.read_excel('data/pandas_aggregation_results.xlsx', sheet_name='User Daily Aggregation')
+    df = pd.read_excel(
+        "data/pandas_aggregation_results.xlsx", sheet_name="User Daily Aggregation"
+    )
 
     # Convertir la colonne 'date' en format datetime
-    df['date'] = pd.to_datetime(df['date'])
+    df["date"] = pd.to_datetime(df["date"])
 
     # Extraire le jour de la semaine pour chaque date sous forme numérique (alignement avec DuckDB)
-    df['day_of_week'] = df['date'].dt.dayofweek + 1  # Lundi = 1, Dimanche = 7
+    df["day_of_week"] = df["date"].dt.dayofweek + 1  # Lundi = 1, Dimanche = 7
 
     # Trier les données par user_id, day_of_week, puis par date
-    df = df.sort_values(by=['user_id', 'day_of_week', 'date'])
+    df = df.sort_values(by=["user_id", "day_of_week", "date"])
 
     # Calcul des moyennes sur les 4 derniers jours similaires
-    df['avg_last_4_calories'] = df.groupby(['user_id', 'day_of_week'])['total_calories'].transform(
-        lambda x: x.rolling(window=4, min_periods=1).mean())
-    df['avg_last_4_lipids'] = df.groupby(['user_id', 'day_of_week'])['total_lipids'].transform(
-        lambda x: x.rolling(window=4, min_periods=1).mean())
-    df['avg_last_4_carbs'] = df.groupby(['user_id', 'day_of_week'])['total_carbs'].transform(
-        lambda x: x.rolling(window=4, min_periods=1).mean())
-    df['avg_last_4_protein'] = df.groupby(['user_id', 'day_of_week'])['total_protein'].transform(
-        lambda x: x.rolling(window=4, min_periods=1).mean())
+    df["avg_last_4_calories"] = df.groupby(["user_id", "day_of_week"])[
+        "total_calories"
+    ].transform(lambda x: x.rolling(window=4, min_periods=1).mean())
+    df["avg_last_4_lipids"] = df.groupby(["user_id", "day_of_week"])[
+        "total_lipids"
+    ].transform(lambda x: x.rolling(window=4, min_periods=1).mean())
+    df["avg_last_4_carbs"] = df.groupby(["user_id", "day_of_week"])[
+        "total_carbs"
+    ].transform(lambda x: x.rolling(window=4, min_periods=1).mean())
+    df["avg_last_4_protein"] = df.groupby(["user_id", "day_of_week"])[
+        "total_protein"
+    ].transform(lambda x: x.rolling(window=4, min_periods=1).mean())
 
     # Calcul des différences par rapport à la moyenne des 4 derniers jours
-    df['calories_diff'] = df['total_calories'] - df['avg_last_4_calories']
-    df['lipids_diff'] = df['total_lipids'] - df['avg_last_4_lipids']
-    df['carbs_diff'] = df['total_carbs'] - df['avg_last_4_carbs']
-    df['protein_diff'] = df['total_protein'] - df['avg_last_4_protein']
+    df["calories_diff"] = df["total_calories"] - df["avg_last_4_calories"]
+    df["lipids_diff"] = df["total_lipids"] - df["avg_last_4_lipids"]
+    df["carbs_diff"] = df["total_carbs"] - df["avg_last_4_carbs"]
+    df["protein_diff"] = df["total_protein"] - df["avg_last_4_protein"]
 
     # Calcul des écarts-types pour les 4 derniers jours
-    df['calories_std_dev'] = df.groupby(['user_id', 'day_of_week'])['total_calories'].transform(
-        lambda x: x.rolling(window=4, min_periods=1).std())
-    df['lipids_std_dev'] = df.groupby(['user_id', 'day_of_week'])['total_lipids'].transform(
-        lambda x: x.rolling(window=4, min_periods=1).std())
-    df['carbs_std_dev'] = df.groupby(['user_id', 'day_of_week'])['total_carbs'].transform(
-        lambda x: x.rolling(window=4, min_periods=1).std())
-    df['protein_std_dev'] = df.groupby(['user_id', 'day_of_week'])['total_protein'].transform(
-        lambda x: x.rolling(window=4, min_periods=1).std())
+    df["calories_std_dev"] = df.groupby(["user_id", "day_of_week"])[
+        "total_calories"
+    ].transform(lambda x: x.rolling(window=4, min_periods=1).std())
+    df["lipids_std_dev"] = df.groupby(["user_id", "day_of_week"])[
+        "total_lipids"
+    ].transform(lambda x: x.rolling(window=4, min_periods=1).std())
+    df["carbs_std_dev"] = df.groupby(["user_id", "day_of_week"])[
+        "total_carbs"
+    ].transform(lambda x: x.rolling(window=4, min_periods=1).std())
+    df["protein_std_dev"] = df.groupby(["user_id", "day_of_week"])[
+        "total_protein"
+    ].transform(lambda x: x.rolling(window=4, min_periods=1).std())
 
-    # Marquer les jours où la déviation est supérieure à 2 écarts-types
-    df['calories_outlier'] = np.abs(df['calories_diff']) > 2 * df['calories_std_dev']
-    df['lipids_outlier'] = np.abs(df['lipids_diff']) > 2 * df['lipids_std_dev']
-    df['carbs_outlier'] = np.abs(df['carbs_diff']) > 2 * df['carbs_std_dev']
-    df['protein_outlier'] = np.abs(df['protein_diff']) > 2 * df['protein_std_dev']
+    # Calcul des outliers avec la méthode IQR pour chaque colonne
+    for col in ["total_calories", "total_lipids", "total_carbs", "total_protein"]:
+        Q1 = df[col].quantile(0.25)
+        Q3 = df[col].quantile(0.75)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+        df[f"{col}_outlier"] = (df[col] < lower_bound) | (df[col] > upper_bound)
 
     # Arrondir les résultats à 3 décimales pour éviter les différences de précision
     df = df.round(3)
 
     # Sauvegarder les résultats dans un fichier Excel
-    df.to_excel('data/pandas_window_function_results.xlsx', index=False)
+    df.to_excel("data/pandas_window_function_results.xlsx", index=False)
 
     return df
 
@@ -61,19 +74,22 @@ def pandas_window_function():
 # Fonction DuckDB
 def duckdb_window_function():
     # Charger les données à partir du fichier Excel
-    df = pd.read_excel('data/duckdb_aggregation_results.xlsx', sheet_name='User Daily Aggregation')
+    df = pd.read_excel(
+        "data/duckdb_aggregation_results.xlsx", sheet_name="User Daily Aggregation"
+    )
 
     # Convertir la colonne 'date' en format datetime
-    df['date'] = pd.to_datetime(df['date'])
+    df["date"] = pd.to_datetime(df["date"])
 
     # Créer une connexion DuckDB en mémoire
-    conn = duckdb.connect(database=':memory:')
+    conn = duckdb.connect(database=":memory:")
 
     # Charger le DataFrame Pandas dans DuckDB
-    conn.register('df', df)
+    conn.register("df", df)
 
     # Modifier l'extraction du jour de la semaine pour que Dimanche soit 7, Lundi soit 1, etc.
-    conn.execute("""
+    conn.execute(
+        """
     CREATE TABLE df_with_day_of_week AS
     SELECT *,
         CASE 
@@ -81,7 +97,8 @@ def duckdb_window_function():
             ELSE CAST(STRFTIME('%w', date) AS INTEGER)
         END AS day_of_week
     FROM df
-    """)
+    """
+    )
 
     # Exécuter la requête pour calculer les fenêtres
     query = """
@@ -132,7 +149,7 @@ def duckdb_window_function():
     result_df = conn.execute(query).df()
 
     # Sauvegarder les résultats dans un fichier Excel
-    result_df.to_excel('data/duckdb_window_function_results.xlsx', index=False)
+    result_df.to_excel("data/duckdb_window_function_results.xlsx", index=False)
 
     return result_df
 
