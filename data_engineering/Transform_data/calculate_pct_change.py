@@ -3,8 +3,13 @@ import numpy as np
 import duckdb
 import os
 def pandas_percentage_change():
+    """
+
+    Returns:
+
+    """
     # Charger les données à partir du fichier Excel
-    df = pd.read_excel('data/pandas_window_function_results.xlsx')
+    df = pd.read_excel('data/pandas_window_function_results_iqr.xlsx')
 
     # Calcul du pourcentage de changement pour chaque nutriment
     df['pct_change_calories'] = ((df['total_calories'] - df['avg_last_4_calories']) / df['avg_last_4_calories']) * 100
@@ -30,7 +35,7 @@ def pandas_percentage_change():
 
 def duckdb_percentage_change():
     # Charger les données à partir du fichier Excel
-    df = pd.read_excel('data/duckdb_window_function_results.xlsx')
+    df = pd.read_excel('data/duckdb_window_function_results_iqr.xlsx')
 
     # Créer une connexion DuckDB en mémoire
     conn = duckdb.connect(database=':memory:')
