@@ -1,91 +1,134 @@
+"""
+This script processes user dietary data and calculates moving averages,
+differences, and identifies outliers based on the Interquartile Range (IQR).
+The script uses both Pandas (for Python) and DuckDB (for SQL-based operations).
+"""
+
 import duckdb
-import numpy as np
 import pandas as pd
 
 
 # Fonction Pandas
 def pandas_window_function():
+    """
+    Processes the data using Pandas to calculate moving averages for
+    total calories, lipids, carbs, and protein over the last four similar days
+    (same day of the week), calculates the difference from the average,
+    and identifies outliers using the Interquartile Range (IQR) method.
+
+    Outliers are identified if they fall below Q1 - 2 * IQR or above Q3 + 2 * IQR.
+    The processed data is saved to an Excel file.
+
+    Returns:
+        DataFrame: The processed data with outlier flags.
+    """
     # Charger les données à partir du fichier Excel
-    df = pd.read_excel(
+    data_frame = pd.read_excel(
         "data/pandas_aggregation_results.xlsx", sheet_name="User Daily Aggregation"
     )
 
     # Convertir la colonne 'date' en format datetime
-    df["date"] = pd.to_datetime(df["date"])
+    data_frame["date"] = pd.to_datetime(data_frame["date"])
 
     # Extraire le jour de la semaine pour chaque date sous forme numérique (alignement avec DuckDB)
-    df["day_of_week"] = df["date"].dt.dayofweek + 1  # Lundi = 1, Dimanche = 7
+    data_frame["day_of_week"] = (
+        data_frame["date"].dt.dayofweek + 1
+    )  # Lundi = 1, Dimanche = 7
 
     # Trier les données par user_id, day_of_week, puis par date
-    df = df.sort_values(by=["user_id", "day_of_week", "date"])
+    data_frame = data_frame.sort_values(by=["user_id", "day_of_week", "date"])
 
     # Calcul des moyennes sur les 4 derniers jours similaires
-    df["avg_last_4_calories"] = df.groupby(["user_id", "day_of_week"])[
+    data_frame["avg_last_4_calories"] = data_frame.groupby(["user_id", "day_of_week"])[
         "total_calories"
     ].transform(lambda x: x.rolling(window=4, min_periods=1).mean())
-    df["avg_last_4_lipids"] = df.groupby(["user_id", "day_of_week"])[
+    data_frame["avg_last_4_lipids"] = data_frame.groupby(["user_id", "day_of_week"])[
         "total_lipids"
     ].transform(lambda x: x.rolling(window=4, min_periods=1).mean())
-    df["avg_last_4_carbs"] = df.groupby(["user_id", "day_of_week"])[
+    data_frame["avg_last_4_carbs"] = data_frame.groupby(["user_id", "day_of_week"])[
         "total_carbs"
     ].transform(lambda x: x.rolling(window=4, min_periods=1).mean())
-    df["avg_last_4_protein"] = df.groupby(["user_id", "day_of_week"])[
+    data_frame["avg_last_4_protein"] = data_frame.groupby(["user_id", "day_of_week"])[
         "total_protein"
     ].transform(lambda x: x.rolling(window=4, min_periods=1).mean())
 
     # Calcul des différences par rapport à la moyenne des 4 derniers jours
-    df["calories_diff"] = df["total_calories"] - df["avg_last_4_calories"]
-    df["lipids_diff"] = df["total_lipids"] - df["avg_last_4_lipids"]
-    df["carbs_diff"] = df["total_carbs"] - df["avg_last_4_carbs"]
-    df["protein_diff"] = df["total_protein"] - df["avg_last_4_protein"]
+    data_frame["calories_diff"] = (
+        data_frame["total_calories"] - data_frame["avg_last_4_calories"]
+    )
+    data_frame["lipids_diff"] = (
+        data_frame["total_lipids"] - data_frame["avg_last_4_lipids"]
+    )
+    data_frame["carbs_diff"] = (
+        data_frame["total_carbs"] - data_frame["avg_last_4_carbs"]
+    )
+    data_frame["protein_diff"] = (
+        data_frame["total_protein"] - data_frame["avg_last_4_protein"]
+    )
 
     # Calcul des écarts-types pour les 4 derniers jours
-    df["calories_std_dev"] = df.groupby(["user_id", "day_of_week"])[
+    data_frame["calories_std_dev"] = data_frame.groupby(["user_id", "day_of_week"])[
         "total_calories"
     ].transform(lambda x: x.rolling(window=4, min_periods=1).std())
-    df["lipids_std_dev"] = df.groupby(["user_id", "day_of_week"])[
+    data_frame["lipids_std_dev"] = data_frame.groupby(["user_id", "day_of_week"])[
         "total_lipids"
     ].transform(lambda x: x.rolling(window=4, min_periods=1).std())
-    df["carbs_std_dev"] = df.groupby(["user_id", "day_of_week"])[
+    data_frame["carbs_std_dev"] = data_frame.groupby(["user_id", "day_of_week"])[
         "total_carbs"
     ].transform(lambda x: x.rolling(window=4, min_periods=1).std())
-    df["protein_std_dev"] = df.groupby(["user_id", "day_of_week"])[
+    data_frame["protein_std_dev"] = data_frame.groupby(["user_id", "day_of_week"])[
         "total_protein"
     ].transform(lambda x: x.rolling(window=4, min_periods=1).std())
 
     # Calcul des outliers avec la méthode IQR pour chaque colonne
     for col in ["total_calories", "total_lipids", "total_carbs", "total_protein"]:
-        Q1 = df[col].quantile(0.25)
-        Q3 = df[col].quantile(0.75)
-        IQR = Q3 - Q1
-        lower_bound = Q1 - 2 * IQR
-        upper_bound = Q3 + 2 * IQR
-        df[f"{col}_outlier"] = (df[col] < lower_bound) | (df[col] > upper_bound)
+        grouped = data_frame.groupby(["user_id", "day_of_week"])[col]
+        quartile_1 = grouped.transform(lambda x: x.quantile(0.25))
+        quartile_3 = grouped.transform(lambda x: x.quantile(0.75))
+        iqr = quartile_3 - quartile_1
+        lower_bound = quartile_1 - 2 * iqr
+        upper_bound = quartile_3 + 2 * iqr
+        data_frame[f"{col}_outlier"] = (
+                (data_frame[col] < lower_bound) | (data_frame[col] > upper_bound)
+        ).astype(int)
 
     # Arrondir les résultats à 3 décimales pour éviter les différences de précision
-    df = df.round(3)
+    data_frame = data_frame.round(3)
 
     # Sauvegarder les résultats dans un fichier Excel
-    df.to_excel("data/pandas_window_function_results.xlsx", index=False)
+    data_frame.to_excel("data/pandas_window_function_results_iqr.xlsx", index=False)
 
-    return df
+    return data_frame
 
 
 # Fonction DuckDB
 def duckdb_window_function():
+    """
+    Processes the data using DuckDB to calculate moving averages and
+    identify outliers using the Interquartile Range (IQR) method.
+
+    The function computes quartiles (Q1 and Q3) and identifies outliers
+    for total calories, lipids, carbs, and protein based on the IQR method.
+
+    Outliers are flagged if they fall outside the range [Q1 - 2 * IQR, Q3 + 2 * IQR].
+    The processed data is saved to an Excel file.
+
+    Returns:
+        DataFrame: The processed data with calculated IQR outlier flags.
+    """
     # Charger les données à partir du fichier Excel
-    df = pd.read_excel(
+    data_frame = pd.read_excel(
         "data/duckdb_aggregation_results.xlsx", sheet_name="User Daily Aggregation"
     )
 
     # Convertir la colonne 'date' en format datetime
-    df["date"] = pd.to_datetime(df["date"])
+    data_frame["date"] = pd.to_datetime(data_frame["date"])
 
     # Créer une connexion DuckDB en mémoire
     conn = duckdb.connect(database=":memory:")
 
     # Charger le DataFrame Pandas dans DuckDB
-    conn.register("df", df)
+    conn.register("df", data_frame)
 
     # Modifier l'extraction du jour de la semaine pour que Dimanche soit 7, Lundi soit 1, etc.
     conn.execute(
@@ -150,16 +193,16 @@ def duckdb_window_function():
            (Quartiles.Q3_protein - Quartiles.Q1_protein) AS IQR_protein,
            CASE WHEN total_calories < Quartiles.Q1_calories - 2 * (Quartiles.Q3_calories - Quartiles.Q1_calories) OR 
                      total_calories > Quartiles.Q3_calories + 2 * (Quartiles.Q3_calories - Quartiles.Q1_calories) 
-                THEN 1 ELSE 0 END AS calories_outlier,
+                THEN 1 ELSE 0 END AS total_calories_outlier,
            CASE WHEN total_lipids < Quartiles.Q1_lipids - 2 * (Quartiles.Q3_lipids - Quartiles.Q1_lipids) OR 
                      total_lipids > Quartiles.Q3_lipids + 2 * (Quartiles.Q3_lipids - Quartiles.Q1_lipids) 
-                THEN 1 ELSE 0 END AS lipids_outlier,
+                THEN 1 ELSE 0 END AS total_lipids_outlier,
            CASE WHEN total_carbs < Quartiles.Q1_carbs - 2 * (Quartiles.Q3_carbs - Quartiles.Q1_carbs) OR 
                      total_carbs > Quartiles.Q3_carbs + 2 * (Quartiles.Q3_carbs - Quartiles.Q1_carbs) 
-                THEN 1 ELSE 0 END AS carbs_outlier,
+                THEN 1 ELSE 0 END AS total_carbs_outlier,
            CASE WHEN total_protein < Quartiles.Q1_protein - 2 * (Quartiles.Q3_protein - Quartiles.Q1_protein) OR 
                      total_protein > Quartiles.Q3_protein + 2 * (Quartiles.Q3_protein - Quartiles.Q1_protein) 
-                THEN 1 ELSE 0 END AS protein_outlier
+                THEN 1 ELSE 0 END AS total_protein_outlier
     FROM WindowedAverages
     JOIN Quartiles ON WindowedAverages.user_id = Quartiles.user_id
                     AND WindowedAverages.day_of_week = Quartiles.day_of_week

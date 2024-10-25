@@ -24,11 +24,14 @@
 - group_data
     note pylint 10/10
 - windows function
-    note pylint
+    note pylint 10/10
+- percentage change
+
 
 Faire tous les test
 - done :
     - combine meal : pylint : 8.97/10 on ne peut pas aller plus haut
     - filter_data : pylint 10/10
     - group_data : pylint 10/10
+    - window_function : pylint 10/10
 - staying all others
