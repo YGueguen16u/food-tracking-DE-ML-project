@@ -9,7 +9,7 @@ Les résultats pour daily_mean_per_food sont identiques.
 Les résultats pour user_food_grouping sont identiques.
 
 Temps d'exécution :
-Pandas : 17.1358 secondes
-DuckDB : 13.0853 secondes
+Pandas : 25.9157 secondes
+DuckDB : 14.8829 secondes
 
 DuckDB est plus rapide.
