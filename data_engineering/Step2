@@ -35,3 +35,4 @@ Faire tous les test
     - group_data : pylint 10/10
     - window_function : pylint 10/10
 - staying all others
+- modifier l'aggrégation des liments par types et non par alimnets puis moyenner aux nombres de jours dans une colonne et ajouter une autre moyenné aux nombres d'aliemnst  et ajouter la colonne nombres d'aliments
