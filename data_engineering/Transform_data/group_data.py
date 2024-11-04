@@ -3,11 +3,12 @@ This module performs grouping and aggregation of meal data using both Pandas and
 It also compares the results and measures the execution time for both methods.
 """
 
+import os
 import time
 
 import duckdb
-import pandas as pd
 import matplotlib.pyplot as plt
+import pandas as pd
 
 
 class PandasAggregation:
@@ -21,12 +22,24 @@ class PandasAggregation:
         user_food_type_grouping: Aggregates data by user and food type and saves to Excel.
     """
 
-    def __init__(self):
+    def __init__(self, dataframe=None, food_type_data=None):
         """Initializes the data by loading the main dataset and food type data."""
-        self.dataframe = pd.read_excel("data/combined_meal_data_filtered.xlsx")
-        self.food_type_data = pd.read_excel("C:/Users/GUEGUEN/Desktop/WSApp/IM/DB/raw_food_data/aliments.XLSX")
-        # Merge food type information with main dataset
-        self.dataframe = self.dataframe.merge(self.food_type_data[['Aliment', 'Type']], on='Aliment', how='left')
+        if dataframe is not None:
+            self.dataframe = dataframe
+        else:
+            self.dataframe = pd.read_excel("data/combined_meal_data_filtered.xlsx")
+
+        if food_type_data is not None:
+            self.food_type_data = food_type_data
+        else:
+            self.food_type_data = pd.read_excel(
+                "C:/Users/GUEGUEN/Desktop/WSApp/IM/DB/raw_food_data/aliments.XLSX"
+            )
+
+        # Fusion des informations de type d'aliment avec le dataset principal
+        self.dataframe = self.dataframe.merge(
+            self.food_type_data[["Aliment", "Type"]], on="Aliment", how="left"
+        )
 
     def daily_aggregation(self):
         """
@@ -54,12 +67,14 @@ class PandasAggregation:
             )
             .reset_index()
         )
-        daily_aggregation = pd.merge(daily_aggregation, distinct_users_per_day, on="date")
+        daily_aggregation = pd.merge(
+            daily_aggregation, distinct_users_per_day, on="date"
+        )
         daily_aggregation["total_calories"] /= daily_aggregation["distinct_user_count"]
         daily_aggregation["total_lipids"] /= daily_aggregation["distinct_user_count"]
         daily_aggregation["total_carbs"] /= daily_aggregation["distinct_user_count"]
         daily_aggregation["total_protein"] /= daily_aggregation["distinct_user_count"]
-
+        print(type(daily_aggregation))
         return daily_aggregation
 
     def user_daily_aggregation(self):
@@ -82,6 +97,7 @@ class PandasAggregation:
             )
             .reset_index()
         )
+        print(type(user_daily_aggregation))
         return user_daily_aggregation
 
     def daily_mean_per_food(self):
@@ -121,22 +137,26 @@ class PandasAggregation:
                 total_lipids=("total_lipids", "sum"),
                 total_carbs=("total_carbs", "sum"),
                 total_protein=("total_protein", "sum"),
-                food_count=("Aliment", "count")
+                food_count=("Aliment", "count"),
             )
             .reset_index()
         )
         # Calculate average values per food item type
         user_food_type_grouping["avg_calories_per_type"] = (
-                user_food_type_grouping["total_calories"] / user_food_type_grouping["food_count"]
+            user_food_type_grouping["total_calories"]
+            / user_food_type_grouping["food_count"]
         )
         user_food_type_grouping["avg_lipids_per_type"] = (
-                user_food_type_grouping["total_lipids"] / user_food_type_grouping["food_count"]
+            user_food_type_grouping["total_lipids"]
+            / user_food_type_grouping["food_count"]
         )
         user_food_type_grouping["avg_carbs_per_type"] = (
-                user_food_type_grouping["total_carbs"] / user_food_type_grouping["food_count"]
+            user_food_type_grouping["total_carbs"]
+            / user_food_type_grouping["food_count"]
         )
         user_food_type_grouping["avg_protein_per_type"] = (
-                user_food_type_grouping["total_protein"] / user_food_type_grouping["food_count"]
+            user_food_type_grouping["total_protein"]
+            / user_food_type_grouping["food_count"]
         )
         return user_food_type_grouping
 
@@ -155,16 +175,27 @@ class PandasAggregation:
         daily_mean_food = self.daily_mean_per_food()
         user_food_type_agg = self.user_food_type_grouping()
 
+        if not os.path.exists("data"):
+            os.makedirs("data")
+
         # Write all results to Excel in one place
-        with pd.ExcelWriter("data/pandas_aggregation_results.xlsx", mode='w') as writer:
+        with pd.ExcelWriter("data/pandas_aggregation_results.xlsx", mode="w") as writer:
             daily_agg.to_excel(writer, sheet_name="Daily Aggregation", index=False)
-            user_daily_agg.to_excel(writer, sheet_name="User Daily Aggregation", index=False)
-            daily_mean_food.to_excel(writer, sheet_name="Daily Mean Per Food", index=False)
-            user_food_type_agg.to_excel(writer, sheet_name="User Food Type Grouping", index=False)
+            user_daily_agg.to_excel(
+                writer, sheet_name="User Daily Aggregation", index=False
+            )
+            daily_mean_food.to_excel(
+                writer, sheet_name="Daily Mean Per Food", index=False
+            )
+            user_food_type_agg.to_excel(
+                writer, sheet_name="User Food Type Grouping", index=False
+            )
 
         # Capture the total elapsed time
         elapsed_time = time.time() - start_time
-        print(f"All aggregations written to data/pandas_aggregation_results.xlsx in {elapsed_time:.2f} seconds")
+        print(
+            f"All aggregations written to data/pandas_aggregation_results.xlsx in {elapsed_time:.2f} seconds"
+        )
 
         # Return results and elapsed time in a dictionary
         return {
@@ -172,7 +203,7 @@ class PandasAggregation:
             "User Daily Aggregation": user_daily_agg,
             "Daily Mean Per Food": daily_mean_food,
             "User Food Type Grouping": user_food_type_agg,
-            "Elapsed Time": elapsed_time
+            "Elapsed Time": elapsed_time,
         }
 
 
@@ -187,14 +218,32 @@ class DuckDBAggregation:
         user_food_type_grouping: Aggregates data by user and food type and saves to Excel.
     """
 
-    def __init__(self):
-        """Initializes the DuckDB connection and registers data for queries."""
-        self.dataframe = pd.read_excel("data/combined_meal_data.xlsx")
-        self.food_type_data = pd.read_excel("C:/Users/GUEGUEN/Desktop/WSApp/IM/DB/raw_food_data/aliments.XLSX")
+    def __init__(self, dataframe=None, food_type_data=None):
+        """Initializes the data by loading the main dataset and food type data and sets up DuckDB connection."""
         self.conn = duckdb.connect(database=":memory:")
-        # Register dataframes in DuckDB
+
+        # Charger et fusionner les données dans DuckDB
+        if dataframe is not None:
+            self.dataframe = dataframe
+        else:
+            self.dataframe = pd.read_excel("data/combined_meal_data_filtered.xlsx")
+
+        if food_type_data is not None:
+            self.food_type_data = food_type_data
+        else:
+            self.food_type_data = pd.read_excel(
+                "C:/Users/GUEGUEN/Desktop/WSApp/IM/DB/raw_food_data/aliments.XLSX"
+            )
+
+        # Fusion des informations de type d'aliment avec le dataset principal
+        self.dataframe = self.dataframe.merge(
+            self.food_type_data[["Aliment", "Type"]], on="Aliment", how="left"
+        )
+
+        # Enregistrement des DataFrames comme tables DuckDB
         self.conn.register("dataframe", self.dataframe)
         self.conn.register("food_type_data", self.food_type_data)
+        print("DuckDB initialized and data registered successfully.")
 
     def daily_aggregation(self):
         """
@@ -207,11 +256,11 @@ class DuckDBAggregation:
         daily_aggregation = self.conn.execute(
             """
             SELECT date,
-                   COUNT(DISTINCT user_id) AS distinct_user_count,
                    SUM(total_calories) / COUNT(DISTINCT user_id) AS total_calories,
                    SUM(total_lipids) / COUNT(DISTINCT user_id) AS total_lipids,
                    SUM(total_carbs) / COUNT(DISTINCT user_id) AS total_carbs,
-                   SUM(total_protein) / COUNT(DISTINCT user_id) AS total_protein
+                   SUM(total_protein) / COUNT(DISTINCT user_id) AS total_protein,
+                   COUNT(DISTINCT user_id) AS distinct_user_count
             FROM dataframe
             GROUP BY date
             ORDER BY date
@@ -237,6 +286,7 @@ class DuckDBAggregation:
                    SUM(total_protein) AS total_protein
             FROM dataframe
             GROUP BY date, user_id
+            ORDER BY date
             """
         ).df()
         return user_daily_aggregation
@@ -258,6 +308,7 @@ class DuckDBAggregation:
                    AVG(total_protein) AS total_protein
             FROM dataframe
             GROUP BY date, Aliment
+            ORDER BY date, Aliment
             """
         ).df()
 
@@ -292,12 +343,14 @@ class DuckDBAggregation:
         ).df()
 
         # Renaming the averaged columns to be consistent with Pandas
-        user_food_type_grouping = user_food_type_grouping.rename(columns={
-            'avg_calories_per_type': 'total_calories',
-            'avg_lipids_per_type': 'total_lipids',
-            'avg_carbs_per_type': 'total_carbs',
-            'avg_protein_per_type': 'total_protein'
-        })
+        user_food_type_grouping = user_food_type_grouping.rename(
+            columns={
+                "avg_calories_per_type": "total_calories",
+                "avg_lipids_per_type": "total_lipids",
+                "avg_carbs_per_type": "total_carbs",
+                "avg_protein_per_type": "total_protein",
+            }
+        )
         return user_food_type_grouping
 
     def duckdb_aggregations(self):
@@ -315,16 +368,27 @@ class DuckDBAggregation:
         daily_mean_food = self.daily_mean_per_food()
         user_food_type_agg = self.user_food_type_grouping()
 
+        if not os.path.exists("data"):
+            os.makedirs("data")
+
         # Write results to Excel file with separate sheets
-        with pd.ExcelWriter("data/duckdb_aggregation_results.xlsx", mode='w') as writer:
+        with pd.ExcelWriter("data/duckdb_aggregation_results.xlsx", mode="w") as writer:
             daily_agg.to_excel(writer, sheet_name="Daily Aggregation", index=False)
-            user_daily_agg.to_excel(writer, sheet_name="User Daily Aggregation", index=False)
-            daily_mean_food.to_excel(writer, sheet_name="Daily Mean Per Food", index=False)
-            user_food_type_agg.to_excel(writer, sheet_name="User Food Type Grouping", index=False)
+            user_daily_agg.to_excel(
+                writer, sheet_name="User Daily Aggregation", index=False
+            )
+            daily_mean_food.to_excel(
+                writer, sheet_name="Daily Mean Per Food", index=False
+            )
+            user_food_type_agg.to_excel(
+                writer, sheet_name="User Food Type Grouping", index=False
+            )
 
         # Capture the total elapsed time
         elapsed_time = time.time() - start_time
-        print(f"All aggregations written to data/duckdb_aggregation_results.xlsx in {elapsed_time:.2f} seconds")
+        print(
+            f"All aggregations written to data/duckdb_aggregation_results.xlsx in {elapsed_time:.2f} seconds"
+        )
 
         # Return results and elapsed time in a dictionary
         return {
@@ -332,7 +396,7 @@ class DuckDBAggregation:
             "User Daily Aggregation": user_daily_agg,
             "Daily Mean Per Food": daily_mean_food,
             "User Food Type Grouping": user_food_type_agg,
-            "Elapsed Time": elapsed_time
+            "Elapsed Time": elapsed_time,
         }
 
 
@@ -344,6 +408,7 @@ class Comparison:
         compare_data: Compares data by checking for discrepancies in merging.
         compare_execution_times: Compares execution times and returns the faster method.
     """
+
     @staticmethod
     def compare_execution_times(pandas_time, duckdb_time):
         """
@@ -369,5 +434,7 @@ if __name__ == "__main__":
     duckdb_results = duckdb_agg.duckdb_aggregations()
 
     # Compare the total elapsed time
-    fastest = compare.compare_execution_times(pandas_results["Elapsed Time"], duckdb_results["Elapsed Time"])
+    fastest = compare.compare_execution_times(
+        pandas_results["Elapsed Time"], duckdb_results["Elapsed Time"]
+    )
     print(f"The fastest method is: {fastest}")
