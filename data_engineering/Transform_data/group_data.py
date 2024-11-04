@@ -7,7 +7,6 @@ import os
 import time
 
 import duckdb
-import matplotlib.pyplot as plt
 import pandas as pd
 
 
@@ -194,7 +193,8 @@ class PandasAggregation:
         # Capture the total elapsed time
         elapsed_time = time.time() - start_time
         print(
-            f"All aggregations written to data/pandas_aggregation_results.xlsx in {elapsed_time:.2f} seconds"
+            f"All aggregations written to data/pandas_aggregation_results.xlsx "
+            f"in {elapsed_time:.2f} seconds"
         )
 
         # Return results and elapsed time in a dictionary
@@ -219,7 +219,9 @@ class DuckDBAggregation:
     """
 
     def __init__(self, dataframe=None, food_type_data=None):
-        """Initializes the data by loading the main dataset and food type data and sets up DuckDB connection."""
+        """Initializes the data by loading the main dataset and food type data and sets
+        up DuckDB connection.
+        """
         self.conn = duckdb.connect(database=":memory:")
 
         # Charger et fusionner les données dans DuckDB
@@ -346,7 +348,8 @@ class DuckDBAggregation:
 
     def duckdb_aggregations(self):
         """
-        Performs all data aggregations using DuckDB, writes results to an Excel file, and returns execution time.
+        Performs all data aggregations using DuckDB, writes results to an Excel file,
+        and returns execution time.
 
         Returns:
             dict: A dictionary containing each aggregation result and the total elapsed time.
@@ -378,7 +381,8 @@ class DuckDBAggregation:
         # Capture the total elapsed time
         elapsed_time = time.time() - start_time
         print(
-            f"All aggregations written to data/duckdb_aggregation_results.xlsx in {elapsed_time:.2f} seconds"
+            f"All aggregations written to data/duckdb_aggregation_results.xlsx "
+            f"in {elapsed_time:.2f} seconds"
         )
 
         # Return results and elapsed time in a dictionary
@@ -391,41 +395,18 @@ class DuckDBAggregation:
         }
 
 
-class Comparison:
-    """
-    Class to compare results between Pandas and DuckDB aggregations.
-
-    Methods:
-        compare_data: Compares data by checking for discrepancies in merging.
-        compare_execution_times: Compares execution times and returns the faster method.
-    """
-
-    @staticmethod
-    def compare_execution_times(pandas_time, duckdb_time):
-        """
-        Compares execution times of Pandas and DuckDB methods.
-
-        Args:
-            pandas_time (float): Execution time of Pandas aggregation.
-            duckdb_time (float): Execution time of DuckDB aggregation.
-
-        Returns:
-            str: Name of the faster method.
-        """
-        return "Pandas" if pandas_time < duckdb_time else "DuckDB"
-
-
 if __name__ == "__main__":
     pandas_agg = PandasAggregation()
     duckdb_agg = DuckDBAggregation()
-    compare = Comparison()
 
     # Run aggregations and capture results and times
     pandas_results = pandas_agg.pandas_aggregations()
     duckdb_results = duckdb_agg.duckdb_aggregations()
 
     # Compare the total elapsed time
-    fastest = compare.compare_execution_times(
-        pandas_results["Elapsed Time"], duckdb_results["Elapsed Time"]
+    FASTEST = (
+        "Pandas"
+        if pandas_results["Elapsed Time"] < duckdb_results["Elapsed Time"]
+        else "DuckDB"
     )
-    print(f"The fastest method is: {fastest}")
+    print(f"The fastest method is: {FASTEST}")
