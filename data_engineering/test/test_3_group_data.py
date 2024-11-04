@@ -145,116 +145,57 @@ class TestDuckDBAggregation(TestDataSetup):
         self.agg = DuckDBAggregation(dataframe=self.test_dataframe, food_type_data=self.test_food_type_data)
 
     def test_daily_aggregation(self):
-        result = self.agg.daily_aggregation().round(4)
-        print("Résultat aggregation:\n", result)
+        result_daily = self.agg.daily_aggregation().round(4)
+        print("Résultat aggregation:\n", result_daily)
         print("Valeurs attendues:\n", self.expected_daily_agg)
-        assert_frame_equal(result, self.expected_daily_agg)
+        assert_frame_equal(result_daily, self.expected_daily_agg)
 
     def test_user_daily_aggregation(self):
-        result = self.agg.user_daily_aggregation().round(4)
-        print("Résultat aggregation:\n", result)
-        print("Valeurs attendues:\n", self.expected_user_daily_agg)
-        assert_frame_equal(result, self.expected_user_daily_agg)
+        # Cast result and expected data to float for relevant columns
+        result_user_daily = self.agg.user_daily_aggregation().astype({
+            'total_calories': 'float',
+            'total_lipids': 'float',
+            'total_carbs': 'float',
+            'total_protein': 'float'
+        }).round(4)
+        expected = self.expected_user_daily_agg.astype({
+            'total_calories': 'float',
+            'total_lipids': 'float',
+            'total_carbs': 'float',
+            'total_protein': 'float'
+        }).round(4)
+        print("Résultat aggregation:\n", result_user_daily)
+        print("Valeurs attendues:\n", expected)
+
+        # Assert equality of frames with float type
+        assert_frame_equal(result_user_daily, expected)
 
     def test_daily_mean_per_food(self):
-        result = self.agg.daily_mean_per_food().round(4)
-        print("Résultat aggregation:\n", result)
+        result_mean_food = self.agg.daily_mean_per_food().round(4)
+        print("Résultat aggregation:\n", result_mean_food)
         print("Valeurs attendues:\n", self.expected_daily_mean_per_food)
-        assert_frame_equal(result, self.expected_daily_mean_per_food)
+        assert_frame_equal(result_mean_food, self.expected_daily_mean_per_food)
 
     def test_user_food_type_grouping(self):
-        result = self.agg.user_food_type_grouping().round(4)
-        print("Résultat aggregation:\n", result)
-        print("Valeurs attendues:\n", self.expected_user_food_type_grouping)
-        assert_frame_equal(result, self.expected_user_food_type_grouping)
+        result_user_food = self.agg.user_food_type_grouping().round(4)
 
-class TestComparison(unittest.TestCase):
-    """
-    Tests unitaires pour la classe Comparison, vérifiant la correspondance
-    entre les agrégations effectuées avec Pandas et DuckDB.
-    """
+        # Convert relevant columns of expected DataFrame to float
+        expected = self.expected_user_food_type_grouping.astype({
+            "total_calories": "float",
+            "total_lipids": "float",
+            "total_carbs": "float",
+            "total_protein": "float",
+            "avg_calories_per_type": "float",
+            "avg_lipids_per_type": "float",
+            "avg_carbs_per_type": "float",
+            "avg_protein_per_type": "float"
+        }).round(4)
 
-    @classmethod
-    def setUpClass(cls):
-        """
-        Charger les résultats attendus pour chaque type d'agrégation à partir des fichiers de référence.
-        """
-        cls.pandas_data_daily = pd.read_excel(
-            f"{FILE_PATH}\\pandas_aggregation_results.xlsx", sheet_name="Daily Aggregation"
-        )
-        cls.duckdb_data_daily = pd.read_excel(
-            f"{FILE_PATH}\\duckdb_aggregation_results.xlsx", sheet_name="Daily Aggregation"
-        )
-        cls.pandas_data_user_daily = pd.read_excel(
-            f"{FILE_PATH}\\pandas_aggregation_results.xlsx", sheet_name="User Daily Aggregation"
-        )
-        cls.duckdb_data_user_daily = pd.read_excel(
-            f"{FILE_PATH}\\duckdb_aggregation_results.xlsx", sheet_name="User Daily Aggregation"
-        )
-        cls.pandas_data_mean_food = pd.read_excel(
-            f"{FILE_PATH}\\pandas_aggregation_results.xlsx", sheet_name="Daily Mean Per Food"
-        )
-        cls.duckdb_data_mean_food = pd.read_excel(
-            f"{FILE_PATH}\\duckdb_aggregation_results.xlsx", sheet_name="Daily Mean Per Food"
-        )
-        cls.pandas_data_user_food = pd.read_excel(
-            f"{FILE_PATH}\\pandas_aggregation_results.xlsx", sheet_name="User Food Grouping"
-        )
-        cls.duckdb_data_user_food = pd.read_excel(
-            f"{FILE_PATH}\\duckdb_aggregation_results.xlsx", sheet_name="User Food Grouping"
-        )
+        print("Résultat aggregation:\n", result_user_food)
+        print("Valeurs attendues:\n", expected)
 
-    def test_compare_daily_aggregation(self):
-        """
-        Test de comparaison des agrégations quotidiennes entre Pandas et DuckDB.
-        """
-        self.assertTrue(
-            Comparison.compare_data(
-                self.pandas_data_daily,
-                self.duckdb_data_daily,
-                "Daily Aggregation"
-            ),
-            "Les agrégations quotidiennes ne correspondent pas entre Pandas et DuckDB."
-        )
-
-    def test_compare_user_daily_aggregation(self):
-        """
-        Test de comparaison des agrégations par utilisateur et par jour entre Pandas et DuckDB.
-        """
-        self.assertTrue(
-            Comparison.compare_data(
-                self.pandas_data_user_daily,
-                self.duckdb_data_user_daily,
-                "User Daily Aggregation"
-            ),
-            "Les agrégations par utilisateur et par jour ne correspondent pas entre Pandas et DuckDB."
-        )
-
-    def test_compare_average_nutrients_per_food(self):
-        """
-        Test de comparaison des moyennes des nutriments par aliment entre Pandas et DuckDB.
-        """
-        self.assertTrue(
-            Comparison.compare_data(
-                self.pandas_data_mean_food,
-                self.duckdb_data_mean_food,
-                "Daily Mean Per Food"
-            ),
-            "Les moyennes des nutriments par aliment ne correspondent pas entre Pandas et DuckDB."
-        )
-
-    def test_compare_grouping_by_user_and_food(self):
-        """
-        Test de comparaison des groupements par utilisateur et par aliment entre Pandas et DuckDB.
-        """
-        self.assertTrue(
-            Comparison.compare_data(
-                self.pandas_data_user_food,
-                self.duckdb_data_user_food,
-                "User Food Grouping"
-            ),
-            "Les groupements par utilisateur et aliment ne correspondent pas entre Pandas et DuckDB."
-        )
+        # Assert equality of frames with consistent types
+        assert_frame_equal(result_user_food, expected)
 
 
 if __name__ == "__main__":

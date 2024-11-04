@@ -286,7 +286,7 @@ class DuckDBAggregation:
                    SUM(total_protein) AS total_protein
             FROM dataframe
             GROUP BY date, user_id
-            ORDER BY date
+            ORDER BY date, user_id
             """
         ).df()
         return user_daily_aggregation
@@ -342,15 +342,6 @@ class DuckDBAggregation:
             """
         ).df()
 
-        # Renaming the averaged columns to be consistent with Pandas
-        user_food_type_grouping = user_food_type_grouping.rename(
-            columns={
-                "avg_calories_per_type": "total_calories",
-                "avg_lipids_per_type": "total_lipids",
-                "avg_carbs_per_type": "total_carbs",
-                "avg_protein_per_type": "total_protein",
-            }
-        )
         return user_food_type_grouping
 
     def duckdb_aggregations(self):
