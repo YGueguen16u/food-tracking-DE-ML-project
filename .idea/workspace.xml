@@ -6,9 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="e5d5be8c-2629-45a1-ad57-aebe2a0a6250" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_engineering/Transform_data/data/duckdb_aggregation_results.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/data_engineering/Transform_data/data/duckdb_aggregation_results.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_engineering/Transform_data/data/pandas_aggregation_results.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/data_engineering/Transform_data/data/pandas_aggregation_results.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_engineering/Transform_data/group_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_engineering/Transform_data/group_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_engineering/test/test_3_group_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_engineering/test/test_3_group_data.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -186,7 +184,8 @@
       <workItem from="1729941943107" duration="6817000" />
       <workItem from="1730290073500" duration="9072000" />
       <workItem from="1730299319978" duration="624000" />
-      <workItem from="1730740180735" duration="6631000" />
+      <workItem from="1730740180735" duration="6977000" />
+      <workItem from="1730822464617" duration="897000" />
     </task>
     <servers />
   </component>
