@@ -4,7 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e5d5be8c-2629-45a1-ad57-aebe2a0a6250" name="Changes" comment="" />
+    <list default="true" id="e5d5be8c-2629-45a1-ad57-aebe2a0a6250" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_engineering/Step2" beforeDir="false" afterPath="$PROJECT_DIR$/data_engineering/Step2" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -74,7 +77,12 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager">
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\GUEGUEN\Desktop\WSApp\IM\data_engineering\Transform_data" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Python.data_engineering.sensor_api.fake_data.__init__">
     <configuration name="__init__" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="IM" />
       <option name="ENV_FILES" value="" />
@@ -182,7 +190,8 @@
       <workItem from="1730290073500" duration="9072000" />
       <workItem from="1730299319978" duration="624000" />
       <workItem from="1730740180735" duration="6977000" />
-      <workItem from="1730822464617" duration="1220000" />
+      <workItem from="1730822464617" duration="4438000" />
+      <workItem from="1730999350266" duration="2373000" />
     </task>
     <servers />
   </component>
