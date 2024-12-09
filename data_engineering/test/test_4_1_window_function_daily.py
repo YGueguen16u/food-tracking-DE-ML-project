@@ -1,126 +1,96 @@
 """
-Unit tests for functions performing data transformation and outlier detection.
-
-These tests validate the creation of output files, the non-emptiness of processed data,
-and ensure consistency in outlier detection across both Pandas and DuckDB implementations.
-
-The tests include:
-- Verifying the existence and non-emptiness of output files.
-- Checking that outlier columns for each nutrient are present in both Pandas and DuckDB outputs.
-- Comparing the consistency of outlier flags between Pandas and DuckDB outputs.
+Unit tests for calculating rolling averages of meal data using both Pandas and DuckDB.
+These tests validate that the rolling averages for the last 4 same weekdays
+(e.g., last 4 Thursdays) are computed correctly and the results match expectations.
 """
 
 import unittest
-import os
 import pandas as pd
-
-FILE_PATH = r"C:\Users\GUEGUEN\Desktop\WSApp\IM\data_engineering\Transform_data\data"
-
-
-class TestPandasWindowFunction(unittest.TestCase):
-    """Test suite for validating the Pandas window function results."""
-
-    @classmethod
-    def setUpClass(cls):
-        """Load the pandas output file once for all tests."""
-        cls.df = pd.read_excel(f"{FILE_PATH}\\pandas_window_function_results_iqr.xlsx")
-
-    def test_pandas_output_file_created(self):
-        """Check if the Pandas output file exists in the specified location."""
-        output_file = os.path.join(FILE_PATH, "pandas_window_function_results_iqr.xlsx")
-        self.assertTrue(
-            os.path.exists(output_file), "Pandas output file is not created"
-        )
-
-    def test_pandas_dataframe_not_empty(self):
-        """Ensure that the Pandas DataFrame is not empty after processing."""
-        self.assertFalse(self.df.empty, "Pandas DataFrame is empty")
-
-    def test_pandas_outliers_categorization(self):
-        """Verify each outlier column categorizes data according to IQR thresholds."""
-        for nutrient in [
-            "total_calories",
-            "total_lipids",
-            "total_carbs",
-            "total_protein",
-        ]:
-            iqr_col = f"{nutrient}_outlier"
-            self.assertIn(
-                iqr_col, self.df.columns, f"{iqr_col} missing in Pandas DataFrame"
-            )
+from pandas.testing import assert_frame_equal
+from data_engineering.Transform_data.window_function_daily import PandasWindowFunction, DuckDBWindowFunction
 
 
-class TestDuckDBWindowFunction(unittest.TestCase):
-    """Test suite for validating the DuckDB window function results."""
+class TestWindowFunction(unittest.TestCase):
+    """
+    Unit tests for Pandas and DuckDB window functions calculating rolling averages.
+    """
 
     @classmethod
     def setUpClass(cls):
-        """Load the DuckDB output file once for all tests."""
-        cls.df = pd.read_excel(f"{FILE_PATH}\\duckdb_window_function_results_iqr.xlsx")
-
-    def test_duckdb_output_file_created(self):
-        """Check if the DuckDB output file exists in the specified location."""
-        output_file = os.path.join(FILE_PATH, "duckdb_window_function_results_iqr.xlsx")
-        self.assertTrue(
-            os.path.exists(output_file), "DuckDB output file is not created"
+        """
+        Set up test data for both Pandas and DuckDB implementations.
+        """
+        # Test input DataFrame
+        cls.test_data = pd.DataFrame(
+            {
+                "date": [
+                    "2024-01-04", "2024-01-11", "2024-01-18", "2024-01-25",
+                    "2024-02-01", "2024-02-08", "2024-02-15", "2024-02-22"
+                ],
+                "total_calories": [2000, 2200, 2040, 2360, 2480, 2300, 2320, 3140],
+                "total_lipids": [20, 22, 24, 26, 28, 30, 32, 34],
+                "total_carbs": [100, 110, 120, 130, 140, 150, 160, 170],
+                "total_protein": [50, 55, 60, 65, 70, 75, 80, 85],
+            }
         )
+        cls.test_data["date"] = pd.to_datetime(cls.test_data["date"])  # Ensure datetime format
 
-    def test_duckdb_dataframe_not_empty(self):
-        """Ensure that the DuckDB DataFrame is not empty after processing."""
-        self.assertFalse(self.df.empty, "DuckDB DataFrame is empty")
+        # Expected DataFrame after rolling averages calculation
+        cls.expected_output = cls.test_data.copy()
+        cls.expected_output["weekday"] = cls.expected_output["date"].dt.day_name()
 
-    def test_duckdb_outliers_categorization(self):
-        """Verify each outlier column categorizes data according to IQR thresholds."""
-        for nutrient in [
-            "total_calories",
-            "total_lipids",
-            "total_carbs",
-            "total_protein",
-        ]:
-            iqr_col = f"{nutrient}_outlier"
-            self.assertIn(
-                iqr_col, self.df.columns, f"{iqr_col} missing in DuckDB DataFrame"
-            )
+        # Manually calculated rolling averages (last 4 same weekdays)
+        cls.expected_output["rolling_avg_total_calories"] = [
+            2000.0, 2100.0, 2080.0, 2150.0, 2270.0, 2295.0, 2365.0, 2560.0
+        ]
+        cls.expected_output["rolling_avg_total_lipids"] = [
+            20.0, 21.0, 22.0, 23.0, 25.0, 27.0, 29.0, 31.0
+        ]
+        cls.expected_output["rolling_avg_total_carbs"] = [
+            100.0, 105.0, 110.0, 115.0, 125.0, 135.0, 145.0, 155.0
+        ]
+        cls.expected_output["rolling_avg_total_protein"] = [
+            50.0, 52.5, 55.0, 57.5, 62.5, 67.5, 72.5, 77.5
+        ]
 
+        # Save test data as an Excel file for input to functions
+        cls.input_file = "test_input.xlsx"
+        cls.sheet_name = "Sheet1"
+        cls.test_data.to_excel(cls.input_file, sheet_name=cls.sheet_name, index=False)
 
-class TestOutliersComparison(unittest.TestCase):
-    """Test suite to compare outliers detected by Pandas and DuckDB for consistency."""
-
-    @classmethod
-    def setUpClass(cls):
-        """Load both Pandas and DuckDB output files and merge them for cross-validation."""
-        pandas_df = pd.read_excel(
-            f"{FILE_PATH}\\pandas_window_function_results_iqr.xlsx"
+    def test_pandas_window_function(self):
+        """
+        Test the rolling averages calculation with the Pandas implementation.
+        """
+        result = PandasWindowFunction.compute_weekly_window(self.input_file, self.sheet_name)
+        # Ensure all columns match the expected output
+        assert_frame_equal(
+            result[[
+                "date", "total_calories", "total_lipids", "total_carbs", "total_protein",
+                "weekday", "rolling_avg_total_calories", "rolling_avg_total_lipids",
+                "rolling_avg_total_carbs", "rolling_avg_total_protein"
+            ]],
+            self.expected_output,
+            check_like=True  # Ignore column order
         )
-        duckdb_df = pd.read_excel(
-            f"{FILE_PATH}\\duckdb_window_function_results_iqr.xlsx"
+        print("Pandas test passed.")
+
+    def test_duckdb_window_function(self):
+        """
+        Test the rolling averages calculation with the DuckDB implementation.
+        """
+        result = DuckDBWindowFunction.compute_weekly_window(self.input_file, self.sheet_name)
+        # Ensure all columns match the expected output
+        assert_frame_equal(
+            result[[
+                "date", "total_calories", "total_lipids", "total_carbs", "total_protein",
+                "weekday", "rolling_avg_total_calories", "rolling_avg_total_lipids",
+                "rolling_avg_total_carbs", "rolling_avg_total_protein"
+            ]],
+            self.expected_output,
+            check_like=True  # Ignore column order
         )
-        cls.merged_df = pd.merge(
-            pandas_df,
-            duckdb_df,
-            on=["user_id", "date"],
-            suffixes=("_pandas", "_duckdb"),
-        )
-
-    def test_outliers_match(self):
-        """Ensure that outliers flagged in Pandas match those in DuckDB for each nutrient."""
-        for nutrient in ["calories", "lipids", "carbs", "protein"]:
-            pandas_outlier_col = f"total_{nutrient}_outlier_pandas"
-            duckdb_outlier_col = f"total_{nutrient}_outlier_duckdb"
-
-            mismatched_rows = self.merged_df[
-                self.merged_df[pandas_outlier_col] != self.merged_df[duckdb_outlier_col]
-            ]
-            if not mismatched_rows.empty:
-                print(
-                    f"Mismatched rows for {nutrient}:\n",
-                    mismatched_rows[[pandas_outlier_col, duckdb_outlier_col]],
-                )
-
-            self.assertTrue(
-                mismatched_rows.empty,
-                f"Outliers for {nutrient} do not match between Pandas and DuckDB",
-            )
+        print("DuckDB test passed.")
 
 
 if __name__ == "__main__":

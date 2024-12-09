@@ -32,7 +32,6 @@ Mais on ne supprime pas pour l’instant les valeurs dont on pense qu’elles so
 5. Faire une window function
 
 Faire une window function
-(partition by “day_of_week”, “id_lieu”, “capteur_id” order by “date”)
 
 qui fait la moyenne sur les 4 derniers même jours de la semaine, par exemple les 4 derniers Jeudis si la ligne concerne la donnée pour un Jeudi)
 
