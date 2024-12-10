@@ -13,11 +13,11 @@ import pandas as pd
 class PandasWindowFunction:
     """
     Class to compute a window function in Pandas that calculates the rolling average of the last
-    4 same weekdays for a given dataset.
+    4 same weekdays for the Daily dataset.
 
     Methods:
-        compute_weekly_window: Computes the rolling average for a specific sheet in an Excel file.
-        save_result: Saves the processed data into an Excel file.
+        compute_daily_window_pandas: Computes rolling averages for a DataFrame.
+        pandas_window_daily: Saves the processed data into an Excel file.
     """
 
     def __init__(self, dataframe=None):
@@ -25,12 +25,13 @@ class PandasWindowFunction:
         if dataframe is not None:
             self.dataframe = dataframe
         else:
-            self.dataframe = pd.read_excel("data/pandas_aggregation_results.xlsx")
+            self.dataframe = pd.read_excel("data/pandas_aggregation_results.xlsx",
+                                           sheet_name="Daily Aggregation")
 
     def compute_daily_window_pandas(self):
         """
         Computes the rolling average of the last 4 same weekdays for the dataset
-        in the specified sheet.
+        in the Daily using Pandas.
         Returns:
             DataFrame: DataFrame with the rolling averages added.
         """
@@ -72,23 +73,24 @@ class PandasWindowFunction:
 class DuckDBWindowFunction:
     """
     Class to compute a window function in DuckDB that calculates the rolling average of the last
-    4 same weekdays for a given dataset.
+    4 same weekdays for the Daily dataset.
 
     Methods:
-        compute_weekly_window: Computes the rolling average for a specific sheet in an Excel file.
-        save_result: Saves the processed data into an Excel file.
+        compute_daily_window_pandas: Computes rolling averages for a DataFrame.
+        duckdb_window_daily: Saves the processed data into an Excel file.
     """
     def __init__(self, dataframe=None):
         """Initializes the data by loading the main dataset and food type data."""
         if dataframe is not None:
             self.dataframe = dataframe
         else:
-            self.dataframe = pd.read_excel("data/duckdb_aggregation_results.xlsx")
+            self.dataframe = pd.read_excel("data/duckdb_aggregation_results.xlsx",
+                                           sheet_name="Daily Aggregation")
 
     def compute_daily_window_duckdb(self):
         """
         Computes the rolling average of the last 4 same weekdays for the dataset
-        in the specified sheet using DuckDB.
+        in the sheet Daily using DuckDB.
 
         Returns:
             DataFrame: DataFrame with the rolling averages added.
