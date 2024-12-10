@@ -10,7 +10,9 @@ import pandas as pd
 from pandas.testing import assert_frame_equal
 
 from data_engineering.Transform_data.window_function_daily import (
-    DuckDBWindowFunction, PandasWindowFunction)
+    DuckDBWindowFunction,
+    PandasWindowFunction,
+)
 
 
 class TestWindowFunction(unittest.TestCase):
