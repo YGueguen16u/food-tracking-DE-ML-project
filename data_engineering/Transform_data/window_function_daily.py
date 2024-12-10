@@ -1,11 +1,10 @@
 """
 This module calculates rolling averages of meal data using both Pandas and DuckDB.
-It processes grouped data to compute the average for the last 4 same weekdays (e.g., last 4 Thursdays).
+It calculates the average of the last 4 same weekdays (e.g., Thursdays).
 The results are saved as Excel files in the same directory as the input file.
 """
 
 import os
-import time
 
 import duckdb
 import pandas as pd
@@ -21,55 +20,51 @@ class PandasWindowFunction:
         save_result: Saves the processed data into an Excel file.
     """
 
-    @staticmethod
-    def compute_weekly_window(input_file, sheet_name):
+    def __init__(self, dataframe=None):
+        """Initializes the data by loading the main dataset and food type data."""
+        if dataframe is not None:
+            self.dataframe = dataframe
+        else:
+            self.dataframe = pd.read_excel("data/pandas_aggregation_results.xlsx")
+
+    def compute_daily_window_pandas(self):
         """
         Computes the rolling average of the last 4 same weekdays for the dataset
         in the specified sheet.
-
-        Args:
-            input_file (str): Path to the input Excel file.
-            sheet_name (str): Name of the sheet to process.
-
         Returns:
             DataFrame: DataFrame with the rolling averages added.
         """
-        # Load the sheet into a DataFrame
-        df = pd.read_excel(input_file, sheet_name=sheet_name)
-
         # Ensure the 'date' column is in datetime format
-        df['date'] = pd.to_datetime(df['date'])
+        self.dataframe["date"] = pd.to_datetime(self.dataframe["date"])
 
         # Extract the weekday for each date
-        df['weekday'] = df['date'].dt.day_name()
+        self.dataframe["weekday"] = self.dataframe["date"].dt.day_name()
 
         # Sort by date
-        df = df.sort_values('date')
+        daily_dataframe = self.dataframe.sort_values("date")
 
         # Apply rolling average grouped by weekday
-        for col in ['total_calories', 'total_lipids', 'total_carbs', 'total_protein']:
-            df[f'rolling_avg_{col}'] = (
-                df.groupby('weekday')[col]
-                .transform(lambda x: x.rolling(window=4, min_periods=1).mean())
-            )
+        for col in ["total_calories", "total_lipids", "total_carbs", "total_protein"]:
+            daily_dataframe[f"rolling_avg_{col}"] = daily_dataframe.groupby("weekday")[
+                col
+            ].transform(lambda x: x.rolling(window=4, min_periods=1).mean())
 
-        return df
+        return daily_dataframe
 
-    @staticmethod
-    def save_result(input_file, sheet_name):
+    def pandas_window_daily(self):
         """
-        Saves the result of the weekly window function into the same folder as the input file,
+        Saves the result of the weekly window function into the 'data' folder,
         with the output file named 'daily_window_function_pandas.xlsx'.
-
-        Args:
-            input_file (str): Path to the input Excel file.
-            sheet_name (str): Name of the sheet to process.
         """
-        output_file = os.path.join(os.path.dirname(input_file), "daily_window_function_pandas.xlsx")
-        result_df = PandasWindowFunction.compute_weekly_window(input_file, sheet_name)
+        # Define the output file path within the 'data' folder
+        output_file = os.path.join("data", "daily_window_function_pandas.xlsx")
 
+        # Compute the rolling averages
+        result_df = self.compute_daily_window_pandas()
+
+        # Save the result as an Excel file
         with pd.ExcelWriter(output_file, mode="w") as writer:
-            result_df.to_excel(writer, sheet_name=sheet_name, index=False)
+            result_df.to_excel(writer, sheet_name="Daily Aggregation", index=False)
 
         print(f"Results saved to: {output_file}")
 
@@ -83,27 +78,25 @@ class DuckDBWindowFunction:
         compute_weekly_window: Computes the rolling average for a specific sheet in an Excel file.
         save_result: Saves the processed data into an Excel file.
     """
+    def __init__(self, dataframe=None):
+        """Initializes the data by loading the main dataset and food type data."""
+        if dataframe is not None:
+            self.dataframe = dataframe
+        else:
+            self.dataframe = pd.read_excel("data/duckdb_aggregation_results.xlsx")
 
-    @staticmethod
-    def compute_weekly_window(input_file, sheet_name):
+    def compute_daily_window_duckdb(self):
         """
         Computes the rolling average of the last 4 same weekdays for the dataset
         in the specified sheet using DuckDB.
-
-        Args:
-            input_file (str): Path to the input Excel file.
-            sheet_name (str): Name of the sheet to process.
 
         Returns:
             DataFrame: DataFrame with the rolling averages added.
         """
         conn = duckdb.connect(database=":memory:")
-
-        # Load the sheet into a DataFrame
-        df = pd.read_excel(input_file, sheet_name=sheet_name)
-
+        daily_dataframe_duckdb = self.dataframe
         # Register the DataFrame as a DuckDB table
-        conn.register("dataframe", df)
+        conn.register("dataframe", daily_dataframe_duckdb)
 
         # DuckDB query for the rolling average
         query = """
@@ -156,32 +149,30 @@ class DuckDBWindowFunction:
         """
         return conn.execute(query).df()
 
-    @staticmethod
-    def save_result(input_file, sheet_name):
+    def duckdb_window_daily(self):
         """
-        Saves the result of the weekly window function into the same folder as the input file,
+        Saves the result of the weekly window function into the 'data' folder,
         with the output file named 'daily_window_function_duckdb.xlsx'.
-
-        Args:
-            input_file (str): Path to the input Excel file.
-            sheet_name (str): Name of the sheet to process.
         """
-        output_file = os.path.join(os.path.dirname(input_file), "daily_window_function_duckdb.xlsx")
-        result_df = DuckDBWindowFunction.compute_weekly_window(input_file, sheet_name)
+        # Define the output file path within the 'data' folder
+        output_file = os.path.join("data", "daily_window_function_duckdb.xlsx")
 
+        # Compute the rolling averages
+        result_df = self.compute_daily_window_duckdb()
+
+        # Save the result as an Excel file
         with pd.ExcelWriter(output_file, mode="w") as writer:
-            result_df.to_excel(writer, sheet_name=sheet_name, index=False)
+            result_df.to_excel(writer, sheet_name="Daily Aggregation", index=False)
 
         print(f"Results saved to: {output_file}")
 
 
 if __name__ == "__main__":
-    input_file = "data/pandas_aggregation_results.xlsx"
-    sheet_name = "Daily Aggregation"
+    pandas_agg = PandasWindowFunction()
+    duckdb_agg = DuckDBWindowFunction()
 
-    # Pandas
-    PandasWindowFunction.save_result(input_file, sheet_name)
+    # Run aggregations and capture results and times
+    pandas_agg.pandas_window_daily()
 
     # DuckDB
-    duckdb_input_file = "data/duckdb_aggregation_results.xlsx"
-    DuckDBWindowFunction.save_result(duckdb_input_file, sheet_name)
+    duckdb_agg.duckdb_window_daily()
