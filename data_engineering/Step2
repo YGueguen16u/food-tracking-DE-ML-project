@@ -27,6 +27,8 @@
     note pylint 10/10
 - windows function daily
     note pylint 10/10
+- windows function user
+    note pylint 10/10
 
 - percentage change
 
@@ -38,6 +40,7 @@ Faire tous les test
     - group_data : pylint 10/10
     - window_function user : pylint 10/10
     - window_function daily : pylint 10/10
+    - window_function user : pylint 10/10
 
 - staying all others
 - reformater group et group test

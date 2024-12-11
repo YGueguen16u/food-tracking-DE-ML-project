@@ -51,13 +51,11 @@ class PandasWindowFunction:
         """
         Saves the result of the user_id-based rolling window function into an Excel file.
         """
-        # Define the output file path within the 'data' folder
         output_file = os.path.join("data", "user_daily_window_function_pandas.xlsx")
 
         # Compute the rolling averages
         result_df = self.compute_user_window_pandas()
 
-        # Save the result as an Excel file
         with pd.ExcelWriter(output_file, mode="w") as writer:
             result_df.to_excel(writer, sheet_name="User Daily Aggregation", index=False)
 
