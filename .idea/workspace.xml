@@ -5,7 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e5d5be8c-2629-45a1-ad57-aebe2a0a6250" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/data_engineering/Transform_data/transform_5_3_percentage_change_type_food.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data_engineering/sensor_api/sensor_api" beforeDir="false" afterPath="$PROJECT_DIR$/data_engineering/sensor_api/sensor_api" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/data_engineering/sensor_api/sensor_data" beforeDir="false" afterPath="$PROJECT_DIR$/data_engineering/sensor_api/sensor_data" afterDir="false" />
@@ -38,55 +37,55 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_ADD_EXTERNAL_FILES": "true",
-    "Python tests.pytest in combine_meal_data_test.py.executor": "Run",
-    "Python tests.pytest in filter_data_test.py.executor": "Run",
-    "Python tests.pytest in group_data_test.py.executor": "Run",
-    "Python tests.pytest in test_3_group_data.py.executor": "Run",
-    "Python tests.pytest in test_4_1_window_function_daily.py.executor": "Run",
-    "Python tests.pytest in test_5_1_percentage_change_daily.py.executor": "Run",
-    "Python tests.pytest in test_5_2_percentage_change_user.py.executor": "Run",
-    "Python tests.pytest in window_function_test.py.executor": "Run",
-    "Python.01_combine_meal.executor": "Run",
-    "Python.02_read_data_duckdb.executor": "Run",
-    "Python.02_read_data_pandas.executor": "Run",
-    "Python.03_filter_data.executor": "Run",
-    "Python.03_group_data.executor": "Run",
-    "Python.04_filter_data.executor": "Run",
-    "Python.04_group_data.executor": "Run",
-    "Python.05_comparison.executor": "Run",
-    "Python.05_windows_function.executor": "Run",
-    "Python.06_calculate_pct_change.executor": "Run",
-    "Python.__init__.executor": "Run",
-    "Python.calculate_pct_change.executor": "Run",
-    "Python.combine_meal.executor": "Run",
-    "Python.connexion_test_S3.executor": "Run",
-    "Python.data_engineering.sensor_api.fake_data.__init__.executor": "Run",
-    "Python.extract_data.executor": "Run",
-    "Python.filter_data.executor": "Run",
-    "Python.group_data.executor": "Run",
-    "Python.pages.executor": "Run",
-    "Python.project_structure.executor": "Run",
-    "Python.transform_5_1_percentage_change_daily.executor": "Run",
-    "Python.transform_5_2_percentage_change_user.executor": "Run",
-    "Python.windows_function.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "com.codeium.enabled": "true",
-    "git-widget-placeholder": "develop",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/GUEGUEN/Desktop/WSApp/IM",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;Python tests.pytest in combine_meal_data_test.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in filter_data_test.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in group_data_test.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_3_group_data.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_4_1_window_function_daily.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_5_1_percentage_change_daily.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in test_5_2_percentage_change_user.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in window_function_test.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python.01_combine_meal.executor&quot;: &quot;Run&quot;,
+    &quot;Python.02_read_data_duckdb.executor&quot;: &quot;Run&quot;,
+    &quot;Python.02_read_data_pandas.executor&quot;: &quot;Run&quot;,
+    &quot;Python.03_filter_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.03_group_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.04_filter_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.04_group_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.05_comparison.executor&quot;: &quot;Run&quot;,
+    &quot;Python.05_windows_function.executor&quot;: &quot;Run&quot;,
+    &quot;Python.06_calculate_pct_change.executor&quot;: &quot;Run&quot;,
+    &quot;Python.__init__.executor&quot;: &quot;Run&quot;,
+    &quot;Python.calculate_pct_change.executor&quot;: &quot;Run&quot;,
+    &quot;Python.combine_meal.executor&quot;: &quot;Run&quot;,
+    &quot;Python.connexion_test_S3.executor&quot;: &quot;Run&quot;,
+    &quot;Python.data_engineering.sensor_api.fake_data.__init__.executor&quot;: &quot;Run&quot;,
+    &quot;Python.extract_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.filter_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.group_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.pages.executor&quot;: &quot;Run&quot;,
+    &quot;Python.project_structure.executor&quot;: &quot;Run&quot;,
+    &quot;Python.transform_5_1_percentage_change_daily.executor&quot;: &quot;Run&quot;,
+    &quot;Python.transform_5_2_percentage_change_user.executor&quot;: &quot;Run&quot;,
+    &quot;Python.windows_function.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;com.codeium.enabled&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;develop&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/GUEGUEN/Desktop/WSApp/IM&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="C:\Users\GUEGUEN\Desktop\WSApp\IM\data_engineering\Transform_data" />
@@ -204,6 +203,7 @@
       <workItem from="1730999350266" duration="5354000" />
       <workItem from="1734021584897" duration="8723000" />
       <workItem from="1734040120918" duration="852000" />
+      <workItem from="1734042882004" duration="388000" />
     </task>
     <servers />
   </component>
