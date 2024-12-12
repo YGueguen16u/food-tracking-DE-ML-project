@@ -74,6 +74,56 @@ Pour exécuter la suite de tests :
 pytest data_engineering/test/
 ```
 
+## Docker
+
+Le projet peut être exécuté dans des conteneurs Docker pour assurer la reproductibilité et l'isolation :
+
+### Services disponibles
+
+- **data-processing** : Service principal pour le traitement des données
+- **data-validation** : Service pour l'exécution des tests de validation
+- **jupyter** : Service Jupyter Lab pour l'analyse interactive
+
+### Utilisation avec Docker
+
+1. Construire et démarrer tous les services :
+```bash
+docker-compose up --build
+```
+
+2. Exécuter uniquement le traitement des données :
+```bash
+docker-compose run data-processing
+```
+
+3. Exécuter les tests :
+```bash
+docker-compose run data-validation
+```
+
+4. Accéder à Jupyter Lab :
+   - Démarrer le service : `docker-compose up jupyter`
+   - Ouvrir dans le navigateur : `http://localhost:8888`
+
+## CI/CD
+
+Le projet utilise GitHub Actions pour l'intégration continue avec les workflows suivants :
+
+### 1. Qualité du Code
+- Vérification du formatage avec Black
+- Validation des imports avec isort
+- Analyse statique avec pylint
+- Tests unitaires avec pytest et couverture de code
+
+### 2. Validation des Données
+- Tests de validation sur les données transformées
+- Vérification de la cohérence des données
+- Tests d'intégration des pipelines de données
+
+Les workflows sont déclenchés sur :
+- Push vers la branche `develop`
+- Pull requests vers `develop`
+
 ## Contribution
 
 Les contributions sont les bienvenues ! Veuillez suivre ces étapes :
