@@ -1,0 +1,35 @@
+name: Data Validation
+on:
+  push:
+    branches: [ develop ]
+    paths:
+      - 'data_engineering/Transform_data/**'
+      - 'data_engineering/Extract_data/**'
+  pull_request:
+    branches: [ develop ]
+    paths:
+      - 'data_engineering/Transform_data/**'
+      - 'data_engineering/Extract_data/**'
+
+jobs:
+  validate-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install great-expectations pandas duckdb
+
+      - name: Run data validation
+        run: |
+          # Exécuter les tests de validation des données
+          python -m pytest data_engineering/test/combine_meal_data_test.py
+          python -m pytest data_engineering/test/filter_data_test.py
+          python -m pytest data_engineering/test/test_3_group_data.py
