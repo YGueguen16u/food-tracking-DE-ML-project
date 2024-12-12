@@ -27,7 +27,11 @@
     note pylint 10/10
 - windows function daily
     note pylint 10/10
-- windows function user
+- windows function type food
+    note pylint 10/10
+- percentage change daily
+    note pylint 10/10
+- percentage change user
     note pylint 10/10
 
 - percentage change
@@ -38,9 +42,11 @@ Faire tous les test
     - combine meal : pylint : 8.97/10 on ne peut pas aller plus haut
     - filter_data : pylint 10/10
     - group_data : pylint 10/10
-    - window_function user : pylint 10/10
-    - window_function daily : pylint 10/10
-    - window_function user : pylint 10/10
+    - window_function_user : pylint 10/10
+    - window_function_daily : pylint 10/10
+    - window_function_type_food : pylint 10/10
+    - percentage_change_daily : pylint 10/10
+    - percentage_change_user : pylint 10/10
 
 - staying all others
 - reformater group et group test
