@@ -28,6 +28,10 @@ var/
 Step.xlsx
 project_structure.md
 project_structure.py
+IA/
+data/raw/
+data_engineering/Step2.md
+Step2
 
 # Virtual Environment
 venv/
@@ -48,7 +52,6 @@ bfg-1.14.0.jar
 
 IM/data_engineering/Transform_data/Step.md
 IM/data_engineering/Transform_data/Step.txt
-IM/data_engineering/Step2
 # Ignorer le répertoire sensor_data
 sensor_api/
 
