@@ -1,122 +1,83 @@
+"""
+This module reads the combined meal data from S3 and performs initial data validation.
+"""
+
 import os
-import time
+import sys
 import pandas as pd
-import duckdb
-from pyspark.sql import SparkSession
+import numpy as np
+from datetime import datetime
 
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+from aws_s3.connect_s3 import S3Manager
 
-def pandas_read_data():
-    start_time = time.time()
-    df = pd.read_excel('combined_meal_data.xlsx')
-
-    # Afficher un aperçu de la DataFrame consolidée
-    print(df.head())
-
-    # Analyse des individus
-    unique_users = df['user_id'].nunique()
-    avg_meals_per_user = df.groupby('user_id').size().mean()
-
-    print(f"Nombre d'utilisateurs uniques : {unique_users}")
-    print(f"Nombre moyen de repas par utilisateur : {avg_meals_per_user}")
-
-    elapsed_time = time.time() - start_time
-    print(f"Elapsed time : {elapsed_time}")
-
-    return unique_users, avg_meals_per_user, elapsed_time
-
-
-def duckdb_read_data():
-    start_time = time.time()
-    # Chemin vers le fichier Excel
-    file_path = 'combined_meal_data.xlsx'
-
-    # Lire la feuille Excel dans un DataFrame Pandas
-    df_pandas = pd.read_excel(file_path, sheet_name='Sheet1')
-
-    # Créer une connexion DuckDB en mémoire
-    conn = duckdb.connect(database=':memory:')
-
-    # Charger le DataFrame Pandas dans DuckDB
-    conn.register('df_pandas', df_pandas)
-
-    # Exécuter des requêtes DuckDB sur les données
-    df = conn.execute("SELECT * FROM df_pandas").df()
-
-    # Afficher un aperçu de la DataFrame
-    print(df.head())
-
-    # Analyse des individus
-    unique_users = conn.execute("SELECT COUNT(DISTINCT user_id) FROM df_pandas").fetchone()[0]
-    avg_meals_per_user = \
-        conn.execute("SELECT AVG(count) FROM (SELECT COUNT(*) AS count FROM df_pandas GROUP BY user_id)").fetchone()[0]
-
-    print(f"Nombre d'utilisateurs uniques : {unique_users}")
-    print(f"Nombre moyen de repas par utilisateur : {avg_meals_per_user}")
-
-    elapsed_time = time.time() - start_time
-    print(f"Elapsed time : {elapsed_time}")
-
-    return unique_users, avg_meals_per_user, elapsed_time
-
-
-"""
-def pyspark_read_data():
-    start_time = time.time()
-    # Créer une session Spark
-    spark = SparkSession.builder.appName("ETL_Projet").getOrCreate()
-
-    # Chemin vers le fichier Excel
-    file_path = 'combined_meal_data.xlsx'
-
-    # Lire la feuille Excel dans un DataFrame Pandas
-    df_pandas = pd.read_excel(file_path, sheet_name='Sheet1')
-
-    # Convertir le DataFrame Pandas en DataFrame PySpark
-    df_spark = spark.createDataFrame(df_pandas)
-
-    # Afficher un aperçu de la DataFrame
-    df_spark.show()
-
-    # Analyse des individus
-    unique_users = df_spark.select("user_id").distinct().count()
-    avg_meals_per_user = df_spark.groupBy("user_id").count().agg({"count": "avg"}).collect()[0][0]
-
-    print(f"Nombre d'utilisateurs uniques : {unique_users}")
-    print(f"Nombre moyen de repas par utilisateur : {avg_meals_per_user}")
-
-    # Arrêter la session Spark
-    spark.stop()
-
-    elapsed_time = time.time() - start_time
-    print(f"Elapsed time : {elapsed_time}")
-
-    return unique_users, avg_meals_per_user, elapsed_time
-"""
-
-
-def compare_results():
-    # Exécution des trois fonctions
-    pandas_results = pandas_read_data()
-    duckdb_results = duckdb_read_data()
-    # pyspark_results = pyspark_read_data()
-
-    # Comparaison des résultats
-    print("\n--- Comparaison des résultats ---")
-    assert pandas_results[:2] == duckdb_results[:2], "Les résultats sont différents entre les méthodes !"
-    # assert pandas_results[:2] == duckdb_results[:2] == pyspark_results[:2], "Les résultats sont différents entre les méthodes !"
-
-    print("Les résultats sont identiques entre toutes les méthodes.")
-
-    # Comparaison des temps d'exécution
-    times = {
-        "Pandas": pandas_results[2],
-        "DuckDB": duckdb_results[2],
-        # "PySpark": pyspark_results[2]
-    }
-
-    fastest = min(times, key=times.get)
-    print(f"\nLa méthode la plus rapide est : {fastest} avec un temps de {times[fastest]:.4f} secondes")
-
+def read_combined_data_from_s3():
+    """
+    Read the combined meal data from S3.
+    
+    Returns:
+        pd.DataFrame: Combined meal data with nutritional values
+    """
+    s3 = S3Manager()
+    s3_key = "transform/folder_1_combine/combined_meal_data.xlsx"
+    
+    # Download file temporarily
+    temp_file = "temp_combined_data.xlsx"
+    try:
+        if s3.download_file(s3_key, temp_file):
+            # Read the Excel file
+            df = pd.read_excel(temp_file)
+            
+            # Validate required columns
+            required_columns = [
+                "meal_record_id", "date", "heure", "user_id",
+                "aliment_id", "quantity", "total_calories",
+                "total_lipids", "total_carbs", "total_protein"
+            ]
+            
+            missing_columns = [col for col in required_columns if col not in df.columns]
+            if missing_columns:
+                raise ValueError(f"Missing required columns: {missing_columns}")
+            
+            # Convert date and time columns
+            df["date"] = pd.to_datetime(df["date"], errors="coerce")
+            df["heure"] = pd.to_datetime(df["heure"], format="%H:%M:%S", errors="coerce").dt.time
+            
+            # Sort by date and time
+            df = df.sort_values(by=["date", "heure"])
+            
+            # Basic data validation
+            if df["total_calories"].isnull().any():
+                print("Warning: Found null values in total_calories")
+            
+            if df["quantity"].isnull().any():
+                print("Warning: Found null values in quantity")
+            
+            return df
+            
+        else:
+            raise FileNotFoundError(f"Could not download file from S3: {s3_key}")
+            
+    except Exception as e:
+        print(f"Error reading combined data: {str(e)}")
+        raise
+        
+    finally:
+        # Clean up temporary file
+        if os.path.exists(temp_file):
+            os.remove(temp_file)
 
 if __name__ == "__main__":
-    compare_results()
+    try:
+        print("Reading combined meal data from S3...")
+        df = read_combined_data_from_s3()
+        print(f"Successfully loaded {len(df)} records")
+        print("\nDataset Overview:")
+        print(f"Date range: {df['date'].min()} to {df['date'].max()}")
+        print(f"Number of unique users: {df['user_id'].nunique()}")
+        print(f"Number of unique aliments: {df['aliment_id'].nunique()}")
+        print("\nNutritional Statistics:")
+        print(df[["total_calories", "total_lipids", "total_carbs", "total_protein"]].describe())
+        
+    except Exception as e:
+        print(f"Error in main execution: {str(e)}")
