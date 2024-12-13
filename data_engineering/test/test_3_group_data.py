@@ -11,8 +11,8 @@ import unittest
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-from data_engineering.Transform_data.group_data import (DuckDBAggregation,
-                                                        PandasAggregation)
+from data_engineering.Transform_data.transform_3_group_data import (DuckDBAggregation,
+                                                                    PandasAggregation)
 
 # Base file path
 FILE_PATH = r"C:\Users\GUEGUEN\Desktop\WSApp\IM\data_engineering\Transform_data\data"

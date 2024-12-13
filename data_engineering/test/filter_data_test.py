@@ -8,7 +8,7 @@ import unittest
 
 import pandas as pd
 
-from data_engineering.Transform_data.filter_data import clean_meal_data
+from data_engineering.Transform_data.transform_2_filter_data import clean_meal_data
 
 
 class TestCleanMealData(unittest.TestCase):
