@@ -2,6 +2,7 @@ import os
 import configparser
 import boto3
 from botocore.exceptions import ClientError
+import json
 
 
 class S3Manager:
@@ -95,3 +96,77 @@ class S3Manager:
         except ClientError as e:
             print(f"Error listing files in S3: {str(e)}")
             return []
+
+    def delete_file(self, s3_key):
+        """
+        Delete a file from S3 bucket.
+        
+        Args:
+            s3_key (str): The key of the file to delete
+        
+        Returns:
+            bool: True if file was deleted, else False
+        """
+        try:
+            self.s3_client.delete_object(Bucket=self.bucket_name, Key=s3_key)
+            print(f"Successfully deleted {s3_key} from {self.bucket_name}")
+            return True
+        except ClientError as e:
+            print(f"Error deleting file from S3: {str(e)}")
+            return False
+
+    def file_exists(self, s3_key):
+        """
+        Check if a file exists in the S3 bucket.
+        
+        Args:
+            s3_key (str): The key of the file to check
+        
+        Returns:
+            bool: True if file exists, else False
+        """
+        try:
+            self.s3_client.head_object(Bucket=self.bucket_name, Key=s3_key)
+            return True
+        except ClientError:
+            return False
+
+    def get_file_size(self, s3_key):
+        """
+        Get the size of a file in S3 bucket.
+        
+        Args:
+            s3_key (str): The key of the file
+        
+        Returns:
+            int: Size of the file in bytes, or None if file doesn't exist
+        """
+        try:
+            response = self.s3_client.head_object(Bucket=self.bucket_name, Key=s3_key)
+            return response['ContentLength']
+        except ClientError:
+            return None
+
+    def upload_json(self, data, s3_key):
+        """
+        Upload JSON data directly to S3.
+        
+        Args:
+            data: The data to serialize to JSON
+            s3_key (str): The key to use in S3
+            
+        Returns:
+            bool: True if data was uploaded, else False
+        """
+        try:
+            json_data = json.dumps(data)
+            self.s3_client.put_object(
+                Body=json_data,
+                Bucket=self.bucket_name,
+                Key=s3_key
+            )
+            print(f"Successfully uploaded JSON data to {self.bucket_name}/{s3_key}")
+            return True
+        except (ClientError, TypeError) as e:
+            print(f"Error uploading JSON to S3: {str(e)}")
+            return False

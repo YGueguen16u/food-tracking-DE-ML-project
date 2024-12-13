@@ -1,35 +1,44 @@
 """
-This module processes and combines multiple CSV files containing meal data,
+This module processes and combines multiple CSV files containing meal data from S3,
 merges them with a reference aliment table, and calculates total nutritional
-values before saving the final dataset as an Excel file.
+values before saving the final dataset as an Excel file back to S3.
 """
 
 import os
-
+import sys
+import io
 import pandas as pd
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+from aws_s3.connect_s3 import S3Manager
 
-# Path to the directory containing the CSV files
-DIRECTORY_PATH = (
-    r"C:\Users\GUEGUEN\Desktop\WSApp\IM\data\raw"
-)
+def download_and_process_s3_files():
+    """Download and process CSV files from S3"""
+    s3 = S3Manager()
+    dataframes = []
+    
+    # List all files in the raw_data_ingestion directory
+    files = s3.list_files("raw_data_ingestion/")
+    
+    for file_path in files:
+        if file_path.endswith('.csv'):
+            try:
+                # Download file from S3 to memory
+                local_path = f"temp_{os.path.basename(file_path)}"
+                if s3.download_file(file_path, local_path):
+                    df = pd.read_csv(local_path)
+                    dataframes.append(df)
+                    os.remove(local_path)  # Clean up temporary file
+            except Exception as e:
+                print(f"Error processing {file_path}: {str(e)}")
+    
+    return dataframes
 
-# Initialize an empty list to store DataFrames
-dataframes = []
+# Initialize S3 manager
+s3 = S3Manager()
 
-# Load all CSV files into a single DataFrame
-for filename in os.listdir(DIRECTORY_PATH):
-    if filename.endswith(".csv"):
-        file_path = os.path.join(DIRECTORY_PATH, filename)
-        try:
-            df = pd.read_csv(file_path)
-            dataframes.append(df)
-        except pd.errors.EmptyDataError:
-            print(f"Empty data in {filename}, skipping.")
-        except pd.errors.ParserError:
-            print(f"Parsing error in {filename}, skipping.")
-        except FileNotFoundError:
-            print(f"File not found: {filename}, skipping.")
-
+# Load all CSV files from S3 into a single DataFrame
+print("Downloading and processing files from S3...")
+dataframes = download_and_process_s3_files()
 
 # Concatenate all DataFrames
 combined_df = pd.concat(dataframes, ignore_index=True)
@@ -84,14 +93,17 @@ final_df = merged_df[
     ["meal_record_id"] + [col for col in merged_df.columns if col != "meal_record_id"]
 ]
 
-# Vérifier si le dossier 'data' existe, sinon le créer
-OUTPUT_DIRECTORY = "data"
-if not os.path.exists(OUTPUT_DIRECTORY):
-    os.makedirs(OUTPUT_DIRECTORY)
+# Save to temporary Excel file
+temp_excel_path = "temp_combined_meal_data.xlsx"
+final_df.to_excel(temp_excel_path, index=False)
 
-# Sauvegarder le DataFrame final dans un fichier Excel
-final_df.to_excel(
-    os.path.join(OUTPUT_DIRECTORY, "combined_meal_data.xlsx"), index=False
-)
+# Upload to S3
+s3_key = "transform/folder_1_combine/combined_meal_data.xlsx"
+print(f"Uploading final Excel file to S3: {s3_key}")
+if s3.upload_file(temp_excel_path, s3_key):
+    print("File uploaded successfully to S3")
+else:
+    print("Error uploading file to S3")
 
-print("File saved successfully.")
+# Clean up temporary file
+os.remove(temp_excel_path)
