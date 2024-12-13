@@ -5,10 +5,12 @@ It also compares the results and measures the execution time for both methods.
 
 import os
 import time
-
-import duckdb
+import sys
 import pandas as pd
+import duckdb
 
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+from aws_s3.connect_s3 import S3Manager
 
 class PandasAggregation:
     """
@@ -23,17 +25,35 @@ class PandasAggregation:
 
     def __init__(self, dataframe=None, food_type_data=None):
         """Initializes the data by loading the main dataset and food type data."""
+        self.s3 = S3Manager()
+        
         if dataframe is not None:
             self.dataframe = dataframe
         else:
-            self.dataframe = pd.read_excel("data/combined_meal_data_filtered.xlsx")
+            # Load from S3
+            temp_meal_file = "temp_meal_data.xlsx"
+            try:
+                if self.s3.download_file("transform/folder_2_filter_data/combined_meal_data_filtered.xlsx", temp_meal_file):
+                    self.dataframe = pd.read_excel(temp_meal_file)
+                else:
+                    raise FileNotFoundError("Could not download meal data from S3")
+            finally:
+                if os.path.exists(temp_meal_file):
+                    os.remove(temp_meal_file)
 
         if food_type_data is not None:
             self.food_type_data = food_type_data
         else:
-            self.food_type_data = pd.read_excel(
-                "C:/Users/GUEGUEN/Desktop/WSApp/IM/DB/raw_food_data/aliments.XLSX"
-            )
+            # Load from S3
+            temp_food_file = "temp_food_data.xlsx"
+            try:
+                if self.s3.download_file("reference_data/food/aliments.XLSX", temp_food_file):
+                    self.food_type_data = pd.read_excel(temp_food_file)
+                else:
+                    raise FileNotFoundError("Could not download food data from S3")
+            finally:
+                if os.path.exists(temp_food_file):
+                    os.remove(temp_food_file)
 
         # Fusion des informations de type d'aliment avec le dataset principal
         self.dataframe = self.dataframe.merge(
@@ -174,27 +194,29 @@ class PandasAggregation:
         daily_mean_food = self.daily_mean_per_food()
         user_food_type_agg = self.user_food_type_grouping()
 
-        if not os.path.exists("data"):
-            os.makedirs("data")
-
-        # Write all results to Excel in one place
-        with pd.ExcelWriter("data/pandas_aggregation_results.xlsx", mode="w") as writer:
-            daily_agg.to_excel(writer, sheet_name="Daily Aggregation", index=False)
-            user_daily_agg.to_excel(
-                writer, sheet_name="User Daily Aggregation", index=False
-            )
-            daily_mean_food.to_excel(
-                writer, sheet_name="Daily Mean Per Food", index=False
-            )
-            user_food_type_agg.to_excel(
-                writer, sheet_name="User Food Type Grouping", index=False
-            )
+        # Save to S3 instead of local file
+        temp_file = "temp_pandas_results.xlsx"
+        try:
+            with pd.ExcelWriter(temp_file, mode="w") as writer:
+                daily_agg.to_excel(writer, sheet_name="Daily Aggregation", index=False)
+                user_daily_agg.to_excel(writer, sheet_name="User Daily Aggregation", index=False)
+                daily_mean_food.to_excel(writer, sheet_name="Daily Mean Per Food", index=False)
+                user_food_type_agg.to_excel(writer, sheet_name="User Food Type Grouping", index=False)
+            
+            # Upload to S3
+            if self.s3.upload_file(temp_file, "transform/folder_3_group_data/pandas_aggregation_results.xlsx"):
+                print("Results uploaded to S3 successfully")
+            else:
+                print("Failed to upload results to S3")
+                
+        finally:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
 
         # Capture the total elapsed time
         elapsed_time = time.time() - start_time
         print(
-            f"All aggregations written to data/pandas_aggregation_results.xlsx "
-            f"in {elapsed_time:.2f} seconds"
+            f"All aggregations written to S3 in {elapsed_time:.2f} seconds"
         )
 
         # Return results and elapsed time in a dictionary
@@ -223,26 +245,41 @@ class DuckDBAggregation:
         up DuckDB connection.
         """
         self.conn = duckdb.connect(database=":memory:")
+        self.s3 = S3Manager()
 
-        # Charger et fusionner les données dans DuckDB
+        # Load data from S3
         if dataframe is not None:
             self.dataframe = dataframe
         else:
-            self.dataframe = pd.read_excel("data/combined_meal_data_filtered.xlsx")
+            temp_meal_file = "temp_meal_data.xlsx"
+            try:
+                if self.s3.download_file("transform/folder_2_filter_data/combined_meal_data_filtered.xlsx", temp_meal_file):
+                    self.dataframe = pd.read_excel(temp_meal_file)
+                else:
+                    raise FileNotFoundError("Could not download meal data from S3")
+            finally:
+                if os.path.exists(temp_meal_file):
+                    os.remove(temp_meal_file)
 
         if food_type_data is not None:
             self.food_type_data = food_type_data
         else:
-            self.food_type_data = pd.read_excel(
-                "C:/Users/GUEGUEN/Desktop/WSApp/IM/DB/raw_food_data/aliments.XLSX"
-            )
+            temp_food_file = "temp_food_data.xlsx"
+            try:
+                if self.s3.download_file("reference_data/food/aliments.XLSX", temp_food_file):
+                    self.food_type_data = pd.read_excel(temp_food_file)
+                else:
+                    raise FileNotFoundError("Could not download food data from S3")
+            finally:
+                if os.path.exists(temp_food_file):
+                    os.remove(temp_food_file)
 
         # Fusion des informations de type d'aliment avec le dataset principal
         self.dataframe = self.dataframe.merge(
             self.food_type_data[["Aliment", "Type"]], on="Aliment", how="left"
         )
 
-        # Enregistrement des DataFrames comme tables DuckDB
+        # Register DataFrames with DuckDB
         self.conn.register("dataframe", self.dataframe)
         self.conn.register("food_type_data", self.food_type_data)
         print("DuckDB initialized and data registered successfully.")
@@ -362,27 +399,29 @@ class DuckDBAggregation:
         daily_mean_food = self.daily_mean_per_food()
         user_food_type_agg = self.user_food_type_grouping()
 
-        if not os.path.exists("data"):
-            os.makedirs("data")
-
-        # Write results to Excel file with separate sheets
-        with pd.ExcelWriter("data/duckdb_aggregation_results.xlsx", mode="w") as writer:
-            daily_agg.to_excel(writer, sheet_name="Daily Aggregation", index=False)
-            user_daily_agg.to_excel(
-                writer, sheet_name="User Daily Aggregation", index=False
-            )
-            daily_mean_food.to_excel(
-                writer, sheet_name="Daily Mean Per Food", index=False
-            )
-            user_food_type_agg.to_excel(
-                writer, sheet_name="User Food Type Grouping", index=False
-            )
+        # Save to S3 instead of local file
+        temp_file = "temp_duckdb_results.xlsx"
+        try:
+            with pd.ExcelWriter(temp_file, mode="w") as writer:
+                daily_agg.to_excel(writer, sheet_name="Daily Aggregation", index=False)
+                user_daily_agg.to_excel(writer, sheet_name="User Daily Aggregation", index=False)
+                daily_mean_food.to_excel(writer, sheet_name="Daily Mean Per Food", index=False)
+                user_food_type_agg.to_excel(writer, sheet_name="User Food Type Grouping", index=False)
+            
+            # Upload to S3
+            if self.s3.upload_file(temp_file, "transform/folder_3_group_data/duckdb_aggregation_results.xlsx"):
+                print("Results uploaded to S3 successfully")
+            else:
+                print("Failed to upload results to S3")
+                
+        finally:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
 
         # Capture the total elapsed time
         elapsed_time = time.time() - start_time
         print(
-            f"All aggregations written to data/duckdb_aggregation_results.xlsx "
-            f"in {elapsed_time:.2f} seconds"
+            f"All aggregations written to S3 in {elapsed_time:.2f} seconds"
         )
 
         # Return results and elapsed time in a dictionary
