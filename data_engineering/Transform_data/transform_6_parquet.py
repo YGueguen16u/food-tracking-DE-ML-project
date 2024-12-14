@@ -139,6 +139,25 @@ class ExcelToParquet:
             self.process_folder(folder)
 
 
+def main():
+    """
+    Main function to convert data to parquet format
+    """
+    try:
+        print("Converting data to parquet format...")
+        
+        # Initialize converter
+        converter = ExcelToParquet()
+        
+        # Convert all folders
+        print("Converting all folders...")
+        converter.convert_all_folders()
+        
+        print("Data converted to parquet successfully!")
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        raise
+
+
 if __name__ == "__main__":
-    converter = ExcelToParquet()
-    converter.convert_all_folders()
+    main()

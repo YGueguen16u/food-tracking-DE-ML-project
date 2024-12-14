@@ -73,6 +73,12 @@ def run_extract_data(start_date):
         print(f"Erreur lors de l'exécution de extract_data.py : {str(e)}")
         sys.exit(1)
 
-if __name__ == "__main__":
+def main():
+    """
+    Fonction principale pour l'extraction des données
+    """
     start_date = get_start_date()
     run_extract_data(start_date)
+
+if __name__ == "__main__":
+    main()

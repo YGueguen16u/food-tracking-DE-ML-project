@@ -206,9 +206,30 @@ class DuckDBPercentageChange:
                 os.remove(temp_file)
 
 
-if __name__ == "__main__":
-    pandas_change = PandasPercentageChange()
-    duckdb_change = DuckDBPercentageChange()
+def main():
+    """
+    Main function to compute daily percentage changes using both Pandas and DuckDB
+    """
+    try:
+        print("Computing daily percentage changes...")
+        
+        # Initialize calculators
+        pandas_change = PandasPercentageChange()
+        duckdb_change = DuckDBPercentageChange()
+        
+        # Compute and save Pandas results
+        print("Computing Pandas percentage changes...")
+        pandas_change.pandas_percentage_change_daily()
+        
+        # Compute and save DuckDB results
+        print("Computing DuckDB percentage changes...")
+        duckdb_change.duckdb_percentage_change_daily()
+        
+        print("Daily percentage changes computed successfully!")
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        raise
 
-    pandas_change.pandas_percentage_change_daily()
-    duckdb_change.duckdb_percentage_change_daily()
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,8 @@
+[python_paths]
+python_env=path_to_your_python_env
+python_executable=path_to_your_python_executable
+activate_script=path_to_your_activate_script
+
+[project_paths]
+project_root=path_to_your_project_root
+dags_folder=path_to_your_dags_folder

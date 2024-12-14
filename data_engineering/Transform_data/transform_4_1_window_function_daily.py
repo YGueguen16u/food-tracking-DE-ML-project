@@ -201,12 +201,30 @@ class DuckDBWindowFunction:
                 os.remove(temp_file)
 
 
+def main():
+    """
+    Main function to compute daily window functions using both Pandas and DuckDB
+    """
+    try:
+        print("Computing daily window functions...")
+        
+        # Initialize aggregators
+        pandas_agg = PandasWindowFunction()
+        duckdb_agg = DuckDBWindowFunction()
+        
+        # Compute and save Pandas results
+        print("Computing Pandas window function...")
+        pandas_agg.pandas_window_daily()
+        
+        # Compute and save DuckDB results
+        print("Computing DuckDB window function...")
+        duckdb_agg.duckdb_window_daily()
+        
+        print("Daily window functions computed successfully!")
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        raise
+
+
 if __name__ == "__main__":
-    pandas_agg = PandasWindowFunction()
-    duckdb_agg = DuckDBWindowFunction()
-
-    # Run aggregations and capture results and times
-    pandas_agg.pandas_window_daily()
-
-    # DuckDB
-    duckdb_agg.duckdb_window_daily()
+    main()

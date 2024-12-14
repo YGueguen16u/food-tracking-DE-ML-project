@@ -1,0 +1,9 @@
+# Airflow admin configuration
+AIRFLOW_USERNAME=your_username
+AIRFLOW_FIRSTNAME=your_firstname
+AIRFLOW_LASTNAME=your_lastname
+AIRFLOW_EMAIL=your_email@example.com
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+AWS_REGION=your_aws_region
+S3_BUCKET=your_bucket_name
