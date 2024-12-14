@@ -5,10 +5,15 @@ It generates Excel files with the processed data for further analysis.
 """
 
 import os
+import sys
 
-import duckdb
+# Add project root to Python path
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+sys.path.append(project_root)
+
 import pandas as pd
-
+import duckdb
+from aws_s3.connect_s3 import S3Manager
 
 class PandasPercentageChange:
     """
@@ -22,12 +27,20 @@ class PandasPercentageChange:
 
     def __init__(self, dataframe=None):
         """Initializes the data by loading the main dataset."""
+        self.s3 = S3Manager()
         if dataframe is not None:
             self.dataframe = dataframe
         else:
-            self.dataframe = pd.read_excel(
-                "data/daily_window_function_pandas.xlsx", sheet_name="Daily Aggregation"
-            )
+            # Load from S3
+            temp_file = "temp_pandas_data.xlsx"
+            try:
+                if self.s3.download_file("transform/folder_4_windows_function/daily/daily_window_function_pandas.xlsx", temp_file):
+                    self.dataframe = pd.read_excel(temp_file, sheet_name="Daily Aggregation")
+                else:
+                    raise FileNotFoundError("Could not download data from S3")
+            finally:
+                if os.path.exists(temp_file):
+                    os.remove(temp_file)
 
     def compute_daily_percentage_change_pandas(self):
         """
@@ -38,18 +51,14 @@ class PandasPercentageChange:
             DataFrame: DataFrame with percentage changes and rolling averages added.
         """
         self.dataframe["date"] = pd.to_datetime(self.dataframe["date"])
-        self.dataframe["weekday"] = self.dataframe["date"].dt.day_name()
-
         daily_dataframe = self.dataframe.sort_values("date")
 
         for col in ["total_calories", "total_lipids", "total_carbs", "total_protein"]:
-            # Compute rolling averages
             rolling_col = f"rolling_avg_{col}"
             daily_dataframe[rolling_col] = daily_dataframe.groupby("weekday")[
                 col
             ].transform(lambda x: x.rolling(window=4, min_periods=1).mean())
 
-            # Compute percentage change
             pct_col = f"percentage_change_{col}"
             daily_dataframe[pct_col] = (
                 (daily_dataframe[col] - daily_dataframe[rolling_col])
@@ -63,15 +72,20 @@ class PandasPercentageChange:
         Saves the result of the percentage change computation into the 'data' folder,
         with the output file named 'daily_percentage_change_pandas.xlsx'.
         """
-        output_file = os.path.join("data", "daily_percentage_change_pandas.xlsx")
-        result_df = self.compute_daily_percentage_change_pandas()
-
-        with pd.ExcelWriter(output_file, mode="w") as writer:
-            result_df.to_excel(
-                writer, sheet_name="Daily Percentage Change", index=False
-            )
-
-        print(f"Results saved to: {output_file}")
+        # Save to S3
+        temp_file = "temp_percentage_pandas.xlsx"
+        try:
+            result_df = self.compute_daily_percentage_change_pandas()
+            with pd.ExcelWriter(temp_file, mode="w") as writer:
+                result_df.to_excel(writer, sheet_name="Daily Percentage Change", index=False)
+            
+            if self.s3.upload_file(temp_file, "transform/folder_5_percentage_change/daily/daily_percentage_change_pandas.xlsx"):
+                print("Results saved to S3")
+            else:
+                print("Failed to upload results to S3")
+        finally:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
 
 
 class DuckDBPercentageChange:
@@ -86,12 +100,20 @@ class DuckDBPercentageChange:
 
     def __init__(self, dataframe=None):
         """Initializes the data by loading the main dataset."""
+        self.s3 = S3Manager()
         if dataframe is not None:
             self.dataframe = dataframe
         else:
-            self.dataframe = pd.read_excel(
-                "data/daily_window_function_duckdb.xlsx", sheet_name="Daily Aggregation"
-            )
+            # Load from S3
+            temp_file = "temp_duckdb_data.xlsx"
+            try:
+                if self.s3.download_file("transform/folder_4_windows_function/daily/daily_window_function_duckdb.xlsx", temp_file):
+                    self.dataframe = pd.read_excel(temp_file, sheet_name="Daily Aggregation")
+                else:
+                    raise FileNotFoundError("Could not download data from S3")
+            finally:
+                if os.path.exists(temp_file):
+                    os.remove(temp_file)
 
     def compute_daily_percentage_change_duckdb(self):
         """
@@ -168,15 +190,20 @@ class DuckDBPercentageChange:
         Saves the result of the percentage change computation into the 'data' folder,
         with the output file named 'daily_percentage_change_duckdb.xlsx'.
         """
-        output_file = os.path.join("data", "daily_percentage_change_duckdb.xlsx")
-        result_df = self.compute_daily_percentage_change_duckdb()
-
-        with pd.ExcelWriter(output_file, mode="w") as writer:
-            result_df.to_excel(
-                writer, sheet_name="Daily Percentage Change", index=False
-            )
-
-        print(f"Results saved to: {output_file}")
+        # Save to S3
+        temp_file = "temp_percentage_duckdb.xlsx"
+        try:
+            result_df = self.compute_daily_percentage_change_duckdb()
+            with pd.ExcelWriter(temp_file, mode="w") as writer:
+                result_df.to_excel(writer, sheet_name="Daily Percentage Change", index=False)
+            
+            if self.s3.upload_file(temp_file, "transform/folder_5_percentage_change/daily/daily_percentage_change_duckdb.xlsx"):
+                print("Results saved to S3")
+            else:
+                print("Failed to upload results to S3")
+        finally:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
 
 
 if __name__ == "__main__":
