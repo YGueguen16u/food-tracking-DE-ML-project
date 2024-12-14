@@ -167,10 +167,30 @@ class DuckDBProportionCalculation:
                 os.remove(temp_file)
 
 
-if __name__ == "__main__":
-    pandas_calc = PandasProportionCalculation()
-    duckdb_calc = DuckDBProportionCalculation()
+def main():
+    """
+    Main function to compute food type proportions using both Pandas and DuckDB
+    """
+    try:
+        print("Computing food type proportions...")
+        
+        # Initialize calculators
+        pandas_calc = PandasProportionCalculation()
+        duckdb_calc = DuckDBProportionCalculation()
+        
+        # Compute and save Pandas results
+        print("Computing Pandas proportions...")
+        pandas_calc.pandas_proportion_results()
+        
+        # Compute and save DuckDB results
+        print("Computing DuckDB proportions...")
+        duckdb_calc.duckdb_proportion_results()
+        
+        print("Food type proportions computed successfully!")
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        raise
 
-    # Run calculations and save results
-    pandas_calc.pandas_proportion_results()
-    duckdb_calc.duckdb_proportion_results()
+
+if __name__ == "__main__":
+    main()

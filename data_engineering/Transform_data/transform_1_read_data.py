@@ -67,7 +67,10 @@ def read_combined_data_from_s3():
         if os.path.exists(temp_file):
             os.remove(temp_file)
 
-if __name__ == "__main__":
+def main():
+    """
+    Main function to read and validate the combined meal data
+    """
     try:
         print("Reading combined meal data from S3...")
         df = read_combined_data_from_s3()
@@ -75,9 +78,15 @@ if __name__ == "__main__":
         print("\nDataset Overview:")
         print(f"Date range: {df['date'].min()} to {df['date'].max()}")
         print(f"Number of unique users: {df['user_id'].nunique()}")
-        print(f"Number of unique aliments: {df['aliment_id'].nunique()}")
+        print(f"Number of unique meals: {df['meal_id'].nunique()}")
         print("\nNutritional Statistics:")
         print(df[["total_calories", "total_lipids", "total_carbs", "total_protein"]].describe())
         
+        return df
     except Exception as e:
-        print(f"Error in main execution: {str(e)}")
+        print(f"Error: {str(e)}")
+        raise
+
+
+if __name__ == "__main__":
+    main()

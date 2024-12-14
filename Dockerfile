@@ -20,16 +20,18 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the project files
-COPY data_engineering/ ./data_engineering/
-COPY setup.py .
-COPY README.md .
+# Create directories for data with proper permissions
+RUN mkdir -p data/raw data/processed && \
+    chmod -R 755 /app
 
-# Create directories for data
-RUN mkdir -p data/raw data/processed
+# Copy the project files with proper permissions
+COPY . .
+RUN chmod -R 755 /app
 
 # Set Python path
 ENV PYTHONPATH=/app
 
 # Command to run tests
-CMD ["pytest", "data_engineering/test/"]
+# CMD ["pytest", "data_engineering/test/"]
+
+CMD ["python", "-m", "data_engineering"]

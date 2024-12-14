@@ -434,18 +434,32 @@ class DuckDBAggregation:
         }
 
 
+def main():
+    """
+    Main function to group data
+    """
+    try:
+        print("Grouping data...")
+        pandas_agg = PandasAggregation()
+        duckdb_agg = DuckDBAggregation()
+
+        # Run aggregations and capture results and times
+        pandas_results = pandas_agg.pandas_aggregations()
+        duckdb_results = duckdb_agg.duckdb_aggregations()
+
+        # Compare the total elapsed time
+        FASTEST = (
+            "Pandas"
+            if pandas_results["Elapsed Time"] < duckdb_results["Elapsed Time"]
+            else "DuckDB"
+        )
+        print(f"The fastest method is: {FASTEST}")
+        print("Data grouped successfully!")
+        return pandas_results, duckdb_results
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        raise
+
+
 if __name__ == "__main__":
-    pandas_agg = PandasAggregation()
-    duckdb_agg = DuckDBAggregation()
-
-    # Run aggregations and capture results and times
-    pandas_results = pandas_agg.pandas_aggregations()
-    duckdb_results = duckdb_agg.duckdb_aggregations()
-
-    # Compare the total elapsed time
-    FASTEST = (
-        "Pandas"
-        if pandas_results["Elapsed Time"] < duckdb_results["Elapsed Time"]
-        else "DuckDB"
-    )
-    print(f"The fastest method is: {FASTEST}")
+    main()

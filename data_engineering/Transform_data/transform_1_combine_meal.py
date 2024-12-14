@@ -33,77 +33,101 @@ def download_and_process_s3_files():
     
     return dataframes
 
-# Initialize S3 manager
-s3 = S3Manager()
 
-# Load all CSV files from S3 into a single DataFrame
-print("Downloading and processing files from S3...")
-dataframes = download_and_process_s3_files()
+def main():
+    """
+    Main function to combine meal data
+    """
+    try:
+        print("Combining meal data...")
+        # Initialize S3 manager
+        s3 = S3Manager()
 
-# Concatenate all DataFrames
-combined_df = pd.concat(dataframes, ignore_index=True)
+        # Load all CSV files from S3 into a single DataFrame
+        print("Downloading and processing files from S3...")
+        dataframes = download_and_process_s3_files()
 
-# Handle potential missing or misformatted columns
-if "date" in combined_df.columns and "heure" in combined_df.columns:
-    # Sort the DataFrame by date and heure
-    combined_df["date"] = pd.to_datetime(combined_df["date"], errors="coerce")
-    combined_df["heure"] = pd.to_datetime(
-        combined_df["heure"], format="%H:%M:%S", errors="coerce"
-    ).dt.time
-    combined_df = combined_df.sort_values(by=["date", "heure"])
-else:
-    raise ValueError(
-        "The required columns 'date' or 'heure' are missing from the combined DataFrame."
-    )
+        # Concatenate all DataFrames
+        combined_df = pd.concat(dataframes, ignore_index=True)
 
-# Generate a unique meal_record_id for each row starting from 1
-combined_df["meal_record_id"] = range(1, len(combined_df) + 1)
+        # Handle potential missing or misformatted columns
+        if "date" in combined_df.columns and "heure" in combined_df.columns:
+            # Sort the DataFrame by date and heure
+            combined_df["date"] = pd.to_datetime(combined_df["date"], errors="coerce")
+            combined_df["heure"] = pd.to_datetime(
+                combined_df["heure"], format="%H:%M:%S", errors="coerce"
+            ).dt.time
+            combined_df = combined_df.sort_values(by=["date", "heure"])
+        else:
+            raise ValueError(
+                "The required columns 'date' or 'heure' are missing from the combined DataFrame."
+            )
 
-# Move meal_record_id to the first column
-cols = ["meal_record_id"] + [
-    col for col in combined_df.columns if col != "meal_record_id"
-]
-combined_df = combined_df[cols]
+        # Generate a unique meal_record_id for each row starting from 1
+        combined_df["meal_record_id"] = range(1, len(combined_df) + 1)
 
-# Load aliment reference table
-aliment_table = pd.read_excel(
-    r"C:\Users\GUEGUEN\Desktop\WSApp\IM\DB\raw_food_data\food_processed.xlsx",
-    usecols=["id", "Aliment", "Valeur calorique", "Lipides", "Glucides", "Protein"],
-)
+        # Move meal_record_id to the first column
+        cols = ["meal_record_id"] + [
+            col for col in combined_df.columns if col != "meal_record_id"
+        ]
+        combined_df = combined_df[cols]
 
-# Rename 'id' in the aliment table to 'aliment_id' to match the combined_df
-aliment_table = aliment_table.rename(columns={"id": "aliment_id"})
+        # Load aliment reference table
+        aliment_table = pd.read_excel(
+            r"C:\Users\GUEGUEN\Desktop\WSApp\IM\DB\raw_food_data\food_processed.xlsx",
+            usecols=[
+                "id",
+                "Aliment",
+                "Valeur calorique",
+                "Lipides",
+                "Glucides",
+                "Protein",
+            ],
+        )
 
-# Ensure 'aliment_id' exists in both DataFrames before merging
-if "aliment_id" in combined_df.columns and "aliment_id" in aliment_table.columns:
-    merged_df = pd.merge(combined_df, aliment_table, on="aliment_id", how="left")
-else:
-    raise ValueError(
-        "The column 'aliment_id' is missing in either the combined DataFrame or aliment table."
-    )
+        # Rename 'id' in the aliment table to 'aliment_id' to match the combined_df
+        aliment_table = aliment_table.rename(columns={"id": "aliment_id"})
 
-# Calculate total nutritional values based on quantity
-merged_df["total_calories"] = merged_df["Valeur calorique"] * merged_df["quantity"]
-merged_df["total_lipids"] = merged_df["Lipides"] * merged_df["quantity"]
-merged_df["total_carbs"] = merged_df["Glucides"] * merged_df["quantity"]
-merged_df["total_protein"] = merged_df["Protein"] * merged_df["quantity"]
+        # Ensure 'aliment_id' exists in both DataFrames before merging
+        if "aliment_id" in combined_df.columns and "aliment_id" in aliment_table.columns:
+            merged_df = pd.merge(combined_df, aliment_table, on="aliment_id", how="left")
+        else:
+            raise ValueError(
+                "The column 'aliment_id' is missing in either the combined DataFrame or aliment table."
+            )
 
-# Reorder columns to have meal_record_id at the beginning
-final_df = merged_df[
-    ["meal_record_id"] + [col for col in merged_df.columns if col != "meal_record_id"]
-]
+        # Calculate total nutritional values based on quantity
+        merged_df["total_calories"] = merged_df["Valeur calorique"] * merged_df["quantity"]
+        merged_df["total_lipids"] = merged_df["Lipides"] * merged_df["quantity"]
+        merged_df["total_carbs"] = merged_df["Glucides"] * merged_df["quantity"]
+        merged_df["total_protein"] = merged_df["Protein"] * merged_df["quantity"]
 
-# Save to temporary Excel file
-temp_excel_path = "temp_combined_meal_data.xlsx"
-final_df.to_excel(temp_excel_path, index=False)
+        # Reorder columns to have meal_record_id at the beginning
+        final_df = merged_df[
+            ["meal_record_id"] + [col for col in merged_df.columns if col != "meal_record_id"]
+        ]
 
-# Upload to S3
-s3_key = "transform/folder_1_combine/combined_meal_data.xlsx"
-print(f"Uploading final Excel file to S3: {s3_key}")
-if s3.upload_file(temp_excel_path, s3_key):
-    print("File uploaded successfully to S3")
-else:
-    print("Error uploading file to S3")
+        # Save to temporary Excel file
+        temp_excel_path = "temp_combined_meal_data.xlsx"
+        final_df.to_excel(temp_excel_path, index=False)
 
-# Clean up temporary file
-os.remove(temp_excel_path)
+        # Upload to S3
+        s3_key = "transform/folder_1_combine/combined_meal_data.xlsx"
+        print(f"Uploading final Excel file to S3: {s3_key}")
+        if s3.upload_file(temp_excel_path, s3_key):
+            print("File uploaded successfully to S3")
+        else:
+            print("Error uploading file to S3")
+
+        # Clean up temporary file
+        os.remove(temp_excel_path)
+        
+        print("Data combined successfully!")
+        return final_df
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        raise
+
+
+if __name__ == "__main__":
+    main()

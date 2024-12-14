@@ -138,19 +138,30 @@ def clean_meal_data(df: pd.DataFrame) -> pd.DataFrame:
 
     return df_cleaned
 
-if __name__ == "__main__":
-    print("Loading data from S3...")
-    input_df = load_from_s3()
-    
-    if input_df is not None:
-        print("Applying cleaning filters...")
-        filtered_df = clean_meal_data(input_df)
+def main():
+    """
+    Main function to filter data
+    """
+    try:
+        print("Loading data from S3...")
+        input_df = load_from_s3()
         
-        print("Saving filtered data to S3...")
-        if save_to_s3(filtered_df):
-            print("Successfully saved filtered data to S3")
-            print(f"Final number of records: {len(filtered_df)}")
+        if input_df is not None:
+            print("Applying cleaning filters...")
+            filtered_df = clean_meal_data(input_df)
+            print("Saving filtered data to S3...")
+            if save_to_s3(filtered_df):
+                print("Successfully saved filtered data to S3")
+                print(f"Final number of records: {len(filtered_df)}")
+            else:
+                print("Failed to save filtered data to S3")
+            return filtered_df
         else:
-            print("Failed to save filtered data to S3")
-    else:
-        print("Failed to load data from S3")
+            print("Failed to load data from S3")
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        raise
+
+
+if __name__ == "__main__":
+    main()
