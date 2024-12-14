@@ -5,6 +5,10 @@ The results are saved as Excel files in the 'data' directory.
 """
 
 import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+from aws_s3.connect_s3 import S3Manager
 
 import duckdb
 import pandas as pd
@@ -18,13 +22,21 @@ class PandasWindowFunction:
 
     def __init__(self, dataframe=None):
         """Initializes the data by loading the main dataset and food type data."""
+        self.s3 = S3Manager()
+        
         if dataframe is not None:
             self.dataframe = dataframe
         else:
-            self.dataframe = pd.read_excel(
-                "data/pandas_aggregation_results.xlsx",
-                sheet_name="User Daily Aggregation",
-            )
+            # Load from S3
+            temp_file = "temp_pandas_data.xlsx"
+            try:
+                if self.s3.download_file("transform/folder_3_group_data/pandas_aggregation_results.xlsx", temp_file):
+                    self.dataframe = pd.read_excel(temp_file, sheet_name="User Daily Aggregation")
+                else:
+                    raise FileNotFoundError("Could not download data from S3")
+            finally:
+                if os.path.exists(temp_file):
+                    os.remove(temp_file)
 
     def compute_user_window_pandas(self):
         """
@@ -51,15 +63,22 @@ class PandasWindowFunction:
         """
         Saves the result of the user_id-based rolling window function into an Excel file.
         """
-        output_file = os.path.join("data", "user_daily_window_function_pandas.xlsx")
-
         # Compute the rolling averages
         result_df = self.compute_user_window_pandas()
 
-        with pd.ExcelWriter(output_file, mode="w") as writer:
-            result_df.to_excel(writer, sheet_name="User Daily Aggregation", index=False)
-
-        print(f"Results saved to: {output_file}")
+        # Save to S3
+        temp_file = "temp_window_pandas.xlsx"
+        try:
+            with pd.ExcelWriter(temp_file, mode="w") as writer:
+                result_df.to_excel(writer, sheet_name="User Daily Aggregation", index=False)
+            
+            if self.s3.upload_file(temp_file, "transform/folder_4_windows_function/user/user_daily_window_function_pandas.xlsx"):
+                print("Results saved to S3")
+            else:
+                print("Failed to upload results to S3")
+        finally:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
 
 
 class DuckDBWindowFunction:
@@ -70,13 +89,21 @@ class DuckDBWindowFunction:
 
     def __init__(self, dataframe=None):
         """Initializes the data by loading the main dataset and food type data."""
+        self.s3 = S3Manager()
+        
         if dataframe is not None:
             self.dataframe = dataframe
         else:
-            self.dataframe = pd.read_excel(
-                "data/duckdb_aggregation_results.xlsx",
-                sheet_name="User Daily Aggregation",
-            )
+            # Load from S3
+            temp_file = "temp_duckdb_data.xlsx"
+            try:
+                if self.s3.download_file("transform/folder_3_group_data/duckdb_aggregation_results.xlsx", temp_file):
+                    self.dataframe = pd.read_excel(temp_file, sheet_name="User Daily Aggregation")
+                else:
+                    raise FileNotFoundError("Could not download data from S3")
+            finally:
+                if os.path.exists(temp_file):
+                    os.remove(temp_file)
 
     def compute_daily_window_duckdb(self):
         """
@@ -132,17 +159,22 @@ class DuckDBWindowFunction:
         """
         Saves the result of the user_id-based rolling window function into an Excel file.
         """
-        # Define the output file path within the 'data' folder
-        output_file = os.path.join("data", "user_daily_window_function_duckdb.xlsx")
-
         # Compute the rolling averages
         result_df = self.compute_daily_window_duckdb()
 
-        # Save the result as an Excel file
-        with pd.ExcelWriter(output_file, mode="w") as writer:
-            result_df.to_excel(writer, sheet_name="User Daily Aggregation", index=False)
-
-        print(f"Results saved to: {output_file}")
+        # Save to S3
+        temp_file = "temp_window_duckdb.xlsx"
+        try:
+            with pd.ExcelWriter(temp_file, mode="w") as writer:
+                result_df.to_excel(writer, sheet_name="User Daily Aggregation", index=False)
+            
+            if self.s3.upload_file(temp_file, "transform/folder_4_windows_function/user/user_daily_window_function_duckdb.xlsx"):
+                print("Results saved to S3")
+            else:
+                print("Failed to upload results to S3")
+        finally:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
 
 
 if __name__ == "__main__":

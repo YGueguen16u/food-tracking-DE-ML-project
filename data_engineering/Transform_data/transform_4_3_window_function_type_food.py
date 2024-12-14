@@ -5,6 +5,10 @@ Saves results as Excel files in the 'data' directory.
 """
 
 import os
+import sys
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+from aws_s3.connect_s3 import S3Manager
 
 import duckdb
 import pandas as pd
@@ -15,16 +19,23 @@ class PandasProportionCalculation:
     Class to compute proportions of total calories, lipids, proteins, and carbs
     per user and food type using Pandas.
     """
-
     def __init__(self, dataframe=None):
         """Initializes the data by loading the main dataset and food type data."""
+        self.s3 = S3Manager()
+        
         if dataframe is not None:
             self.dataframe = dataframe
         else:
-            self.dataframe = pd.read_excel(
-                "data/pandas_aggregation_results.xlsx",
-                sheet_name="User Food Type Grouping",
-            )
+            # Load from S3
+            temp_file = "temp_pandas_data.xlsx"
+            try:
+                if self.s3.download_file("transform/folder_3_group_data/pandas_aggregation_results.xlsx", temp_file):
+                    self.dataframe = pd.read_excel(temp_file, sheet_name="User Food Type Grouping")
+                else:
+                    raise FileNotFoundError("Could not download data from S3")
+            finally:
+                if os.path.exists(temp_file):
+                    os.remove(temp_file)
 
     def compute_proportions_pandas(self):
         """
@@ -55,13 +66,20 @@ class PandasProportionCalculation:
         """
         Saves the result of the proportion calculation into an Excel file.
         """
-        output_file = os.path.join("data", "user_food_proportion_pandas.xlsx")
-        result_df = self.compute_proportions_pandas()
-
-        with pd.ExcelWriter(output_file, mode="w") as writer:
-            result_df.to_excel(writer, sheet_name="Proportion Results", index=False)
-
-        print(f"Results saved to: {output_file}")
+        # Save to S3
+        temp_file = "temp_window_pandas.xlsx"
+        try:
+            result_df = self.compute_proportions_pandas()
+            with pd.ExcelWriter(temp_file, mode="w") as writer:
+                result_df.to_excel(writer, sheet_name="Proportion Results", index=False)
+            
+            if self.s3.upload_file(temp_file, "transform/folder_4_windows_function/type_food/user_food_proportion_pandas.xlsx"):
+                print("Results saved to S3")
+            else:
+                print("Failed to upload results to S3")
+        finally:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
 
 
 class DuckDBProportionCalculation:
@@ -69,16 +87,23 @@ class DuckDBProportionCalculation:
     Class to compute proportions of total calories, lipids, proteins, and carbs
     per user and food type using DuckDB.
     """
-
     def __init__(self, dataframe=None):
         """Initializes the data by loading the main dataset and food type data."""
+        self.s3 = S3Manager()
+        
         if dataframe is not None:
             self.dataframe = dataframe
         else:
-            self.dataframe = pd.read_excel(
-                "data/duckdb_aggregation_results.xlsx",
-                sheet_name="User Food Type Grouping",
-            )
+            # Load from S3
+            temp_file = "temp_duckdb_data.xlsx"
+            try:
+                if self.s3.download_file("transform/folder_3_group_data/duckdb_aggregation_results.xlsx", temp_file):
+                    self.dataframe = pd.read_excel(temp_file, sheet_name="User Food Type Grouping")
+                else:
+                    raise FileNotFoundError("Could not download data from S3")
+            finally:
+                if os.path.exists(temp_file):
+                    os.remove(temp_file)
 
     def compute_proportions_duckdb(self):
         """
@@ -120,20 +145,26 @@ class DuckDBProportionCalculation:
         ORDER BY g.user_id, g.Type
 
         """
-
         return conn.execute(query).df()
 
     def duckdb_proportion_results(self):
         """
         Saves the result of the proportion calculation into an Excel file.
         """
-        output_file = os.path.join("data", "user_food_proportion_duckdb.xlsx")
-        result_df = self.compute_proportions_duckdb()
-
-        with pd.ExcelWriter(output_file, mode="w") as writer:
-            result_df.to_excel(writer, sheet_name="Proportion Results", index=False)
-
-        print(f"Results saved to: {output_file}")
+        # Save to S3
+        temp_file = "temp_window_duckdb.xlsx"
+        try:
+            result_df = self.compute_proportions_duckdb()
+            with pd.ExcelWriter(temp_file, mode="w") as writer:
+                result_df.to_excel(writer, sheet_name="Proportion Results", index=False)
+            
+            if self.s3.upload_file(temp_file, "transform/folder_4_windows_function/type_food/user_food_proportion_duckdb.xlsx"):
+                print("Results saved to S3")
+            else:
+                print("Failed to upload results to S3")
+        finally:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
 
 
 if __name__ == "__main__":
