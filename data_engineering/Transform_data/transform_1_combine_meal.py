@@ -72,18 +72,26 @@ def main():
         ]
         combined_df = combined_df[cols]
 
-        # Load aliment reference table
-        aliment_table = pd.read_excel(
-            r"C:\Users\GUEGUEN\Desktop\WSApp\IM\DB\raw_food_data\food_processed.xlsx",
-            usecols=[
-                "id",
-                "Aliment",
-                "Valeur calorique",
-                "Lipides",
-                "Glucides",
-                "Protein",
-            ],
-        )
+        # Load aliment reference table from S3
+        temp_food_file = "temp_food_data.xlsx"
+        try:
+            if s3.download_file("reference_data/food/food_processed.xlsx", temp_food_file):
+                aliment_table = pd.read_excel(
+                    temp_food_file,
+                    usecols=[
+                        "id",
+                        "Aliment",
+                        "Valeur calorique",
+                        "Lipides",
+                        "Glucides",
+                        "Protein",
+                    ],
+                )
+            else:
+                raise FileNotFoundError("Could not download food data from S3")
+        finally:
+            if os.path.exists(temp_food_file):
+                os.remove(temp_food_file)
 
         # Rename 'id' in the aliment table to 'aliment_id' to match the combined_df
         aliment_table = aliment_table.rename(columns={"id": "aliment_id"})

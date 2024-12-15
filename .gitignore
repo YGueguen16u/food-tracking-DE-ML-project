@@ -72,3 +72,7 @@ data_engineering/dags/paths_config.txt
 # Airflow
 data_engineering/dags/airflow.db
 data_engineering/dags/logs/
+
+# Logs
+data_engineering/logs/
+*.log

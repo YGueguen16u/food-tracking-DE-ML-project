@@ -1,24 +1,25 @@
-# Use an official Python runtime as the base image
-FROM python:3.9-slim
+# Use Apache Airflow as the base image
+FROM apache/airflow:2.7.1
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1
-
-# Set the working directory
-WORKDIR /app
+USER root
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    python3-dev \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+USER airflow
 
 # Copy requirements file
 COPY requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Set the working directory
+WORKDIR /app
 
 # Create directories for data with proper permissions
 RUN mkdir -p data/raw data/processed && \
