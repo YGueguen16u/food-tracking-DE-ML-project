@@ -82,6 +82,12 @@ class ExcelToParquet:
                 # Read the specific sheet
                 df = pd.read_excel(temp_excel, sheet_name=sheet_name)
                 
+                # Convert numeric columns to float
+                numeric_columns = ["total_calories", "total_lipids", "total_carbs", "total_protein", "Protein", "Lipides", "Glucides", "Valeur calorique"]
+                for col in numeric_columns:
+                    if col in df.columns:
+                        df[col] = pd.to_numeric(df[col], errors='coerce')
+                
                 # Create temporary parquet file for this sheet
                 temp_parquet = f"temp_parquet_{sheet_name}.parquet"
                 

@@ -115,6 +115,12 @@ def clean_meal_data(df: pd.DataFrame) -> pd.DataFrame:
         axis=1,
     )
 
+    # Remove rows marked as "High"
+    high_values_mask = df_cleaned["quantity_status"] == "High"
+    deleted_rows_log.append(df_cleaned[high_values_mask])
+    df_cleaned = df_cleaned[~high_values_mask]
+    print(f"Rows removed due to high values: {high_values_mask.sum()}")
+
     # 4. Analyze null or outlier values by user
     user_nulls = df.isnull().groupby(df["user_id"]).sum()
     user_outliers = df_cleaned.groupby("user_id")["quantity_status"].apply(
