@@ -76,3 +76,13 @@ data_engineering/dags/logs/
 # Logs
 data_engineering/logs/
 *.log
+
+# AI specific files
+AI/**/results/*.csv
+AI/**/results/*.json
+AI/**/models/trained/
+AI/**/*.joblib
+AI/**/*.pkl
+AI/**/*.h5
+AI/**/*.parquet
+AI/**/*.feather

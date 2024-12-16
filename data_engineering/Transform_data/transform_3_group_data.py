@@ -60,6 +60,11 @@ class PandasAggregation:
             self.food_type_data[["Aliment", "Type"]], on="Aliment", how="left"
         )
 
+        # Convert numeric columns to float
+        numeric_columns = ["total_calories", "total_lipids", "total_carbs", "total_protein"]
+        for col in numeric_columns:
+            self.dataframe[col] = pd.to_numeric(self.dataframe[col], errors='coerce')
+
     def daily_aggregation(self):
         """
         Aggregates daily data by calculating average nutrients per user per day.
@@ -278,6 +283,11 @@ class DuckDBAggregation:
         self.dataframe = self.dataframe.merge(
             self.food_type_data[["Aliment", "Type"]], on="Aliment", how="left"
         )
+
+        # Convert numeric columns to float
+        numeric_columns = ["total_calories", "total_lipids", "total_carbs", "total_protein"]
+        for col in numeric_columns:
+            self.dataframe[col] = pd.to_numeric(self.dataframe[col], errors='coerce')
 
         # Register DataFrames with DuckDB
         self.conn.register("dataframe", self.dataframe)
