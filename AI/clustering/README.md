@@ -57,7 +57,7 @@ L'analyse des clusters révèle une forte correspondance avec les classes préd�
   - Distribution temporelle régulière ($\tau$ stable)
 
 #### Cluster 1 - "Vegans"
-- **Utilisateurs**: [2, 13, 20]
+- **Utilisateurs**: [2, 9, 13] (aussi 20 mais collect s'est arreté à 19)
 - **Caractéristiques**:
   - Absence totale de produits animaux
   - Ratio glucides/protéines élevé
@@ -71,21 +71,21 @@ L'analyse des clusters révèle une forte correspondance avec les classes préd�
   - Valeurs nutritionnelles variables
 
 #### Cluster 3 - "Vegetarians"
-- **Utilisateurs**: [4, 7, 14]
+- **Utilisateurs**: [4, 7, 14, 16]
 - **Caractéristiques**:
   - Absence de viande
   - Présence de produits laitiers
   - Profil nutritionnel équilibré
 
 #### Cluster 4 - "Standard"
-- **Utilisateurs**: [5, 6, 16, 17, 18]
+- **Utilisateurs**: [5, 6, 17, 18]
 - **Caractéristiques**:
   - Distribution temporelle classique (pics à 7h, 12h, 19h)
   - Valeurs nutritionnelles proches des moyennes
   - Variété alimentaire modérée
 
 #### Cluster 5 - "Fasting"
-- **Utilisateurs**: [9, 10, 11]
+- **Utilisateurs**: [10, 11]
 - **Caractéristiques**:
   - Fenêtre temporelle réduite ($\tau_i = 0$ pour la majorité des heures)
   - Nombre de repas quotidiens réduit ($\rho < 2$)
