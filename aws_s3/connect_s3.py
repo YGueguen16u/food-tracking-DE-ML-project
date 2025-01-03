@@ -170,3 +170,83 @@ class S3Manager:
         except (ClientError, TypeError) as e:
             print(f"Error uploading JSON to S3: {str(e)}")
             return False
+
+    def save_ai_results(self, model_type, results, filename=None, timestamp=None):
+        """
+        Save AI model results to specific S3 folders.
+        
+        Args:
+            model_type (str): Type of AI model (e.g., 'clustering', 'recommender')
+            results: Results to save (can be dict, DataFrame, or other serializable object)
+            filename (str, optional): Custom filename. If None, will be auto-generated
+            timestamp (str, optional): Timestamp to use in filename. If None, current time used
+            
+        Returns:
+            str: S3 key where results were saved
+        """
+        import datetime
+        import pandas as pd
+        
+        # Generate timestamp if not provided
+        if timestamp is None:
+            timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+            
+        # Generate filename if not provided
+        if filename is None:
+            filename = f"{model_type}_results_{timestamp}.json"
+            
+        # Construct S3 key
+        s3_key = f"AI/{model_type}/{filename}"
+        
+        # Convert results to appropriate format
+        if isinstance(results, pd.DataFrame):
+            # For DataFrames, save as CSV
+            local_path = f"/tmp/{filename}.csv"
+            results.to_csv(local_path, index=False)
+        else:
+            # For other objects, save as JSON
+            local_path = f"/tmp/{filename}"
+            with open(local_path, 'w') as f:
+                json.dump(results, f)
+                
+        # Upload to S3
+        success = self.upload_file(local_path, s3_key)
+        
+        # Clean up temporary file
+        if os.path.exists(local_path):
+            os.remove(local_path)
+            
+        if success:
+            return s3_key
+        return None
+
+    def upload_with_overwrite(self, file_path, s3_key):
+        """
+        Upload a file to S3 bucket, overwriting if it already exists.
+        
+        Args:
+            file_path (str): Local path to the file
+            s3_key (str): The key to use in S3
+            
+        Returns:
+            bool: True if file was uploaded, else False
+        """
+        try:
+            # Vérifier si le fichier existe
+            try:
+                self.s3_client.head_object(Bucket=self.bucket_name, Key=s3_key)
+                print(f"Le fichier {s3_key} existe déjà dans S3 et sera écrasé")
+            except ClientError as e:
+                if e.response['Error']['Code'] == '404':
+                    print(f"Le fichier {s3_key} n'existe pas encore dans S3")
+                else:
+                    raise e
+                    
+            # Upload le fichier (écrase si existe)
+            self.s3_client.upload_file(file_path, self.bucket_name, s3_key)
+            print(f"Successfully uploaded {file_path} to {self.bucket_name}/{s3_key}")
+            return True
+            
+        except ClientError as e:
+            print(f"Error uploading file to S3: {str(e)}")
+            return False

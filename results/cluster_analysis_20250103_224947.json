@@ -1,0 +1,165 @@
+{
+    "cluster_0": {
+        "utilisateurs": [
+            1,
+            8,
+            12,
+            19
+        ],
+        "nombre_utilisateurs": 4,
+        "repas_par_jour": 18.361350574712645,
+        "heures_principales": [
+            7,
+            11,
+            8
+        ],
+        "aliments_frequents": {
+            "Blanc d'œuf cru": 922,
+            "Œuf à la coque": 878,
+            "Jaune d'œuf cru": 860,
+            "Œuf cru": 796,
+            "Eau": 793
+        },
+        "moyennes_nutriments": {
+            "calories": 124.98643155053014,
+            "lipides": 12.681732462146407,
+            "proteines": 10.441378138408597,
+            "glucides": 13.131769631049728
+        }
+    },
+    "cluster_1": {
+        "utilisateurs": [
+            4,
+            7,
+            14,
+            16
+        ],
+        "nombre_utilisateurs": 4,
+        "repas_par_jour": 14.723419540229886,
+        "heures_principales": [
+            11,
+            20,
+            19
+        ],
+        "aliments_frequents": {
+            "Chanterelles": 308,
+            "Eau du robinet": 298,
+            "Champignons, crus": 293,
+            "Eau de source": 290,
+            "Eau pétillante": 287
+        },
+        "moyennes_nutriments": {
+            "calories": 110.39955828250794,
+            "lipides": 3.2283630153696024,
+            "proteines": 3.9176070428171266,
+            "glucides": 18.259199804830445
+        }
+    },
+    "cluster_2": {
+        "utilisateurs": [
+            3,
+            15
+        ],
+        "nombre_utilisateurs": 2,
+        "repas_par_jour": 4.511494252873563,
+        "heures_principales": [
+            15,
+            14,
+            13
+        ],
+        "aliments_frequents": {
+            "Pain à la farine d'avoine": 94,
+            "Muffin anglais": 90,
+            "Pain au son d'avoine": 83,
+            "Tortilla": 75,
+            "Pain blanc": 73
+        },
+        "moyennes_nutriments": {
+            "calories": 300.95078949044586,
+            "lipides": 16.240382165605098,
+            "proteines": 10.978722404884921,
+            "glucides": 49.2425796178344
+        }
+    },
+    "cluster_3": {
+        "utilisateurs": [
+            5,
+            6,
+            17,
+            18
+        ],
+        "nombre_utilisateurs": 4,
+        "repas_par_jour": 17.49712643678161,
+        "heures_principales": [
+            20,
+            11,
+            19
+        ],
+        "aliments_frequents": {
+            "Eau du robinet": 1010,
+            "Limonade, pauvre en calories": 970,
+            "Eau": 967,
+            "Eau parfumée aux fruits": 960,
+            "Boisson gazeuse au citron vert": 940
+        },
+        "moyennes_nutriments": {
+            "calories": 111.20255571522416,
+            "lipides": 5.3023567088191825,
+            "proteines": 5.964514260249555,
+            "glucides": 18.31412382985712
+        }
+    },
+    "cluster_4": {
+        "utilisateurs": [
+            10,
+            11
+        ],
+        "nombre_utilisateurs": 2,
+        "repas_par_jour": 16.32902298850575,
+        "heures_principales": [
+            11,
+            12,
+            17
+        ],
+        "aliments_frequents": {
+            "Tonic": 311,
+            "Eau du robinet": 292,
+            "Eau pétillante": 277,
+            "Eau de source": 276,
+            "Limonade, pauvre en calories": 265
+        },
+        "moyennes_nutriments": {
+            "calories": 117.16932635283764,
+            "lipides": 8.274219093708755,
+            "proteines": 11.79227515173809,
+            "glucides": 14.001187857457106
+        }
+    },
+    "cluster_5": {
+        "utilisateurs": [
+            2,
+            9,
+            13
+        ],
+        "nombre_utilisateurs": 3,
+        "repas_par_jour": 14.647509578544062,
+        "heures_principales": [
+            11,
+            19,
+            20
+        ],
+        "aliments_frequents": {
+            "Chanterelles": 285,
+            "Limonade, pauvre en calories": 237,
+            "Champignons de Paris": 229,
+            "Tonic": 224,
+            "Shiitaké, séché": 223
+        },
+        "moyennes_nutriments": {
+            "calories": 100.2291099267591,
+            "lipides": 2.9200039236201936,
+            "proteines": 3.5577945016126558,
+            "glucides": 17.337549045252423
+        }
+    }
+}
