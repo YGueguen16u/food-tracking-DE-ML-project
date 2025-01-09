@@ -1,7 +1,5 @@
-# Use Apache Airflow as the base image
-FROM apache/airflow:2.7.1
-
-USER root
+# Use Python as base image
+FROM python:3.12-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -10,7 +8,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-USER airflow
+# Set the working directory
+WORKDIR /app
 
 # Copy requirements file
 COPY requirements.txt .
@@ -18,21 +17,21 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Set the working directory
-WORKDIR /app
-
 # Create directories for data with proper permissions
 RUN mkdir -p data/raw data/processed && \
     chmod -R 755 /app
 
-# Copy the project files with proper permissions
+# Copy the project files
 COPY . .
-RUN chmod -R 755 /app
 
 # Set Python path
 ENV PYTHONPATH=/app
 
-# Command to run tests
-# CMD ["pytest", "data_engineering/test/"]
+# Copy .env file if it exists
+COPY .env* ./aws_s3/ 2>/dev/null || :
 
-CMD ["python", "-m", "data_engineering"]
+# Expose Streamlit port
+EXPOSE 8501
+
+# Command to run Streamlit
+CMD ["streamlit", "run", "streamlit_app/Home.py"]
