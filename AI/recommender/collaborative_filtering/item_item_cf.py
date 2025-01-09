@@ -1,155 +1,130 @@
 import os
 import sys
-
-# Ajouter le chemin racine au PYTHONPATH
-root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-sys.path.append(root_path)
-
-from AI.recommender.collaborative_filtering.base_recommender import BaseRecommender
 import numpy as np
 import pandas as pd
 from scipy.spatial.distance import cosine
 from typing import List, Tuple
+import joblib
+from sklearn.metrics.pairwise import cosine_similarity
+
+class BaseRecommender:
+    pass
 
 class ItemItemCF(BaseRecommender):
-    """Système de recommandation basé sur le filtrage collaboratif item-item"""
+    """Système de recommandation basé sur la similarité entre types d'aliments"""
     
     def __init__(self):
         """Initialise le système de recommandation"""
         super().__init__()
-        self.item_similarity_matrix = None
-        self.item_means = None
+        self.item_similarity = None
+        self.ratings_matrix = None
         
-    def compute_item_similarity(self):
-        """Calcule la matrice de similarité entre items"""
-        if self.ratings_matrix is None:
-            print("Données non chargées. Appelez load_data() d'abord.")
-            return
-            
-        # Calculer les moyennes par item
-        self.item_means = self.ratings_matrix.mean()
+    def fit(self, train_data):
+        """
+        Entraîne le modèle sur les données
         
-        # Normaliser les ratings
-        normalized_matrix = self.ratings_matrix.sub(self.item_means, axis=1)
+        Args:
+            train_data (pd.DataFrame): Données d'entraînement avec colonnes [user_id, Type, rating]
+        """
+        # Créer la matrice utilisateur-type d'aliment
+        self.ratings_matrix = train_data.pivot(
+            index='user_id',
+            columns='Type',
+            values='rating'
+        ).fillna(0)
         
-        # Calculer les similarités
-        self.item_similarity_matrix = pd.DataFrame(
-            index=self.ratings_matrix.columns,
-            columns=self.ratings_matrix.columns,
-            dtype=float
+        # Calculer les similarités entre types d'aliments
+        item_matrix = self.ratings_matrix.T
+        self.item_similarity = pd.DataFrame(
+            cosine_similarity(item_matrix),
+            index=item_matrix.index,
+            columns=item_matrix.index
         )
-        
-        for i in self.ratings_matrix.columns:
-            for j in self.ratings_matrix.columns:
-                if i == j:
-                    self.item_similarity_matrix.loc[i, j] = 1.0
-                else:
-                    # Obtenir les vecteurs de ratings
-                    item1_vector = normalized_matrix[i].values
-                    item2_vector = normalized_matrix[j].values
-                    
-                    # Calculer similarité uniquement sur les utilisateurs communs
-                    mask = (item1_vector != 0) & (item2_vector != 0)
-                    if mask.sum() > 0:
-                        similarity = 1 - cosine(item1_vector[mask], item2_vector[mask])
-                        self.item_similarity_matrix.loc[i, j] = similarity
-                    else:
-                        self.item_similarity_matrix.loc[i, j] = 0
-        
-    def get_similar_items(self, meal_id: str, n: int = 5) -> List[Tuple[str, float]]:
-        """
-        Trouve les N items les plus similaires
-        
-        Args:
-            meal_id: ID du repas
-            n: Nombre d'items similaires à retourner
-            
-        Returns:
-            Liste de tuples (meal_id, score_similarité)
-        """
-        if self.item_similarity_matrix is None:
-            print("Similarités non calculées. Appelez compute_item_similarity() d'abord.")
-            return []
-            
-        if meal_id not in self.item_similarity_matrix.index:
-            return []
-            
-        similarities = self.item_similarity_matrix.loc[meal_id]
-        top_similar = similarities.nlargest(n+1)[1:n+1]  # Exclure l'item lui-même
-        return list(zip(top_similar.index, top_similar.values))
-        
-    def predict_rating(self, user_id: int, meal_id: str) -> float:
-        """
-        Prédit la note pour un repas non noté
-        
-        Args:
-            user_id: ID de l'utilisateur
-            meal_id: ID du repas
-            
-        Returns:
-            Note prédite
-        """
-        if meal_id not in self.item_similarity_matrix.index:
-            return self.item_means.mean()
-            
-        similar_items = self.get_similar_items(meal_id)
-        if not similar_items:
-            return self.item_means[meal_id]
-            
-        numerator = 0
-        denominator = 0
-        
-        user_ratings = self.ratings_matrix.loc[user_id]
-        
-        for sim_meal_id, similarity in similar_items:
-            if sim_meal_id in user_ratings.index:
-                rating = user_ratings[sim_meal_id]
-                if rating != 0:  # Si l'utilisateur a noté le repas
-                    numerator += similarity * (rating - self.item_means[sim_meal_id])
-                    denominator += abs(similarity)
-        
-        if denominator == 0:
-            return self.item_means[meal_id]
-            
-        predicted_rating = self.item_means[meal_id] + (numerator / denominator)
-        return max(1, min(5, predicted_rating))  # Limiter entre 1 et 5
-        
-    def get_recommendations(self, user_id: int, n_recommendations: int = 5) -> List[Tuple[str, float]]:
+    
+    def predict(self, user_id, k=5):
         """
         Génère des recommandations pour un utilisateur
         
         Args:
             user_id: ID de l'utilisateur
-            n_recommendations: Nombre de recommandations à générer
+            k (int): Nombre de recommandations à générer
             
         Returns:
-            Liste de tuples (meal_id, score_prédit)
+            list: Liste de tuples (type_aliment, score)
         """
         if user_id not in self.ratings_matrix.index:
+            print(f"Utilisateur {user_id} non trouvé dans les données d'entraînement")
             return []
             
-        # Trouver les repas non notés
+        # Obtenir les notes de l'utilisateur
         user_ratings = self.ratings_matrix.loc[user_id]
-        unrated_meals = user_ratings[user_ratings == 0].index
         
-        # Prédire les notes pour les repas non notés
-        predictions = []
-        for meal_id in unrated_meals:
-            predicted_rating = self.predict_rating(user_id, meal_id)
-            predictions.append((meal_id, predicted_rating))
+        # Calculer les scores prédits pour chaque type d'aliment
+        weighted_sum = pd.DataFrame(0, index=self.ratings_matrix.columns, columns=['score'])
+        weight_sum = pd.DataFrame(0, index=self.ratings_matrix.columns, columns=['weight'])
         
-        # Trier et retourner les top N recommandations
-        recommendations = sorted(predictions, key=lambda x: x[1], reverse=True)[:n_recommendations]
+        for item in user_ratings.index:
+            if user_ratings[item] > 0:
+                similarities = self.item_similarity[item]
+                weighted_sum['score'] += similarities * user_ratings[item]
+                weight_sum['weight'] += np.abs(similarities)
+                
+        # Éviter la division par zéro
+        weight_sum.loc[weight_sum['weight'] == 0, 'weight'] = 1
+        predicted_ratings = weighted_sum['score'] / weight_sum['weight']
         
-        # Sauvegarder les recommandations
-        self.save_recommendations(user_id, recommendations)
+        # Filtrer les types d'aliments déjà consommés
+        user_consumed = user_ratings > 0
+        predicted_ratings = predicted_ratings[~user_consumed]
+        
+        # Retourner les k meilleures recommandations
+        recommendations = [
+            (food_type, score)
+            for food_type, score in predicted_ratings.nlargest(k).items()
+        ]
         
         return recommendations
-
-if __name__ == "__main__":
-    # Test du système de recommandation
-    recommender = ItemItemCF()
-    recommender.load_data()
-    recommender.compute_item_similarity()
-    recommendations = recommender.get_recommendations(user_id=1)
-    print("Recommandations:", recommendations)
+        
+    def evaluate(self, test_data):
+        """
+        Évalue le modèle sur les données de test
+        
+        Args:
+            test_data (pd.DataFrame): Données de test
+            
+        Returns:
+            dict: Métriques d'évaluation
+        """
+        predictions = []
+        actuals = []
+        
+        for user_id in test_data['user_id'].unique():
+            user_test = test_data[test_data['user_id'] == user_id]
+            recs = self.predict(user_id)
+            
+            for _, row in user_test.iterrows():
+                if row['Type'] in dict(recs):
+                    predictions.append(dict(recs)[row['Type']])
+                    actuals.append(row['rating'])
+        
+        if not predictions:
+            return {'mae': float('inf'), 'rmse': float('inf'), 'coverage': 0.0}
+            
+        mae = np.mean(np.abs(np.array(predictions) - np.array(actuals)))
+        rmse = np.sqrt(np.mean((np.array(predictions) - np.array(actuals)) ** 2))
+        coverage = len(set(dict(recs).keys())) / len(self.ratings_matrix.columns)
+        
+        return {'mae': mae, 'rmse': rmse, 'coverage': coverage}
+        
+    def save(self, filepath: str) -> None:
+        """
+        Sauvegarde le modèle entraîné
+        
+        Args:
+            filepath: Chemin où sauvegarder le modèle
+        """
+        model_data = {
+            'ratings_matrix': self.ratings_matrix,
+            'item_similarity': self.item_similarity
+        }
+        joblib.dump(model_data, filepath)

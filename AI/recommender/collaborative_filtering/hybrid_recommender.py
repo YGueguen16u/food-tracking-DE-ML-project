@@ -1,206 +1,116 @@
-import pandas as pd
 import numpy as np
-from typing import List, Dict, Tuple
+import pandas as pd
+from typing import List, Tuple
+import sys
+import joblib
+from AI.recommender.collaborative_filtering.base_recommender import BaseRecommender
 import boto3
 import json
 from datetime import datetime
 from .user_user_cf import UserUserCF
 from .item_item_cf import ItemItemCF
+import os
 
-class HybridRecommender:
-    def __init__(self, bucket_name: str, region_name: str = 'eu-west-3'):
+class HybridRecommender(BaseRecommender):
+    """Système de recommandation hybride combinant les approches user-user et item-item"""
+    
+    def __init__(self, user_model, item_model, alpha=0.5):
         """
-        Initialise le système de recommandation hybride.
+        Initialise le système de recommandation hybride
         
         Args:
-            bucket_name: Nom du bucket S3
-            region_name: Région AWS
+            user_model: Modèle de filtrage collaboratif user-user
+            item_model: Modèle de filtrage collaboratif item-item
+            alpha: Poids relatif des deux modèles (0 = uniquement item-item, 1 = uniquement user-user)
         """
-        self.user_cf = UserUserCF(bucket_name, region_name)
-        self.item_cf = ItemItemCF(bucket_name, region_name)
-        self.s3_client = boto3.client('s3', region_name=region_name)
-        self.bucket_name = bucket_name
-
-    def initialize(self) -> None:
-        """Initialise les deux systèmes de recommandation."""
-        # Charger les données
-        self.user_cf.load_data_from_s3()
-        self.item_cf.load_data_from_s3()
+        super().__init__()
+        self.user_model = user_model
+        self.item_model = item_model
+        self.alpha = alpha
         
-        # Calculer les matrices de similarité
-        self.user_cf.compute_user_similarity()
-        self.item_cf.compute_item_similarity()
-
-    def get_hybrid_recommendations(
-        self,
-        user_id: int,
-        n_recommendations: int = 5,
-        user_weight: float = 0.5
-    ) -> List[Tuple[str, float]]:
+    def fit(self, train_data):
         """
-        Génère des recommandations hybrides en combinant les approches user-user et item-item.
+        Entraîne le modèle sur les données
+        
+        Args:
+            train_data (pd.DataFrame): Données d'entraînement avec colonnes [user_id, Type, rating]
+        """
+        # Les modèles sont déjà entraînés individuellement
+        pass
+        
+    def predict(self, user_id, k=5):
+        """
+        Génère des recommandations pour un utilisateur
         
         Args:
             user_id: ID de l'utilisateur
-            n_recommendations: Nombre de recommandations à générer
-            user_weight: Poids donné aux recommandations user-user (0-1)
+            k (int): Nombre de recommandations à générer
             
         Returns:
-            Liste de tuples (item_id, score_hybride)
+            list: Liste de tuples (type_aliment, score)
         """
-        # Obtenir les recommandations des deux systèmes
-        user_recs = self.user_cf.get_recommendations(user_id, n_recommendations * 2)
-        item_recs = self.item_cf.get_recommendations(user_id, n_recommendations * 2)
-        
-        # Convertir en dictionnaires pour faciliter la fusion
-        user_dict = dict(user_recs)
-        item_dict = dict(item_recs)
+        # Obtenir les recommandations des deux modèles
+        user_recs = dict(self.user_model.predict(user_id, k=k))
+        item_recs = dict(self.item_model.predict(user_id, k=k))
         
         # Combiner les scores
-        hybrid_scores = {}
-        all_items = set(user_dict.keys()) | set(item_dict.keys())
+        combined_scores = {}
+        all_types = set(user_recs.keys()) | set(item_recs.keys())
         
-        for item_id in all_items:
-            user_score = user_dict.get(item_id, 0)
-            item_score = item_dict.get(item_id, 0)
+        for food_type in all_types:
+            user_score = user_recs.get(food_type, 0)
+            item_score = item_recs.get(food_type, 0)
+            combined_scores[food_type] = self.alpha * user_score + (1 - self.alpha) * item_score
             
-            # Score hybride pondéré
-            hybrid_score = (user_weight * user_score + 
-                          (1 - user_weight) * item_score)
-            
-            hybrid_scores[item_id] = hybrid_score
+        # Retourner les k meilleures recommandations
+        recommendations = [
+            (food_type, score)
+            for food_type, score in sorted(combined_scores.items(), key=lambda x: x[1], reverse=True)[:k]
+        ]
         
-        # Trier et retourner les top N recommandations
-        sorted_items = sorted(
-            hybrid_scores.items(),
-            key=lambda x: x[1],
-            reverse=True
-        )
-        return sorted_items[:n_recommendations]
-
-    def get_contextual_recommendations(
-        self,
-        user_id: int,
-        context: Dict,
-        n_recommendations: int = 5
-    ) -> List[Tuple[str, float]]:
+        return recommendations
+        
+    def evaluate(self, test_data):
         """
-        Génère des recommandations contextuelles.
+        Évalue le modèle sur les données de test
         
         Args:
-            user_id: ID de l'utilisateur
-            context: Dictionnaire contenant les informations contextuelles
-                    (e.g., {'time': '12:00', 'day': 'Monday'})
-            n_recommendations: Nombre de recommandations à générer
+            test_data (pd.DataFrame): Données de test
             
         Returns:
-            Liste de tuples (item_id, score_ajusté)
+            dict: Métriques d'évaluation
         """
-        # Obtenir les recommandations de base
-        base_recommendations = self.get_hybrid_recommendations(
-            user_id,
-            n_recommendations * 2
-        )
+        predictions = []
+        actuals = []
         
-        try:
-            # Charger les données contextuelles depuis S3
-            response = self.s3_client.get_object(
-                Bucket=self.bucket_name,
-                Key='processed_data/meal_context.json'
-            )
-            context_data = json.loads(response['Body'].read().decode('utf-8'))
+        for user_id in test_data['user_id'].unique():
+            user_test = test_data[test_data['user_id'] == user_id]
+            recs = self.predict(user_id)
             
-            # Ajuster les scores en fonction du contexte
-            adjusted_scores = []
-            for item_id, base_score in base_recommendations:
-                context_score = self._calculate_context_score(
-                    item_id,
-                    context,
-                    context_data
-                )
-                adjusted_score = base_score * context_score
-                adjusted_scores.append((item_id, adjusted_score))
+            for _, row in user_test.iterrows():
+                if row['Type'] in dict(recs):
+                    predictions.append(dict(recs)[row['Type']])
+                    actuals.append(row['rating'])
+        
+        if not predictions:
+            return {'mae': float('inf'), 'rmse': float('inf'), 'coverage': 0.0}
             
-            # Trier et retourner les top N recommandations
-            return sorted(
-                adjusted_scores,
-                key=lambda x: x[1],
-                reverse=True
-            )[:n_recommendations]
-            
-        except Exception as e:
-            print(f"Erreur lors du chargement des données contextuelles: {e}")
-            return base_recommendations[:n_recommendations]
-
-    def _calculate_context_score(
-        self,
-        item_id: str,
-        current_context: Dict,
-        context_data: Dict
-    ) -> float:
+        mae = np.mean(np.abs(np.array(predictions) - np.array(actuals)))
+        rmse = np.sqrt(np.mean((np.array(predictions) - np.array(actuals)) ** 2))
+        coverage = len(set(dict(recs).keys())) / len(self.user_model.ratings_matrix.columns)
+        
+        return {'mae': mae, 'rmse': rmse, 'coverage': coverage}
+        
+    def save(self, filepath: str) -> None:
         """
-        Calcule un score contextuel pour un item.
+        Sauvegarde le modèle entraîné
         
         Args:
-            item_id: ID de l'item
-            current_context: Contexte actuel
-            context_data: Données historiques de contexte
-            
-        Returns:
-            Score contextuel (0-1)
+            filepath: Chemin où sauvegarder le modèle
         """
-        if item_id not in context_data:
-            return 1.0
-            
-        item_context = context_data[item_id]
-        context_score = 1.0
-        
-        # Ajuster le score en fonction de l'heure
-        if 'time' in current_context and 'time_distribution' in item_context:
-            hour = int(current_context['time'].split(':')[0])
-            time_score = item_context['time_distribution'].get(str(hour), 0)
-            context_score *= (0.5 + 0.5 * time_score)  # Normaliser entre 0.5 et 1
-            
-        # Ajuster le score en fonction du jour
-        if 'day' in current_context and 'day_distribution' in item_context:
-            day = current_context['day']
-            day_score = item_context['day_distribution'].get(day, 0)
-            context_score *= (0.5 + 0.5 * day_score)  # Normaliser entre 0.5 et 1
-            
-        return context_score
-
-    def save_recommendations_to_s3(
-        self,
-        user_id: int,
-        recommendations: List[Tuple[str, float]],
-        context: Dict = None
-    ) -> None:
-        """
-        Sauvegarde les recommandations hybrides dans S3.
-        
-        Args:
-            user_id: ID de l'utilisateur
-            recommendations: Liste de tuples (item_id, score)
-            context: Dictionnaire de contexte (optionnel)
-        """
-        timestamp = datetime.now().isoformat()
-        data = {
-            'user_id': user_id,
-            'timestamp': timestamp,
-            'recommendations': [
-                {'item_id': item_id, 'score': float(score)}
-                for item_id, score in recommendations
-            ]
+        model_data = {
+            'user_model': self.user_model,
+            'item_model': self.item_model,
+            'alpha': self.alpha
         }
-        
-        if context:
-            data['context'] = context
-        
-        try:
-            self.s3_client.put_object(
-                Bucket=self.bucket_name,
-                Key=f'recommendations/user_{user_id}/{timestamp}_hybrid.json',
-                Body=json.dumps(data)
-            )
-        except Exception as e:
-            print(f"Erreur lors de la sauvegarde des recommandations: {e}")
+        joblib.dump(model_data, filepath)
