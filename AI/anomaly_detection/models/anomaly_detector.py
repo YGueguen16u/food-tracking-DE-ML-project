@@ -131,18 +131,18 @@ class MealAnomalyDetector:
         
         return df_copy[['user_id', 'heure', 'calories', 'lipides', 'glucides', 'proteines', 'anomaly_score', 'is_anomaly', 'explanation']]
     
-    def save(self, folder_path):
+    def save(self, model_path):
         """
         Sauvegarde le modèle et le scaler
         
         Args:
-            folder_path (str): Chemin du dossier où sauvegarder
+            model_path (str): Chemin complet où sauvegarder le modèle
         """
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        model_path = os.path.join(folder_path, f"isolation_forest_{timestamp}.joblib")
-        scaler_path = os.path.join(folder_path, f"scaler_{timestamp}.joblib")
-        
+        # Sauvegarder le modèle
         joblib.dump(self.model, model_path)
+        
+        # Sauvegarder le scaler dans le même dossier
+        scaler_path = os.path.join(os.path.dirname(model_path), "scaler.joblib")
         joblib.dump(self.scaler, scaler_path)
         
     @classmethod

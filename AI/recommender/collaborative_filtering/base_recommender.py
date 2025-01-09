@@ -1,6 +1,7 @@
 import os
 import sys
 import io
+import tempfile
 
 # Ajouter le chemin racine au PYTHONPATH
 root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -159,52 +160,25 @@ class BaseRecommender:
         
         Args:
             user_id: ID de l'utilisateur
-            recommendations: Liste de tuples (meal_id, score)
+            recommendations: Liste de tuples (type_aliment, score)
         """
         try:
-            # Préparer les données
-            recommendations_data = []
-            for meal_id, score in recommendations:
-                meal_info = self.meal_features[
-                    self.meal_features['meal_id'] == meal_id
-                ].iloc[0] if meal_id in self.meal_features['meal_id'].values else None
-                
-                rec_dict = {
-                    'meal_id': meal_id,
-                    'predicted_rating': score
-                }
-                
-                if meal_info is not None:
-                    rec_dict.update({
-                        'aliments': meal_info['Aliment'],
-                        'calories': meal_info['total_calories'],
-                        'proteins': meal_info['total_protein'],
-                        'lipids': meal_info['total_lipids'],
-                        'carbohydrates': meal_info['total_carbs']
-                    })
-                
-                recommendations_data.append(rec_dict)
-            
-            # Convertir en DataFrame
-            df = pd.DataFrame(recommendations_data)
+            # Créer un DataFrame avec les recommandations
+            recommendations_df = pd.DataFrame(recommendations, columns=['type_aliment', 'score'])
+            recommendations_df['user_id'] = user_id
+            recommendations_df['timestamp'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             
             # Sauvegarder dans S3
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-            buffer = io.BytesIO()
-            df.to_excel(buffer, index=False)
-            buffer.seek(0)
-            
-            s3_key = f'recommendations/user_{user_id}/{timestamp}_recommendations.xlsx'
-            self.s3_manager.s3_client.put_object(
-                Bucket=self.s3_manager.bucket_name,
-                Key=s3_key,
-                Body=buffer.getvalue()
-            )
-            
-            print(f"Recommandations sauvegardées dans {s3_key}")
-            
+            with tempfile.NamedTemporaryFile(suffix='.xlsx') as tmp:
+                recommendations_df.to_excel(tmp.name, index=False)
+                self.s3_manager.s3_client.upload_file(
+                    tmp.name,
+                    self.s3_manager.bucket_name,
+                    f'recommendations/user_{user_id}_recommendations.xlsx'
+                )
+                
         except Exception as e:
-            print(f"Erreur lors de la sauvegarde des recommandations: {str(e)}")
+            print(f"Erreur lors de la sauvegarde des recommandations : {str(e)}")
 
 if __name__ == "__main__":
     # Test du chargement des données

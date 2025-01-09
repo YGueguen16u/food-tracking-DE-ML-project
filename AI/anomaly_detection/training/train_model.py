@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 from sklearn.model_selection import train_test_split
+import json
+import tempfile
 
 # Ajouter le chemin racine au PYTHONPATH
 root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -11,6 +13,7 @@ sys.path.append(root_dir)
 
 from AI.anomaly_detection.models.anomaly_detector import MealAnomalyDetector, AnomalyAnalyzer
 from AI.anomaly_detection.utils.data_loader import DataLoader
+from aws_s3.connect_s3 import S3Manager
 
 def prepare_training_data(filtered_data, daily_stats, food_proportions):
     """
@@ -152,6 +155,12 @@ def calculate_model_statistics(detector, train_data, test_data, results_df):
 def train_and_save_model():
     """Entraîne et sauvegarde le modèle de détection d'anomalies"""
     
+    # Initialiser S3Manager
+    s3_manager = S3Manager()
+    
+    # Créer un dossier temporaire
+    temp_dir = tempfile.mkdtemp()
+    
     print("Chargement des données...")
     loader = DataLoader()
     filtered_data, daily_stats, food_proportions = loader.load_training_data()
@@ -174,13 +183,6 @@ def train_and_save_model():
     detector = MealAnomalyDetector(contamination=0.1)
     detector.fit(train_data)
     
-    # Créer le dossier pour les modèles s'il n'existe pas
-    models_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'models', 'trained')
-    os.makedirs(models_dir, exist_ok=True)
-    
-    print("Sauvegarde du modèle...")
-    detector.save(models_dir)
-    
     print("Évaluation du modèle...")
     test_predictions = detector.predict(test_data)
     
@@ -202,25 +204,40 @@ def train_and_save_model():
         for reason in reasons:
             print(f"  * {reason}")
     
-    # Sauvegarde des résultats dans un fichier CSV
-    results_path = os.path.join(os.path.dirname(__file__), "..", "results")
-    os.makedirs(results_path, exist_ok=True)
-    results_file = os.path.join(results_path, "anomalies_detected.csv")
+    # Sauvegarder les résultats dans S3
+    print("\nSauvegarde des résultats dans S3...")
     
-    # Tri des résultats par score d'anomalie (les plus anormaux en premier)
-    test_predictions = test_predictions.sort_values('anomaly_score', ascending=True)
-    test_predictions.to_csv(results_file, index=False, encoding='utf-8')
-    print(f"\nLes résultats détaillés ont été sauvegardés dans: {results_file}")
-    
-    # Calcul et sauvegarde des statistiques
-    stats = calculate_model_statistics(detector, train_data, test_data, test_predictions)
-    
-    # Sauvegarde des statistiques au format JSON
-    stats_file = os.path.join(results_path, "model_statistics.json")
-    import json
-    with open(stats_file, 'w', encoding='utf-8') as f:
-        json.dump(stats, f, indent=4, ensure_ascii=False)
-    print(f"\nLes statistiques du modèle ont été sauvegardées dans: {stats_file}")
+    try:
+        # 1. Sauvegarder les prédictions
+        predictions_key = "AI/anomaly_detection/results/anomalies_detected.xlsx"
+        temp_predictions = os.path.join(temp_dir, "predictions.xlsx")
+        with pd.ExcelWriter(temp_predictions) as writer:
+            test_predictions.to_excel(writer, index=False)
+        s3_manager.upload_with_overwrite(temp_predictions, predictions_key)
+        
+        # 2. Sauvegarder les statistiques
+        stats = calculate_model_statistics(detector, train_data, test_data, test_predictions)
+        stats_key = "AI/anomaly_detection/results/model_statistics.json"
+        temp_stats = os.path.join(temp_dir, "stats.json")
+        with open(temp_stats, 'w', encoding='utf-8') as f:
+            json.dump(stats, f, indent=4, ensure_ascii=False)
+        s3_manager.upload_with_overwrite(temp_stats, stats_key)
+        
+        # 3. Sauvegarder le modèle
+        model_key = "AI/anomaly_detection/models/trained_model.joblib"
+        temp_model = os.path.join(temp_dir, "model.joblib")
+        detector.save(temp_model)
+        s3_manager.upload_with_overwrite(temp_model, model_key)
+        
+        print("\nFichiers sauvegardés dans S3:")
+        print(f"- Prédictions: {predictions_key}")
+        print(f"- Statistiques: {stats_key}")
+        print(f"- Modèle: {model_key}")
+        
+    finally:
+        # Nettoyage : supprimer les fichiers temporaires
+        import shutil
+        shutil.rmtree(temp_dir, ignore_errors=True)
     
     # Affichage de quelques statistiques clés
     print(f"\nStatistiques clés:")

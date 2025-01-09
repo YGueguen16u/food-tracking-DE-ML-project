@@ -3,7 +3,7 @@ import io
 from aws_s3.connect_s3 import S3Manager
 
 class DataLoader:
-    """Charge les données depuis S3 pour le système de recommandation"""
+    """Classe pour charger les données d'entraînement"""
     
     def __init__(self):
         """Initialise la connexion S3"""
@@ -28,66 +28,27 @@ class DataLoader:
         except Exception as e:
             print(f"Erreur lors du chargement de {s3_key}: {str(e)}")
             return None
-    
-    def load_ratings_data(self):
+        
+    def load_training_data(self):
         """
-        Charge les données de ratings depuis S3
+        Charge les données pour l'entraînement
         
         Returns:
-            pd.DataFrame: DataFrame des ratings utilisateur-repas
-        """
-        return self.load_dataframe_from_s3(
-            'transform/folder_4_windows_function/ratings/user_meal_ratings.xlsx'
-        )
-    
-    def load_meal_features(self):
-        """
-        Charge les caractéristiques des repas depuis S3
-        
-        Returns:
-            pd.DataFrame: DataFrame des caractéristiques des repas
-        """
-        return self.load_dataframe_from_s3(
-            'transform/folder_2_filter_data/combined_meal_data_filtered.xlsx'
-        )
-    
-    def load_user_preferences(self):
-        """
-        Charge les préférences utilisateur depuis S3
-        
-        Returns:
-            pd.DataFrame: DataFrame des préférences utilisateur
-        """
-        return self.load_dataframe_from_s3(
-            'transform/folder_4_windows_function/preferences/user_preferences.xlsx'
-        )
-    
-    def save_recommendations_to_s3(self, user_id, recommendations, timestamp):
-        """
-        Sauvegarde les recommandations dans S3
-        
-        Args:
-            user_id (int): ID de l'utilisateur
-            recommendations (list): Liste des recommandations
-            timestamp (str): Horodatage des recommandations
+            tuple: (données d'entraînement, données de test)
         """
         try:
-            # Convertir les recommandations en DataFrame
-            recommendations_df = pd.DataFrame(recommendations)
-            
-            # Créer un buffer en mémoire
-            buffer = io.BytesIO()
-            recommendations_df.to_excel(buffer, index=False)
-            buffer.seek(0)
-            
-            # Sauvegarder dans S3
-            s3_key = f'recommendations/user_{user_id}/{timestamp}_recommendations.xlsx'
-            self.s3_manager.s3_client.put_object(
-                Bucket=self.s3_manager.bucket_name,
-                Key=s3_key,
-                Body=buffer.getvalue()
-            )
-            print(f"Recommandations sauvegardées dans {s3_key}")
+            # Charger les données combinées
+            combined_data = self.load_dataframe_from_s3('transform/folder_1_combine/combined_meal_data.xlsx')
+            if combined_data is None:
+                return None, None
+                
+            # Charger les données de type d'aliments
+            food_types = self.load_dataframe_from_s3('reference_data/food/food_processed.xlsx')
+            if food_types is None:
+                return None, None
+                
+            return combined_data, food_types
             
         except Exception as e:
-            print(f"Erreur lors de la sauvegarde des recommandations: {str(e)}")
+            print(f"Erreur lors du chargement des données : {str(e)}")
+            return None, None
