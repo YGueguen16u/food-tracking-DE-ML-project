@@ -3,28 +3,50 @@ import configparser
 import boto3
 from botocore.exceptions import ClientError
 import json
-
+from dotenv import load_dotenv
 
 class S3Manager:
     """Manages interactions with AWS S3 bucket."""
     
     def __init__(self, config_file='s3_config.txt'):
         """
-        Initialize S3 client using configuration file.
+        Initialize S3 client using configuration file or environment variables.
         
         Args:
             config_file (str): Path to configuration file (relative to this script)
         """
-        # Read configuration
-        config = configparser.ConfigParser()
-        config_path = os.path.join(os.path.dirname(__file__), config_file)
-        config.read(config_path)
+        # Try to load from .env file first
+        env_path = os.path.join(os.path.dirname(__file__), '.env')
+        load_dotenv(env_path)
         
-        # Set up AWS credentials
-        self.aws_access_key_id = config['aws_credentials']['aws_access_key_id']
-        self.aws_secret_access_key = config['aws_credentials']['aws_secret_access_key']
-        self.region = config['aws_credentials']['region']
-        self.bucket_name = config['s3_config']['bucket_name']
+        # Initialize credentials as None
+        self.aws_access_key_id = None
+        self.aws_secret_access_key = None
+        self.region = None
+        self.bucket_name = None
+        
+        # Try to read from config file first
+        try:
+            config = configparser.ConfigParser()
+            config_path = os.path.join(os.path.dirname(__file__), config_file)
+            if os.path.exists(config_path):
+                config.read(config_path)
+                self.aws_access_key_id = config['aws_credentials']['aws_access_key_id']
+                self.aws_secret_access_key = config['aws_credentials']['aws_secret_access_key']
+                self.region = config['aws_credentials']['region']
+                self.bucket_name = config['s3_config']['bucket_name']
+        except (configparser.Error, KeyError, FileNotFoundError):
+            pass
+            
+        # If config file failed, try environment variables
+        self.aws_access_key_id = self.aws_access_key_id or os.getenv('AWS_ACCESS_KEY_ID')
+        self.aws_secret_access_key = self.aws_secret_access_key or os.getenv('AWS_SECRET_ACCESS_KEY')
+        self.region = self.region or os.getenv('AWS_REGION')
+        self.bucket_name = self.bucket_name or os.getenv('S3_BUCKET_NAME')
+        
+        # Verify we have all required credentials
+        if not all([self.aws_access_key_id, self.aws_secret_access_key, self.region, self.bucket_name]):
+            raise ValueError("Missing AWS credentials. Please set them in config file or environment variables.")
         
         # Initialize S3 client
         self.s3_client = boto3.client(
