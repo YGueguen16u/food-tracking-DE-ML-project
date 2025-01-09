@@ -4,6 +4,11 @@ import boto3
 from botocore.exceptions import ClientError
 import json
 from dotenv import load_dotenv
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class S3Manager:
     """Manages interactions with AWS S3 bucket."""
@@ -21,6 +26,9 @@ class S3Manager:
         
         # Try to load from .env file first
         env_path = os.path.join(current_dir, '.env')
+        logger.info(f"Looking for .env file at: {env_path}")
+        logger.info(f"File exists: {os.path.exists(env_path)}")
+        
         load_dotenv(env_path)
         
         # Initialize credentials as None
@@ -35,9 +43,21 @@ class S3Manager:
         self.region = os.getenv('AWS_REGION')
         self.bucket_name = os.getenv('S3_BUCKET_NAME')
         
+        # Log what we found (masking sensitive data)
+        logger.info(f"AWS_ACCESS_KEY_ID found: {'Yes' if self.aws_access_key_id else 'No'}")
+        logger.info(f"AWS_SECRET_ACCESS_KEY found: {'Yes' if self.aws_secret_access_key else 'No'}")
+        logger.info(f"AWS_REGION found: {'Yes' if self.region else 'No'}")
+        logger.info(f"S3_BUCKET_NAME found: {'Yes' if self.bucket_name else 'No'}")
+        
         # Verify we have all required credentials
         if not all([self.aws_access_key_id, self.aws_secret_access_key, self.region, self.bucket_name]):
-            raise ValueError("Missing AWS credentials. Please check your .env file in the aws_s3 directory.")
+            logger.error("Missing AWS credentials!")
+            missing_vars = []
+            if not self.aws_access_key_id: missing_vars.append('AWS_ACCESS_KEY_ID')
+            if not self.aws_secret_access_key: missing_vars.append('AWS_SECRET_ACCESS_KEY')
+            if not self.region: missing_vars.append('AWS_REGION')
+            if not self.bucket_name: missing_vars.append('S3_BUCKET_NAME')
+            raise ValueError(f"Missing AWS credentials in .env file: {', '.join(missing_vars)}")
         
         # Initialize S3 client
         self.s3_client = boto3.client(
@@ -46,6 +66,7 @@ class S3Manager:
             aws_secret_access_key=self.aws_secret_access_key,
             region_name=self.region
         )
+        logger.info("Successfully initialized S3 client")
 
     def upload_file(self, file_path, s3_key=None):
         """
@@ -63,10 +84,10 @@ class S3Manager:
             
         try:
             self.s3_client.upload_file(file_path, self.bucket_name, s3_key)
-            print(f"Successfully uploaded {file_path} to {self.bucket_name}/{s3_key}")
+            logger.info(f"Successfully uploaded {file_path} to {self.bucket_name}/{s3_key}")
             return True
         except ClientError as e:
-            print(f"Error uploading file to S3: {str(e)}")
+            logger.error(f"Error uploading file to S3: {str(e)}")
             return False
 
     def download_file(self, s3_key, local_path):
@@ -82,10 +103,10 @@ class S3Manager:
         """
         try:
             self.s3_client.download_file(self.bucket_name, s3_key, local_path)
-            print(f"Successfully downloaded {s3_key} to {local_path}")
+            logger.info(f"Successfully downloaded {s3_key} to {local_path}")
             return True
         except ClientError as e:
-            print(f"Error downloading file from S3: {str(e)}")
+            logger.error(f"Error downloading file from S3: {str(e)}")
             return False
 
     def list_files(self, prefix=""):
@@ -107,7 +128,7 @@ class S3Manager:
                 return [obj['Key'] for obj in response['Contents']]
             return []
         except ClientError as e:
-            print(f"Error listing files in S3: {str(e)}")
+            logger.error(f"Error listing files in S3: {str(e)}")
             return []
 
     def delete_file(self, s3_key):
@@ -122,10 +143,10 @@ class S3Manager:
         """
         try:
             self.s3_client.delete_object(Bucket=self.bucket_name, Key=s3_key)
-            print(f"Successfully deleted {s3_key} from {self.bucket_name}")
+            logger.info(f"Successfully deleted {s3_key} from {self.bucket_name}")
             return True
         except ClientError as e:
-            print(f"Error deleting file from S3: {str(e)}")
+            logger.error(f"Error deleting file from S3: {str(e)}")
             return False
 
     def file_exists(self, s3_key):
@@ -178,10 +199,10 @@ class S3Manager:
                 Bucket=self.bucket_name,
                 Key=s3_key
             )
-            print(f"Successfully uploaded JSON data to {self.bucket_name}/{s3_key}")
+            logger.info(f"Successfully uploaded JSON data to {self.bucket_name}/{s3_key}")
             return True
         except (ClientError, TypeError) as e:
-            print(f"Error uploading JSON to S3: {str(e)}")
+            logger.error(f"Error uploading JSON to S3: {str(e)}")
             return False
 
     def save_ai_results(self, model_type, results, filename=None, timestamp=None):
@@ -248,18 +269,18 @@ class S3Manager:
             # Vérifier si le fichier existe
             try:
                 self.s3_client.head_object(Bucket=self.bucket_name, Key=s3_key)
-                print(f"Le fichier {s3_key} existe déjà dans S3 et sera écrasé")
+                logger.info(f"Le fichier {s3_key} existe déjà dans S3 et sera écrasé")
             except ClientError as e:
                 if e.response['Error']['Code'] == '404':
-                    print(f"Le fichier {s3_key} n'existe pas encore dans S3")
+                    logger.info(f"Le fichier {s3_key} n'existe pas encore dans S3")
                 else:
                     raise e
                     
             # Upload le fichier (écrase si existe)
             self.s3_client.upload_file(file_path, self.bucket_name, s3_key)
-            print(f"Successfully uploaded {file_path} to {self.bucket_name}/{s3_key}")
+            logger.info(f"Successfully uploaded {file_path} to {self.bucket_name}/{s3_key}")
             return True
             
         except ClientError as e:
-            print(f"Error uploading file to S3: {str(e)}")
+            logger.error(f"Error uploading file to S3: {str(e)}")
             return False
