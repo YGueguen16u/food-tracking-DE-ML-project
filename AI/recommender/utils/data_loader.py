@@ -37,8 +37,8 @@ class DataLoader:
             tuple: (données d'entraînement, données de test)
         """
         try:
-            # Charger les données combinées
-            combined_data = self.load_dataframe_from_s3('transform/folder_1_combine/combined_meal_data.xlsx')
+            # Charger les données combinées filtrées
+            combined_data = self.load_dataframe_from_s3('transform/folder_2_filter_data/combined_meal_data_filtered.xlsx')
             if combined_data is None:
                 return None, None
                 
