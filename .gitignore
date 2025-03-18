@@ -87,3 +87,6 @@ AI/**/*.pkl
 AI/**/*.h5
 AI/**/*.parquet
 AI/**/*.feather
+
+# Streamlit secrets
+.streamlit/secrets.toml

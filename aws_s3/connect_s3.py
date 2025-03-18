@@ -5,6 +5,7 @@ from botocore.exceptions import ClientError
 import json
 from dotenv import load_dotenv
 import logging
+import streamlit as st
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -13,35 +14,45 @@ logger = logging.getLogger(__name__)
 class S3Manager:
     """Manages interactions with AWS S3 bucket."""
     
-    def __init__(self, config_file='s3_config.txt'):
+    def __init__(self):
         """
         Initialize S3 client using configuration file or environment variables.
-        
-        Args:
-            config_file (str): Path to configuration file (relative to this script)
         """
-        # Get the absolute path to the project root directory
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-        project_root = os.path.dirname(os.path.dirname(current_dir))
-        
-        # Try to load from .env file first
-        env_path = os.path.join(current_dir, '.env')
-        logger.info(f"Looking for .env file at: {env_path}")
-        logger.info(f"File exists: {os.path.exists(env_path)}")
-        
-        load_dotenv(env_path)
-        
-        # Initialize credentials as None
+        # Try to get credentials from various sources
         self.aws_access_key_id = None
         self.aws_secret_access_key = None
         self.region = None
         self.bucket_name = None
         
-        # Try environment variables
-        self.aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
-        self.aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
-        self.region = os.getenv('AWS_REGION')
-        self.bucket_name = os.getenv('S3_BUCKET_NAME')
+        # 1. Try Streamlit secrets
+        try:
+            self.aws_access_key_id = st.secrets["AWS_ACCESS_KEY_ID"]
+            self.aws_secret_access_key = st.secrets["AWS_SECRET_ACCESS_KEY"]
+            self.region = st.secrets["AWS_REGION"]
+            self.bucket_name = st.secrets["S3_BUCKET_NAME"]
+            logger.info("Using credentials from Streamlit secrets")
+        except Exception as e:
+            logger.info(f"No Streamlit secrets found: {str(e)}")
+        
+        # 2. Try environment variables
+        if not all([self.aws_access_key_id, self.aws_secret_access_key, self.region, self.bucket_name]):
+            self.aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+            self.aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+            self.region = os.getenv('AWS_REGION')
+            self.bucket_name = os.getenv('S3_BUCKET_NAME')
+            logger.info("Using credentials from environment variables")
+        
+        # 3. Try .env file
+        if not all([self.aws_access_key_id, self.aws_secret_access_key, self.region, self.bucket_name]):
+            current_dir = os.path.dirname(os.path.abspath(__file__))
+            env_path = os.path.join(current_dir, '.env')
+            if os.path.exists(env_path):
+                load_dotenv(env_path)
+                self.aws_access_key_id = os.getenv('AWS_ACCESS_KEY_ID')
+                self.aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY')
+                self.region = os.getenv('AWS_REGION')
+                self.bucket_name = os.getenv('S3_BUCKET_NAME')
+                logger.info("Using credentials from .env file")
         
         # Log what we found (masking sensitive data)
         logger.info(f"AWS_ACCESS_KEY_ID found: {'Yes' if self.aws_access_key_id else 'No'}")
@@ -57,7 +68,7 @@ class S3Manager:
             if not self.aws_secret_access_key: missing_vars.append('AWS_SECRET_ACCESS_KEY')
             if not self.region: missing_vars.append('AWS_REGION')
             if not self.bucket_name: missing_vars.append('S3_BUCKET_NAME')
-            raise ValueError(f"Missing AWS credentials in .env file: {', '.join(missing_vars)}")
+            raise ValueError(f"Missing AWS credentials: {', '.join(missing_vars)}")
         
         # Initialize S3 client
         self.s3_client = boto3.client(
