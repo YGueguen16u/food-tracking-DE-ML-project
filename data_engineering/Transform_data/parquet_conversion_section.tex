@@ -1,0 +1,156 @@
+\section{Parquet Conversion System}
+
+\subsection{Overview}
+The Parquet conversion system (transform\_6\_parquet.py) provides a robust solution for converting Excel files to the columnar Parquet format. This conversion optimizes storage and query performance while preserving the original data structure and types.
+
+\subsection{Architecture}
+\begin{figure}[h]
+    \centering
+    \begin{tikzpicture}[node distance=2cm]
+        % Input Sources
+        \node[rectangle,draw] (s1) {Filter Data};
+        \node[rectangle,draw] (s2) [right=1cm of s1] {Group Data};
+        \node[rectangle,draw] (s3) [right=1cm of s2] {Window Data};
+        \node[rectangle,draw] (s4) [right=1cm of s3] {Change Data};
+        
+        % Converter
+        \node[rectangle,draw,text width=3cm,align=center] (conv) [below=2cm of s2] {Excel to Parquet Converter};
+        
+        % Processing Steps
+        \node[rectangle,draw] (p1) [below left=2cm of conv] {Download Excel};
+        \node[rectangle,draw] (p2) [below=2cm of conv] {Process Sheets};
+        \node[rectangle,draw] (p3) [below right=2cm of conv] {Upload Parquet};
+        
+        % Output Structure
+        \node[rectangle,draw] (out) [below=2cm of p2] {Parquet Files};
+        
+        % Connections
+        \draw[->] (s1) -- (conv);
+        \draw[->] (s2) -- (conv);
+        \draw[->] (s3) -- (conv);
+        \draw[->] (s4) -- (conv);
+        \draw[->] (conv) -- (p1);
+        \draw[->] (conv) -- (p2);
+        \draw[->] (conv) -- (p3);
+        \draw[->] (p1) -- (p2);
+        \draw[->] (p2) -- (p3);
+        \draw[->] (p3) -- (out);
+    \end{tikzpicture}
+    \caption{Parquet Conversion System Architecture}
+\end{figure}
+
+\subsection{Core Components}
+
+\subsubsection{ExcelToParquet Class}
+The main conversion engine:
+
+\begin{lstlisting}[style=pythonstyle, caption=Excel to Parquet Conversion]
+class ExcelToParquet:
+    def convert_file(self, excel_path, parquet_path):
+        """
+        Convert Excel file to Parquet format
+        - Handles multiple sheets
+        - Converts numeric columns
+        - Manages temporary files
+        """
+        for sheet_name in sheet_names:
+            # Process each sheet
+            df = pd.read_excel(temp_excel, sheet_name=sheet_name)
+            
+            # Convert numeric columns
+            numeric_columns = ["total_calories", "total_lipids", ...]
+            for col in numeric_columns:
+                df[col] = pd.to_numeric(df[col], errors='coerce')
+                
+            # Save as Parquet
+            df.to_parquet(temp_parquet, index=False)
+\end{lstlisting}
+
+\subsection{Key Features}
+
+\subsubsection{Data Processing}
+Comprehensive conversion capabilities:
+\begin{itemize}
+    \item \textbf{Multi-sheet Handling}:
+    \begin{itemize}
+        \item Detects multiple sheets in Excel files
+        \item Creates separate Parquet files per sheet
+        \item Preserves sheet names in file naming
+    \end{itemize}
+    
+    \item \textbf{Data Type Management}:
+    \begin{itemize}
+        \item Converts numeric columns to float
+        \item Handles missing values
+        \item Preserves column types
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Storage Organization}
+Structured file management:
+\begin{itemize}
+    \item \textbf{Folder Structure}:
+    \begin{itemize}
+        \item Maintains source folder hierarchy
+        \item Creates filtered subfolders
+        \item Organizes by data type
+    \end{itemize}
+    
+    \item \textbf{File Naming}:
+    \begin{itemize}
+        \item Consistent naming conventions
+        \item Sheet-specific identifiers
+        \item Clear source tracking
+    \end{itemize}
+\end{itemize}
+
+\subsection{Implementation Features}
+
+\subsubsection{S3 Integration}
+Cloud storage management:
+\begin{itemize}
+    \item File download handling
+    \item Parquet upload process
+    \item Path transformation logic
+    \item Error recovery
+\end{itemize}
+
+\subsubsection{Resource Management}
+Efficient resource handling:
+\begin{itemize}
+    \item Temporary file cleanup
+    \item Memory optimization
+    \item Progressive processing
+    \item Error isolation
+\end{itemize}
+
+\subsection{Source Folders}
+The system processes data from multiple transformation stages:
+\begin{enumerate}
+    \item \texttt{folder\_2\_filter\_data}: Filtered nutritional data
+    \item \texttt{folder\_3\_group\_data}: Aggregated statistics
+    \item \texttt{folder\_4\_windows\_function}: Time-based analysis
+    \item \texttt{folder\_5\_percentage\_change}: Trend calculations
+\end{enumerate}
+
+\subsection{Error Handling}
+
+\subsubsection{Robust Processing}
+Error management strategies:
+\begin{itemize}
+    \item File access verification
+    \item Data type conversion safety
+    \item Resource cleanup guarantees
+    \item Exception logging
+\end{itemize}
+
+\subsubsection{Progress Tracking}
+Monitoring features:
+\begin{itemize}
+    \item Folder progress updates
+    \item File conversion status
+    \item Error reporting
+    \item Success confirmation
+\end{itemize}
+
+This Parquet conversion system ensures efficient and reliable transformation of Excel data to optimized Parquet format while maintaining data integrity and organization.

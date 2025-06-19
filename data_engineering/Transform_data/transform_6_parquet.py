@@ -1,6 +1,20 @@
+# data_engineering/Transform_data/transform_6_parquet.py
+
 """
 This script converts Excel files from multiple folders to Parquet format.
 It preserves the folder structure while converting the files.
+
+Key Features:
+    - Converts multiple Excel files to Parquet format
+    - Preserves folder structure in S3
+    - Handles multiple sheets in Excel files
+    - Converts numeric columns to float
+    - Creates separate Parquet files for each sheet
+    - Includes progress tracking and logging
+    - Includes error handling and cleanup
+
+Typical usage:
+    python transform_6_parquet.py
 """
 
 import os
@@ -18,6 +32,10 @@ class ExcelToParquet:
     """
     Class to convert Excel files to Parquet format.
     Handles files from multiple folders while preserving structure.
+    
+    Attributes:
+        s3 (S3Manager): Manager for AWS S3 operations
+        source_folders (list): List of source folders containing Excel files
     """
 
     def __init__(self):

@@ -1,7 +1,34 @@
 """
-Calculates 4-day rolling averages of meal data grouped by user_id.
-It supports both Pandas and DuckDB implementations for flexibility and performance.
-The results are saved as Excel files in the 'data' directory.
+This module implements user-specific rolling window functions for meal data analysis using both Pandas and DuckDB.
+
+The module focuses on calculating trailing averages of nutritional metrics (calories, proteins, etc.)
+for each user over a 4-day period. This allows tracking of individual user's nutritional patterns
+and trends over time, helping identify changes in eating habits or potential anomalies.
+
+Key Features:
+    - User-specific rolling averages over 4-day periods
+    - Dual implementation using both Pandas and DuckDB for performance comparison
+    - Automated data loading from S3 and result storage
+    - Handles large-scale user data efficiently
+    - Maintains data integrity with proper date handling and sorting
+
+Input Data:
+    - Expects user-aggregated daily meal data from the group_data transformation step
+    - Required columns: user_id, date, and various nutritional metrics
+
+Output:
+    - Excel files containing the original data enriched with rolling averages per user
+    - Separate files for Pandas and DuckDB implementations for comparison
+    - Results are stored both locally and in S3 for further analysis
+
+Dependencies:
+    - pandas: For DataFrame operations and Excel I/O
+    - duckdb: For SQL-based window function calculations
+    - aws_s3.connect_s3: For S3 storage integration
+
+Note:
+    This implementation differs from the daily window function as it focuses on individual user
+    patterns rather than weekday-based patterns across all users.
 """
 
 import os
@@ -16,8 +43,32 @@ import pandas as pd
 
 class PandasWindowFunction:
     """
-    Class to compute a window function in Pandas that calculates the rolling average of the last
-    4 days for the Daily dataset grouped by user_id.
+    A class implementing user-specific rolling window functions using Pandas.
+
+    This class calculates trailing averages of nutritional metrics for each user over
+    a 4-day period. For example, for each user on any given day, it computes the average
+    of their nutritional values from the previous 4 days, providing insights into their
+    recent eating patterns.
+
+    Attributes:
+        s3 (S3Manager): Instance of S3Manager for cloud storage operations
+        dataframe (pd.DataFrame): The input DataFrame containing user-specific daily meal data
+            Required columns:
+                - user_id: Unique identifier for each user
+                - date: Date of the meals
+                - total_calories: Total calories for the user per day
+                - total_proteins: Total proteins for the user per day
+                - total_carbohydrates: Total carbohydrates for the user per day
+                - total_lipids: Total lipids for the user per day
+
+    Methods:
+        compute_user_window_pandas: Computes 4-day rolling averages by user
+        pandas_window_daily: Saves the processed data to Excel and S3
+
+    Example:
+        >>> window_func = PandasWindowFunction()
+        >>> df_with_averages = window_func.compute_user_window_pandas()
+        >>> window_func.pandas_window_daily()  # Saves results to Excel and S3
     """
 
     def __init__(self, dataframe=None):
@@ -62,6 +113,9 @@ class PandasWindowFunction:
     def pandas_window_daily(self):
         """
         Saves the result of the user_id-based rolling window function into an Excel file.
+        
+        Raises:
+            FileNotFoundError: If required files cannot be downloaded from S3
         """
         # Compute the rolling averages
         result_df = self.compute_user_window_pandas()
@@ -83,8 +137,37 @@ class PandasWindowFunction:
 
 class DuckDBWindowFunction:
     """
-    Class to compute a window function in DuckDB that calculates the rolling average of the last
-    4 days for the Daily dataset grouped by user_id.
+    A class implementing user-specific rolling window functions using DuckDB.
+
+    This class provides an SQL-based implementation of rolling window calculations using
+    DuckDB's window functions. For each user, it calculates trailing averages of nutritional
+    metrics over a 4-day period, similar to the Pandas implementation but potentially with
+    better performance for larger datasets.
+
+    The implementation uses SQL window functions with PARTITION BY user_id and ORDER BY date
+    clauses to efficiently compute rolling averages while maintaining data grouped by user.
+    It also employs CTEs (Common Table Expressions) for better query organization and
+    readability.
+
+    Attributes:
+        s3 (S3Manager): Instance of S3Manager for cloud storage operations
+        dataframe (pd.DataFrame): The input DataFrame containing user-specific daily meal data
+            Required columns:
+                - user_id: Unique identifier for each user
+                - date: Date of the meals
+                - total_calories: Total calories for the user per day
+                - total_lipids: Total lipids for the user per day
+                - total_carbs: Total carbohydrates for the user per day
+                - total_protein: Total proteins for the user per day
+
+    Methods:
+        compute_daily_window_duckdb: Computes 4-day rolling averages using SQL window functions
+        duckdb_window_daily: Saves the processed data to Excel and S3
+
+    Example:
+        >>> window_func = DuckDBWindowFunction()
+        >>> df_with_averages = window_func.compute_daily_window_duckdb()
+        >>> window_func.duckdb_window_daily()  # Saves results to Excel and S3
     """
 
     def __init__(self, dataframe=None):

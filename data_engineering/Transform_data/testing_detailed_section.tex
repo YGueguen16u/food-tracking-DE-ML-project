@@ -1,0 +1,201 @@
+\section{Test-Driven Development Strategy}
+
+\subsection{Testing Philosophy}
+The development process strictly follows Test-Driven Development (TDD) principles, where each module is developed only after its test suite is complete and passing. This approach ensures:
+
+\begin{itemize}
+    \item Complete test coverage before implementation
+    \item Validation of both Pandas and DuckDB implementations
+    \item Precise numerical accuracy in calculations
+    \item Comprehensive edge case handling
+\end{itemize}
+
+\subsection{Test Data Engineering}
+
+\subsubsection{Synthetic Dataset Design}
+Each test suite uses carefully engineered test data:
+
+\begin{lstlisting}[style=pythonstyle, caption=Test Data Example]
+cls.test_data = pd.DataFrame({
+    "date": ["2024-01-04", "2024-01-11"...],
+    "user_id": [1, 1, 2, 2...],
+    "total_calories": [2000, 2200...],
+    "Aliment": ["Cacahuètes", "Amandes"...]
+})
+\end{lstlisting}
+
+Key characteristics:
+\begin{itemize}
+    \item \textbf{Temporal Patterns:}
+    \begin{itemize}
+        \item Regular intervals (daily, weekly)
+        \item Multiple weeks of data
+        \item Specific weekday patterns
+    \end{itemize}
+    
+    \item \textbf{User Behaviors:}
+    \begin{itemize}
+        \item Multiple users with different patterns
+        \item Varied meal frequencies
+        \item Different nutritional profiles
+    \end{itemize}
+    
+    \item \textbf{Food Varieties:}
+    \begin{itemize}
+        \item Different food categories
+        \item Various nutritional compositions
+        \item Multiple portion sizes
+    \end{itemize}
+\end{itemize}
+
+\subsection{Test Suite Architecture}
+
+\subsubsection{Data Validation Tests}
+\texttt{test\_1\_combine\_meal\_data.py}:
+
+\begin{lstlisting}[style=pythonstyle, caption=Data Validation]
+def test_calculated_values(load_dataframe):
+    df_filtered = load_dataframe.dropna(subset=[
+        "total_calories", "Valeur calorique"
+    ])
+    calories_match = np.isclose(
+        df_filtered["total_calories"],
+        df_filtered["Valeur calorique"] * 
+        df_filtered["quantity"],
+        rtol=1e-5
+    )
+\end{lstlisting}
+
+Validation aspects:
+\begin{itemize}
+    \item Precise numerical calculations
+    \item Proper handling of missing data
+    \item Date/time format verification
+    \item Data integrity checks
+\end{itemize}
+
+\subsubsection{Aggregation Tests}
+\texttt{test\_3\_group\_data.py}:
+
+\begin{itemize}
+    \item \textbf{Test Data Structure:}
+    \begin{itemize}
+        \item Multiple days per user
+        \item Various meal times
+        \item Different food types
+    \end{itemize}
+    
+    \item \textbf{Validation Points:}
+    \begin{itemize}
+        \item Daily totals accuracy
+        \item User-specific aggregations
+        \item Food type groupings
+        \item Statistical computations
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Window Function Tests}
+Three specialized test modules:
+
+\paragraph{Daily Windows} \texttt{test\_4\_1\_window\_function\_daily.py}:
+\begin{itemize}
+    \item Pre-calculated rolling averages
+    \item 4-week patterns
+    \item Weekday-specific calculations
+\end{itemize}
+
+\begin{lstlisting}[style=pythonstyle, caption=Window Function Test]
+# Pre-calculated expected results
+cls.expected_output["rolling_avg_total_calories"] = [
+    2000.0,  # Initial value
+    2100.0,  # Average of first two
+    2080.0,  # Average of first three
+    2150.0   # Average of all four
+]
+\end{lstlisting}
+
+\paragraph{User Windows} \texttt{test\_4\_2\_window\_function\_user.py}:
+\begin{itemize}
+    \item User-specific patterns
+    \item 4-day rolling windows
+    \item Multiple metrics per user
+\end{itemize}
+
+\paragraph{Food Type Analysis} \texttt{test\_4\_3\_window\_function\_type\_food.py}:
+\begin{itemize}
+    \item Category proportions
+    \item Nutritional distributions
+    \item Time-based patterns
+\end{itemize}
+
+\subsection{Percentage Change Analysis}
+
+\subsubsection{Daily Changes}
+\texttt{test\_5\_1\_percentage\_change\_daily.py}:
+
+\begin{lstlisting}[style=pythonstyle, caption=Percentage Change Test]
+cls.expected_output["percentage_change_total_calories"] = [
+    0.0,    # Base value
+    4.76,   # (2200-2100)/2100 * 100
+    -1.92,  # (2040-2080)/2080 * 100
+    9.77    # (2360-2150)/2150 * 100
+]
+\end{lstlisting}
+
+Test characteristics:
+\begin{itemize}
+    \item Manual calculation verification
+    \item Edge case handling
+    \item Precision control
+\end{itemize}
+
+\subsubsection{User Changes}
+\texttt{test\_5\_2\_percentage\_change\_user.py}:
+\begin{itemize}
+    \item Individual baseline calculations
+    \item Personal trend analysis
+    \item Multi-user validation
+\end{itemize}
+
+\subsection{Testing Infrastructure}
+
+\subsubsection{Base Classes}
+Common testing infrastructure:
+\begin{itemize}
+    \item \texttt{TestDataSetup} for shared data
+    \item \texttt{setUp} methods for each test class
+    \item Cleanup procedures
+    \item Error handling
+\end{itemize}
+
+\subsubsection{Assertion Methods}
+Specialized validation:
+\begin{itemize}
+    \item \texttt{assert\_frame\_equal} with specific tolerances
+    \item Date format verification
+    \item Numerical precision checks
+    \item Data integrity validation
+\end{itemize}
+
+\subsection{Development Process}
+
+\subsubsection{TDD Workflow}
+Step-by-step approach:
+\begin{enumerate}
+    \item Design test data with known outcomes
+    \item Implement comprehensive test suite
+    \item Verify test failures with empty implementation
+    \item Develop feature to pass tests
+    \item Refactor while maintaining test coverage
+\end{enumerate}
+
+\subsubsection{Quality Gates}
+Implementation requirements:
+\begin{itemize}
+    \item All tests must pass
+    \item Both implementations must match exactly
+    \item Edge cases must be handled
+    \item Performance metrics must be acceptable
+\end{itemize}
+
+This rigorous testing approach ensures the reliability and accuracy of the nutritional data pipeline, with particular emphasis on numerical precision, data integrity, and implementation consistency between Pandas and DuckDB approaches.

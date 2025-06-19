@@ -1,7 +1,30 @@
 """
-This module calculates rolling averages of meal data using both Pandas and DuckDB.
-It calculates the average of the last 4 same weekdays (e.g., Thursdays).
-The results are saved as Excel files in the same directory as the input file.
+This module implements rolling window functions for daily meal data analysis using both Pandas and DuckDB.
+
+The module focuses on calculating trailing averages of nutritional metrics (calories, proteins, etc.)
+for the same weekday over a 4-week period. For example, it computes the average of the last 4 Thursdays
+for each nutritional metric, providing insights into weekly patterns and trends.
+
+Key Features:
+    - Dual implementation using both Pandas and DuckDB for performance comparison
+    - Rolling 4-week window calculations specific to each weekday
+    - Automated data loading from S3 and result storage
+    - Handles both aggregated daily data and user-specific metrics
+    - Maintains data integrity with proper date handling and sorting
+
+Input Data:
+    - Expects aggregated daily meal data from the group_data transformation step
+    - Required columns: date, weekday, and various nutritional metrics
+
+Output:
+    - Excel files containing the original data enriched with rolling averages
+    - Separate files for Pandas and DuckDB implementations for comparison
+    - Results are stored both locally and in S3 for further analysis
+
+Dependencies:
+    - pandas: For DataFrame operations and Excel I/O
+    - duckdb: For SQL-based window function calculations
+    - aws_s3.connect_s3: For S3 storage integration
 """
 
 import os
@@ -16,16 +39,44 @@ import pandas as pd
 
 class PandasWindowFunction:
     """
-    Class to compute a window function in Pandas that calculates the rolling average of the last
-    4 same weekdays for the Daily dataset.
+    A class implementing rolling window functions for daily meal data analysis using Pandas.
+
+    This class calculates trailing averages of nutritional metrics for the same weekday over
+    a 4-week period. For example, for each Thursday, it computes the average of the nutritional
+    values from the previous 4 Thursdays.
+
+    Attributes:
+        s3 (S3Manager): Instance of S3Manager for cloud storage operations
+        dataframe (pd.DataFrame): The input DataFrame containing daily aggregated meal data
+            Required columns:
+                - date: Date of the meals
+                - weekday: Day of the week (0-6)
+                - calories: Total calories for the day
+                - proteins: Total proteins for the day
+                - carbohydrates: Total carbohydrates for the day
+                - lipids: Total lipids for the day
 
     Methods:
-        compute_daily_window_pandas: Computes rolling averages for a DataFrame.
-        pandas_window_daily: Saves the processed data into an Excel file.
+        compute_daily_window_pandas: Computes 4-week rolling averages by weekday
+        pandas_window_daily: Saves the processed data to Excel and S3
+
+    Example:
+        >>> window_func = PandasWindowFunction()
+        >>> df_with_averages = window_func.compute_daily_window_pandas()
+        >>> window_func.pandas_window_daily()  # Saves results to Excel and S3
     """
 
     def __init__(self, dataframe=None):
-        """Initializes the data by loading the main dataset and food type data."""
+        """
+        Initializes the data by loading the main dataset and food type data.
+
+        Args:
+            dataframe (pd.DataFrame, optional): Pre-loaded meal data DataFrame.
+                If None, data will be loaded from S3.
+
+        Raises:
+            FileNotFoundError: If required files cannot be downloaded from S3
+        """
         self.s3 = S3Manager()
         
         if dataframe is not None:
@@ -68,6 +119,9 @@ class PandasWindowFunction:
         """
         Saves the result of the weekly window function into the 'data' folder,
         with the output file named 'daily_window_function_pandas.xlsx'.
+
+        Raises:
+            FileNotFoundError: If required files cannot be downloaded from S3
         """
         # Compute the rolling averages
         result_df = self.compute_daily_window_pandas()
@@ -89,15 +143,46 @@ class PandasWindowFunction:
 
 class DuckDBWindowFunction:
     """
-    Class to compute a window function in DuckDB that calculates the rolling average of the last
-    4 same weekdays for the Daily dataset.
+    A class implementing rolling window functions for daily meal data analysis using DuckDB.
+
+    This class provides an alternative SQL-based implementation of the rolling window calculations
+    using DuckDB's window functions. It calculates trailing averages of nutritional metrics for
+    the same weekday over a 4-week period, similar to the Pandas implementation but potentially
+    with better performance for larger datasets.
+
+    The implementation uses SQL window functions with PARTITION BY and ORDER BY clauses to
+    efficiently compute rolling averages while maintaining data grouped by weekday.
+
+    Attributes:
+        s3 (S3Manager): Instance of S3Manager for cloud storage operations
+        dataframe (pd.DataFrame): The input DataFrame containing daily aggregated meal data
+            Required columns:
+                - date: Date of the meals
+                - total_calories: Total calories for the day
+                - total_lipids: Total lipids for the day
+                - total_carbs: Total carbohydrates for the day
+                - total_protein: Total proteins for the day
 
     Methods:
-        compute_daily_window_pandas: Computes rolling averages for a DataFrame.
-        duckdb_window_daily: Saves the processed data into an Excel file.
+        compute_daily_window_duckdb: Computes 4-week rolling averages using SQL window functions
+        duckdb_window_daily: Saves the processed data to Excel and S3
+
+    Example:
+        >>> window_func = DuckDBWindowFunction()
+        >>> df_with_averages = window_func.compute_daily_window_duckdb()
+        >>> window_func.duckdb_window_daily()  # Saves results to Excel and S3
     """
     def __init__(self, dataframe=None):
-        """Initializes the data by loading the main dataset and food type data."""
+        """
+        Initializes the data by loading the main dataset and food type data.
+        
+        Args:
+            dataframe (pd.DataFrame, optional): Pre-loaded meal data DataFrame.
+                If None, data will be loaded from S3.
+
+        Raises:
+            FileNotFoundError: If required files cannot be downloaded from S3
+        """
         self.s3 = S3Manager()
         
         if dataframe is not None:
@@ -182,6 +267,9 @@ class DuckDBWindowFunction:
         """
         Saves the result of the weekly window function into the 'data' folder,
         with the output file named 'daily_window_function_duckdb.xlsx'.
+        
+        Raises:
+            FileNotFoundError: If required files cannot be downloaded from S3  
         """
         # Compute the rolling averages
         result_df = self.compute_daily_window_duckdb()

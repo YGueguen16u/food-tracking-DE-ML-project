@@ -1,0 +1,160 @@
+\section{Testing Strategy}
+
+\subsection{Overview}
+The testing strategy follows a strict Test-Driven Development (TDD) approach, where each transformation module is thoroughly tested before proceeding to the next stage. This ensures data integrity and correct calculations throughout the pipeline.
+
+\subsection{Testing Philosophy}
+\begin{itemize}
+    \item \textbf{Test-First Development:} Tests are written before implementing the actual functionality
+    \item \textbf{Comprehensive Coverage:} Each transformation stage has its own test suite
+    \item \textbf{Synthetic Data:} Carefully crafted test data to verify edge cases
+    \item \textbf{Dual Implementation Testing:} Both Pandas and DuckDB implementations are tested
+\end{itemize}
+
+\subsection{Test Data Generation}
+Test data is created with specific characteristics:
+\begin{itemize}
+    \item Small but representative datasets
+    \item Known input-output relationships
+    \item Edge cases and special scenarios
+    \item Consistent date ranges and user patterns
+\end{itemize}
+
+\subsection{Test Suites}
+
+\subsubsection{Meal Data Combination Tests}
+\texttt{test\_1\_combine\_meal\_data.py}:
+\begin{itemize}
+    \item Tests meal record combination logic
+    \item Verifies correct joining of user and meal data
+    \item Validates nutritional calculations
+    \item Ensures proper handling of missing data
+\end{itemize}
+
+\begin{lstlisting}[style=pythonstyle, caption=Meal Combination Test Example]
+def test_meal_combination(self):
+    # Test data with known relationships
+    test_meals = pd.DataFrame({
+        'meal_id': [1, 2],
+        'user_id': [1, 1],
+        'date': ['2024-04-01', '2024-04-01']
+    })
+    # Verify combined results
+    assert_frame_equal(result, expected)
+\end{lstlisting}
+
+\subsubsection{Data Aggregation Tests}
+\texttt{test\_3\_group\_data.py}:
+\begin{itemize}
+    \item Tests daily and user-based aggregations
+    \item Verifies group-by operations
+    \item Validates statistical calculations
+    \item Tests both Pandas and DuckDB implementations
+\end{itemize}
+
+\begin{lstlisting}[style=pythonstyle, caption=Aggregation Test Example]
+class TestPandasAggregation(TestDataSetup):
+    def test_daily_totals(self):
+        aggregator = PandasAggregation(self.test_dataframe)
+        result = aggregator.compute_daily_totals()
+        # Verify daily calculations
+\end{lstlisting}
+
+\subsubsection{Window Function Tests}
+Three test suites for different window analyses:
+
+\paragraph{Daily Windows} \texttt{test\_4\_1\_window\_function\_daily.py}:
+\begin{itemize}
+    \item Tests daily rolling calculations
+    \item Verifies date-based windows
+    \item Validates statistical aggregations
+\end{itemize}
+
+\paragraph{User Windows} \texttt{test\_4\_2\_window\_function\_user.py}:
+\begin{itemize}
+    \item Tests user-specific patterns
+    \item Verifies rolling averages by user
+    \item Validates temporal sequences
+\end{itemize}
+
+\paragraph{Food Type Windows} \texttt{test\_4\_3\_window\_function\_type\_food.py}:
+\begin{itemize}
+    \item Tests food category analysis
+    \item Verifies nutritional proportions
+    \item Validates category groupings
+\end{itemize}
+
+\subsubsection{Percentage Change Tests}
+Two test suites for change analysis:
+
+\paragraph{Daily Changes} \texttt{test\_5\_1\_percentage\_change\_daily.py}:
+\begin{itemize}
+    \item Tests weekday-based changes
+    \item Verifies 4-week rolling averages
+    \item Validates percentage calculations
+\end{itemize}
+
+\begin{lstlisting}[style=pythonstyle, caption=Percentage Change Test]
+def test_percentage_changes(self):
+    # Test data spanning 4 weeks
+    dates = pd.date_range('2024-03-01', '2024-03-28')
+    # Verify percentage calculations
+    assert_frame_equal(result, expected)
+\end{lstlisting}
+
+\paragraph{User Changes} \texttt{test\_5\_2\_percentage\_change\_user.py}:
+\begin{itemize}
+    \item Tests user-specific changes
+    \item Verifies 4-day rolling averages
+    \item Validates individual patterns
+\end{itemize}
+
+\subsection{Testing Best Practices}
+
+\subsubsection{Test Structure}
+Each test suite follows a consistent pattern:
+\begin{enumerate}
+    \item Setup test data in \texttt{setUpClass}
+    \item Define expected results
+    \item Execute transformations
+    \item Assert equality with expected results
+    \item Cleanup resources
+\end{enumerate}
+
+\subsubsection{Assertion Strategies}
+Different types of assertions are used:
+\begin{itemize}
+    \item \texttt{assert\_frame\_equal}: For DataFrame comparisons
+    \item \texttt{assertEqual}: For scalar values
+    \item \texttt{assertAlmostEqual}: For floating-point comparisons
+    \item \texttt{assertRaises}: For error handling
+\end{itemize}
+
+\subsection{Test Data Examples}
+Example of synthetic test data:
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|l|l|l|l|l|}
+        \hline
+        \textbf{meal\_id} & \textbf{user\_id} & \textbf{date} & \textbf{calories} & \textbf{protein} \\
+        \hline
+        1 & 1 & 2024-04-01 & 500 & 20 \\
+        2 & 1 & 2024-04-01 & 700 & 30 \\
+        3 & 2 & 2024-04-01 & 600 & 25 \\
+        \hline
+    \end{tabular}
+    \caption{Example Test Dataset}
+\end{table}
+
+\subsection{Quality Assurance Process}
+Testing workflow:
+\begin{enumerate}
+    \item Write tests for new functionality
+    \item Implement the feature
+    \item Run all tests to ensure no regressions
+    \item Verify edge cases and error handling
+    \item Document test cases and expected behavior
+\end{enumerate}
+
+This comprehensive testing strategy ensures the reliability and accuracy of the nutritional data pipeline, with each transformation stage thoroughly validated before proceeding to the next phase.

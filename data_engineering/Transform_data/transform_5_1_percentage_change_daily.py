@@ -1,7 +1,37 @@
 """
-This script calculates percentage changes in nutrients for meal data.
-The changes are relative to the rolling average of the last 4 same weekdays.
-It generates Excel files with the processed data for further analysis.
+This module analyzes trends in nutritional intake by calculating 
+percentage changes relative to historical averages.
+
+The module computes how current nutritional values (calories, proteins, etc.) 
+deviate from the rolling average of the same weekday over the past 4 weeks. 
+This analysis helps identify significant changes in eating patterns 
+and potential areas for dietary adjustments.
+
+Key Features:
+    - Calculates percentage deviations from 4-week weekday averages
+    - Dual implementation using both Pandas and DuckDB for performance comparison
+    - Automated data loading from S3 and result storage
+    - Handles missing data and edge cases appropriately
+    - Maintains data integrity with proper date handling and sorting
+
+Input Data:
+    - Expects data from the window function transformation step
+    - Required columns: date, weekday, nutritional metrics, and their rolling averages
+
+Output:
+    - Excel files containing original data enriched with percentage changes
+    - Separate files for Pandas and DuckDB implementations for comparison
+    - Results include both absolute values and percentage changes
+
+Dependencies:
+    - pandas: For DataFrame operations and Excel I/O
+    - duckdb: For SQL-based calculations
+    - aws_s3.connect_s3: For S3 storage integration
+
+Example Use Cases:
+    - Identifying significant changes in caloric intake patterns
+    - Monitoring adherence to dietary goals
+    - Detecting unusual deviations in nutrient consumption
 """
 
 import os
@@ -17,12 +47,37 @@ from aws_s3.connect_s3 import S3Manager
 
 class PandasPercentageChange:
     """
-    Class to compute percentage changes in nutrient values compared to the average of the last
-    4 same weekdays for the Daily dataset using Pandas.
+    A class implementing percentage change calculations for daily nutritional metrics using Pandas.
+
+    This class analyzes how current nutritional values deviate from historical patterns by
+    calculating percentage changes relative to rolling averages. For example, it can show
+    if today's caloric intake is 20% higher than the average of the last 4 Thursdays,
+    helping identify significant changes in eating patterns.
+
+    The implementation uses the rolling averages computed by the window function module
+    as a baseline and calculates percentage deviations from these averages. Special
+    handling is implemented for edge cases like zero averages or missing data.
+
+    Attributes:
+        s3 (S3Manager): Instance of S3Manager for cloud storage operations
+        dataframe (pd.DataFrame): The input DataFrame containing daily nutritional data
+            Required columns:
+                - date: Date of the meals
+                - weekday: Day of the week
+                - total_calories: Total calories for the day
+                - total_proteins: Total proteins for the day
+                - total_carbohydrates: Total carbohydrates for the day
+                - total_lipids: Total lipids for the day
+                - rolling_avg_* columns: Rolling averages from window function
 
     Methods:
-        compute_daily_percentage_change_pandas: Computes percentage changes for a DataFrame.
-        pandas_percentage_change_daily: Saves the processed data into an Excel file.
+        compute_daily_percentage_change_pandas: Calculates percentage changes from averages
+        pandas_percentage_change_daily: Saves the processed data to Excel and S3
+
+    Example:
+        >>> pct_change = PandasPercentageChange()
+        >>> df_with_changes = pct_change.compute_daily_percentage_change_pandas()
+        >>> pct_change.pandas_percentage_change_daily()  # Saves results to Excel and S3
     """
 
     def __init__(self, dataframe=None):
@@ -53,6 +108,7 @@ class PandasPercentageChange:
         self.dataframe["date"] = pd.to_datetime(self.dataframe["date"])
         daily_dataframe = self.dataframe.sort_values("date")
 
+        # Compute rolling averages
         for col in ["total_calories", "total_lipids", "total_carbs", "total_protein"]:
             rolling_col = f"rolling_avg_{col}"
             daily_dataframe[rolling_col] = daily_dataframe.groupby("weekday")[
@@ -90,12 +146,35 @@ class PandasPercentageChange:
 
 class DuckDBPercentageChange:
     """
-    Class to compute percentage changes in nutrient values compared to the average of the last
-    4 same weekdays for the Daily dataset using DuckDB.
+    A class implementing percentage change calculations for daily nutritional metrics using DuckDB.
+
+    This class provides an SQL-based implementation for analyzing deviations from historical
+    nutritional patterns. It calculates how current nutrient values differ from rolling
+    averages of the same weekday over the past 4 weeks, expressed as percentage changes.
+
+    The implementation uses a series of CTEs (Common Table Expressions) for clarity and efficiency:
+    1. ranked_data: Extracts weekday information and assigns ranks for proper ordering
+    2. rolling_avg: Computes 4-week rolling averages using window functions
+    3. percentage_change: Calculates percentage deviations from the averages
+
+    Attributes:
+        s3 (S3Manager): Instance of S3Manager for cloud storage operations
+        dataframe (pd.DataFrame): The input DataFrame containing daily nutritional data
+            Required columns:
+                - date: Date of the meals
+                - total_calories: Total calories for the day
+                - total_proteins: Total proteins for the day
+                - total_carbohydrates: Total carbohydrates for the day
+                - total_lipids: Total lipids for the day
 
     Methods:
-        compute_daily_percentage_change_duckdb: Computes percentage changes for a DataFrame.
-        duckdb_percentage_change_daily: Saves the processed data into an Excel file.
+        compute_daily_percentage_change_duckdb: Calculates percentage changes using SQL
+        duckdb_percentage_change_daily: Saves the processed data to Excel and S3
+
+    Example:
+        >>> pct_change = DuckDBPercentageChange()
+        >>> df_with_changes = pct_change.compute_daily_percentage_change_duckdb()
+        >>> pct_change.duckdb_percentage_change_daily()  # Saves results to Excel and S3
     """
 
     def __init__(self, dataframe=None):

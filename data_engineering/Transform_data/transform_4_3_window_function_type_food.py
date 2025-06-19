@@ -1,7 +1,35 @@
 """
-Computes nutrient proportions per food type for each user.
-Supports Pandas and DuckDB implementations.
-Saves results as Excel files in the 'data' directory.
+This module analyzes nutritional composition by food type for each user in the meal tracking system.
+
+The module calculates the proportions of different nutrients (calories, proteins, lipids,
+carbohydrates) contributed by each food type to a user's total intake. This analysis helps
+understand users' dietary patterns and preferences in terms of food choices.
+
+Key Features:
+    - Calculates nutrient proportions by food type for each user
+    - Dual implementation using both Pandas and DuckDB for performance comparison
+    - Automated data loading from S3 and result storage
+    - Handles aggregation and proportion calculations efficiently
+    - Maintains data integrity with proper grouping and calculations
+
+Input Data:
+    - Expects user and food type aggregated data from the group_data transformation step
+    - Required columns: user_id, Type (food type), and various nutritional metrics
+
+Output:
+    - Excel files containing proportional analysis of nutrients by food type
+    - Separate files for Pandas and DuckDB implementations for comparison
+    - Results include percentage contributions of each food type to total nutrients
+
+Dependencies:
+    - pandas: For DataFrame operations and Excel I/O
+    - duckdb: For SQL-based aggregation calculations
+    - aws_s3.connect_s3: For S3 storage integration
+
+Example Use Cases:
+    - Understanding which food types contribute most to a user's protein intake
+    - Analyzing caloric distribution across different food categories
+    - Identifying patterns in users' food type preferences
 """
 
 import os
@@ -16,8 +44,36 @@ import pandas as pd
 
 class PandasProportionCalculation:
     """
-    Class to compute proportions of total calories, lipids, proteins, and carbs
-    per user and food type using Pandas.
+    A class implementing food type proportion calculations using Pandas.
+
+    This class analyzes the nutritional composition of users' diets by calculating
+    the proportion of nutrients (calories, proteins, lipids, carbohydrates) that
+    comes from each food type. For example, it can show what percentage of a user's
+    protein intake comes from meat vs. dairy vs. vegetables.
+
+    The implementation uses Pandas groupby operations to first aggregate nutrients
+    by user and food type, then calculates proportions relative to each user's
+    total intake.
+
+    Attributes:
+        s3 (S3Manager): Instance of S3Manager for cloud storage operations
+        dataframe (pd.DataFrame): The input DataFrame containing user and food type data
+            Required columns:
+                - user_id: Unique identifier for each user
+                - Type: Food type category
+                - total_calories: Total calories for this food type
+                - total_proteins: Total proteins for this food type
+                - total_carbohydrates: Total carbohydrates for this food type
+                - total_lipids: Total lipids for this food type
+
+    Methods:
+        compute_proportions_pandas: Calculates nutrient proportions by food type
+        pandas_proportion_results: Saves the processed data to Excel and S3
+
+    Example:
+        >>> prop_calc = PandasProportionCalculation()
+        >>> df_with_proportions = prop_calc.compute_proportions_pandas()
+        >>> prop_calc.pandas_proportion_results()  # Saves results to Excel and S3
     """
     def __init__(self, dataframe=None):
         """Initializes the data by loading the main dataset and food type data."""
@@ -84,8 +140,37 @@ class PandasProportionCalculation:
 
 class DuckDBProportionCalculation:
     """
-    Class to compute proportions of total calories, lipids, proteins, and carbs
-    per user and food type using DuckDB.
+    A class implementing food type proportion calculations using DuckDB.
+
+    This class provides an SQL-based implementation for analyzing nutritional composition
+    by food type using DuckDB's efficient query engine. It calculates what proportion of
+    each user's total nutrient intake comes from different food types (e.g., what percentage
+    of total calories comes from vegetables vs. proteins).
+
+    The implementation uses SQL Common Table Expressions (CTEs) for clarity and efficiency:
+    1. First CTE 'grouped' aggregates nutrients by user and food type
+    2. Second CTE 'user_totals' calculates total nutrients per user
+    3. Final query joins these to compute proportions with proper handling of floating-point division
+
+    Attributes:
+        s3 (S3Manager): Instance of S3Manager for cloud storage operations
+        dataframe (pd.DataFrame): The input DataFrame containing user and food type data
+            Required columns:
+                - user_id: Unique identifier for each user
+                - Type: Food type category
+                - total_calories: Total calories for this food type
+                - total_proteins: Total proteins for this food type
+                - total_carbohydrates: Total carbohydrates for this food type
+                - total_lipids: Total lipids for this food type
+
+    Methods:
+        compute_proportions_duckdb: Calculates nutrient proportions using SQL
+        duckdb_proportion_results: Saves the processed data to Excel and S3
+
+    Example:
+        >>> prop_calc = DuckDBProportionCalculation()
+        >>> df_with_proportions = prop_calc.compute_proportions_duckdb()
+        >>> prop_calc.duckdb_proportion_results()  # Saves results to Excel and S3
     """
     def __init__(self, dataframe=None):
         """Initializes the data by loading the main dataset and food type data."""
