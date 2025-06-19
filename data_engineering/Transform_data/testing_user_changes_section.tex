@@ -1,0 +1,130 @@
+\subsection{User-Based Percentage Change Tests}
+
+\subsubsection{Test Data Structure}
+\texttt{test\_5\_2\_percentage\_change\_user.py} utilise un jeu de données sophistiqué :
+
+\begin{lstlisting}[style=pythonstyle, caption=User Test Data Setup]
+cls.test_data = pd.DataFrame({
+    "date": ["2024-01-01", "2024-01-02"...],
+    "user_id": [1, 1, 1, 1, 1, 1, 1, 1,  # User 1
+                2, 2, 2, 2, 2, 2, 2, 2],  # User 2
+    "total_calories": [
+        2000, 2100, 2200, 2300,  # Progressive increase
+        2400, 2500, 2600, 2700,  # User 1
+        1500, 1600, 1700, 1800,  # Lower baseline
+        1900, 2000, 2100, 2200   # User 2
+    ]
+})
+\end{lstlisting}
+
+Caractéristiques clés des données de test :
+\begin{itemize}
+    \item \textbf{Motifs Utilisateur:}
+    \begin{itemize}
+        \item User 1: Augmentation progressive régulière
+        \item User 2: Valeurs de base plus faibles
+        \item Séquences temporelles continues
+        \item Variations nutritionnelles cohérentes
+    \end{itemize}
+    
+    \item \textbf{Valeurs Pré-calculées:}
+    \begin{itemize}
+        \item Moyennes mobiles sur 4 jours
+        \item Changements en pourcentage attendus
+        \item Valeurs pour tous les nutriments
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Test Scenarios}
+Scénarios de test complets :
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        \textbf{User} & \textbf{Pattern} & \textbf{Initial} & \textbf{Final} \\
+        \hline
+        1 & Linear increase & 2000 cal & 2700 cal \\
+        2 & Lower baseline & 1500 cal & 2200 cal \\
+        \hline
+    \end{tabular}
+    \caption{User Test Patterns}
+\end{table}
+
+\subsubsection{Validation Points}
+Points de validation spécifiques :
+
+\begin{itemize}
+    \item \textbf{Calculs par Utilisateur:}
+    \begin{itemize}
+        \item Moyennes mobiles individuelles
+        \item Tendances personnelles
+        \item Variations quotidiennes
+    \end{itemize}
+    
+    \item \textbf{Métriques Nutritionnelles:}
+    \begin{itemize}
+        \item Calories totales
+        \item Lipides (progression +2g/jour)
+        \item Glucides (progression +5g/jour)
+        \item Protéines (progression +5g/jour)
+    \end{itemize}
+    
+    \item \textbf{Validation Temporelle:}
+    \begin{itemize}
+        \item Séquences continues
+        \item Intervalles réguliers
+        \item Périodes de 4 jours
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Expected Results}
+Résultats attendus précis :
+
+\begin{lstlisting}[style=pythonstyle, caption=Expected Results]
+# User 1 rolling averages
+rolling_avg_total_calories = [
+    2000.0,  # Initial value
+    2050.0,  # (2000 + 2100) / 2
+    2100.0,  # (2000 + 2100 + 2200) / 3
+    2150.0   # (2000 + 2100 + 2200 + 2300) / 4
+]
+
+# User 2 rolling averages
+rolling_avg_total_calories = [
+    1500.0,  # Initial value
+    1550.0,  # (1500 + 1600) / 2
+    1600.0,  # (1500 + 1600 + 1700) / 3
+    1650.0   # (1500 + 1600 + 1700 + 1800) / 4
+]
+\end{lstlisting}
+
+\subsubsection{Implementation Tests}
+Tests d'implémentation spécifiques :
+
+\begin{itemize}
+    \item \textbf{Pandas Implementation:}
+    \begin{itemize}
+        \item Groupby user\_id
+        \item Rolling window de 4 jours
+        \item Calculs de pourcentage
+    \end{itemize}
+    
+    \item \textbf{DuckDB Implementation:}
+    \begin{itemize}
+        \item Partition by user\_id
+        \item Window frame de 4 rows
+        \item CTEs pour les calculs
+    \end{itemize}
+\end{itemize}
+
+\subsubsection{Edge Cases}
+Cas limites testés :
+\begin{itemize}
+    \item Début de séquence utilisateur
+    \item Changements importants de valeurs
+    \item Transitions entre jours
+    \item Valeurs manquantes potentielles
+\end{itemize}
+
+Cette batterie de tests garantit que les changements de pourcentage par utilisateur sont calculés correctement, en tenant compte des spécificités de chaque utilisateur et en validant la cohérence des calculs sur l'ensemble des données nutritionnelles.

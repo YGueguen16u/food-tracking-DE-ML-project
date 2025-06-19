@@ -1,7 +1,29 @@
+# data_engineering/Transform_data/transform_5_2_percentage_change_user.py
+
 """
-This script calculates percentage changes in nutrients for meal data grouped by user_id.
-The changes use the rolling average of the last 4 days per user.
-It generates Excel files with the processed data for further analysis.
+This module calculates percentage changes in nutritional values for each user over time.
+
+It analyzes how a user's daily nutrient intake changes compared to their recent history,
+using a 4-day rolling average as the baseline. This helps identify trends and variations
+in individual dietary patterns.
+
+Key Features:
+    - User-specific analysis: Tracks changes for each user independently
+    - 4-day rolling window: Compares current intake to recent average
+    - Multiple nutrients: Analyzes calories, proteins, lipids, and carbohydrates
+    - Dual implementation: Both Pandas and DuckDB for performance comparison
+    - S3 integration: Loads data and saves results to AWS S3
+
+The module supports two processing approaches:
+1. Pandas: Using DataFrame operations and groupby functions
+2. DuckDB: Using SQL window functions and CTEs
+
+Output Format:
+    Excel files containing:
+    - Original nutritional values
+    - 4-day rolling averages per nutrient
+    - Percentage changes from rolling averages
+    - Results grouped by user_id and date
 """
 
 import os
@@ -16,12 +38,26 @@ import pandas as pd
 
 class PandasPercentageChange:
     """
-    Class to compute percentage changes in nutrient values compared to the average of the last
-    4 days grouped by user_id using Pandas.
-
+    Calculates user-specific nutrient intake changes using Pandas operations.
+    
+    This class analyzes how each user's nutritional intake changes over time by:
+    1. Computing 4-day rolling averages of nutrient intake
+    2. Calculating percentage changes from these averages
+    3. Organizing results by user and date
+    
+    The analysis covers multiple nutrients:
+    - Calories
+    - Proteins
+    - Lipids
+    - Carbohydrates
+    
+    Attributes:
+        s3 (S3Manager): Manager for AWS S3 operations
+        dataframe (pd.DataFrame): Input data containing user nutritional records
+    
     Methods:
-        compute_user_percentage_change_pandas: Computes percentage changes for a DataFrame.
-        pandas_percentage_change_daily: Saves the processed data into an Excel file.
+        compute_user_percentage_change_pandas: Calculates rolling averages and changes
+        pandas_percentage_change_daily: Saves results to Excel and uploads to S3
     """
 
     def __init__(self, dataframe=None):
@@ -42,15 +78,27 @@ class PandasPercentageChange:
 
     def compute_user_percentage_change_pandas(self):
         """
-        Computes percentage changes of nutrient values compared to the rolling average of the last
-        4 days for the dataset grouped by user_id using Pandas.
-
+        Computes percentage changes in nutrient values using Pandas operations.
+        
+        For each user, the function:
+        1. Sorts data chronologically
+        2. Calculates 4-day rolling averages for each nutrient
+        3. Computes percentage deviations from these averages
+        
+        The calculation uses the formula:
+        percentage_change = ((current_value - rolling_avg) / rolling_avg) * 100
+        
         Returns:
-            DataFrame: DataFrame with percentage changes and rolling averages added.
+            pd.DataFrame: DataFrame containing:
+                - Original columns (user_id, date, nutrient values)
+                - Rolling averages (rolling_avg_*)
+                - Percentage changes (percentage_change_*)
+                Sorted by user_id and date
         """
         self.dataframe["date"] = pd.to_datetime(self.dataframe["date"])
         user_dataframe = self.dataframe.sort_values(["user_id", "date"])
 
+        # Calculate rolling averages for each user
         for col in ["total_calories", "total_lipids", "total_carbs", "total_protein"]:
             rolling_col = f"rolling_avg_{col}"
             user_dataframe[rolling_col] = user_dataframe.groupby("user_id")[
@@ -67,8 +115,20 @@ class PandasPercentageChange:
 
     def pandas_percentage_change_daily(self):
         """
-        Saves the result of the percentage change computation into the 'data' folder,
-        with the output file named 'user_daily_percentage_change_pandas.xlsx'.
+        Saves the percentage change computation results to S3.
+        
+        The results are saved as an Excel file containing:
+        - Original nutrient values
+        - Rolling averages for each nutrient
+        - Percentage changes from the rolling averages
+        - Data grouped by user_id and sorted by date
+        
+        The file is saved to:
+        transform/folder_5_percentage_change/user/user_daily_percentage_change_pandas.xlsx
+        
+        Raises:
+            FileNotFoundError: If there are issues accessing S3
+            Exception: If there are computation or file handling errors
         """
         temp_file = "temp_percentage_pandas.xlsx"
         try:
@@ -87,12 +147,31 @@ class PandasPercentageChange:
 
 class DuckDBPercentageChange:
     """
-    Class to compute percentage changes in nutrient values compared to the average of the last
-    4 days grouped by user_id using DuckDB.
-
+    Calculates user-specific nutrient intake changes using DuckDB SQL operations.
+    
+    This class analyzes how each user's nutritional intake changes over time by:
+    1. Computing 4-day rolling averages using SQL window functions
+    2. Calculating percentage changes through CTEs
+    3. Organizing results by user and date
+    
+    SQL Implementation:
+    - ranked_data CTE: Assigns chronological ranks to each user's records
+    - rolling_avg CTE: Computes 4-day moving averages using window functions
+    - percentage_change CTE: Calculates deviations from rolling averages
+    
+    The analysis covers multiple nutrients:
+    - Calories
+    - Proteins
+    - Lipids
+    - Carbohydrates
+    
+    Attributes:
+        s3 (S3Manager): Manager for AWS S3 operations
+        dataframe (pd.DataFrame): Input data containing user nutritional records
+    
     Methods:
-        compute_user_percentage_change_duckdb: Computes percentage changes for a DataFrame.
-        duckdb_percentage_change_daily: Saves the processed data into an Excel file.
+        compute_user_percentage_change_duckdb: Executes SQL analysis pipeline
+        duckdb_percentage_change_daily: Saves results to Excel and uploads to S3
     """
 
     def __init__(self, dataframe=None):
@@ -113,11 +192,25 @@ class DuckDBPercentageChange:
 
     def compute_user_percentage_change_duckdb(self):
         """
-        Computes percentage changes of nutrient values compared to the rolling average of the last
-        4 days for the dataset grouped by user_id using DuckDB.
-
+        Computes percentage changes in nutrient values using DuckDB SQL operations.
+        
+        The function executes a SQL query that:
+        1. Ranks each user's records chronologically
+        2. Computes 4-day rolling averages using window functions
+        3. Calculates percentage deviations using the formula:
+           ((current - average) / average) * 100
+        
+        SQL Implementation Details:
+        - Uses CTEs for clear, modular query structure
+        - Employs window functions for efficient aggregation
+        - Handles all nutrients in a single pass
+        
         Returns:
-            DataFrame: DataFrame with percentage changes and rolling averages added.
+            pd.DataFrame: DataFrame containing:
+                - Original columns (user_id, date, nutrient values)
+                - Rolling averages (rolling_avg_*)
+                - Percentage changes (percentage_change_*)
+                Sorted by user_id and date
         """
         conn = duckdb.connect(database=":memory:")
         conn.register("dataframe", self.dataframe)
@@ -169,8 +262,20 @@ class DuckDBPercentageChange:
 
     def duckdb_percentage_change_daily(self):
         """
-        Saves the result of the percentage change computation into the 'data' folder,
-        with the output file named 'user_daily_percentage_change_duckdb.xlsx'.
+        Saves the percentage change computation results to S3.
+        
+        The results are saved as an Excel file containing:
+        - Original nutrient values
+        - Rolling averages computed via SQL window functions
+        - Percentage changes from the rolling averages
+        - Data grouped by user_id and sorted by date
+        
+        The file is saved to:
+        transform/folder_5_percentage_change/user/user_daily_percentage_change_duckdb.xlsx
+        
+        Raises:
+            FileNotFoundError: If there are issues accessing S3
+            Exception: If there are computation or file handling errors
         """
         temp_file = "temp_percentage_duckdb.xlsx"
         try:

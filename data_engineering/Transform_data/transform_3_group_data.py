@@ -1,6 +1,13 @@
+# data_engineering/Transform_data/transform_3_group_data.py
+
 """
 This module performs grouping and aggregation of meal data using both Pandas and DuckDB.
 It also compares the results and measures the execution time for both methods.
+
+Typical usage:
+    python transform_3_group_data.py
+
+The script will load the data from S3, perform validations, and display summary statistics.
 """
 
 import os
@@ -9,6 +16,7 @@ import sys
 import pandas as pd
 import duckdb
 
+# Add parent directory to sys.path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 from aws_s3.connect_s3 import S3Manager
 
@@ -24,7 +32,7 @@ class PandasAggregation:
     """
 
     def __init__(self, dataframe=None, food_type_data=None):
-        """Initializes the data by loading the main dataset and food type data."""
+
         self.s3 = S3Manager()
         
         if dataframe is not None:
@@ -55,7 +63,7 @@ class PandasAggregation:
                 if os.path.exists(temp_food_file):
                     os.remove(temp_food_file)
 
-        # Fusion des informations de type d'aliment avec le dataset principal
+        # Merge food type data with the main dataset
         self.dataframe = self.dataframe.merge(
             self.food_type_data[["Aliment", "Type"]], on="Aliment", how="left"
         )
@@ -76,6 +84,7 @@ class PandasAggregation:
         distinct_users_per_day = (
             self.dataframe.groupby("date")["user_id"].nunique().reset_index()
         )
+        # Rename columns
         distinct_users_per_day.columns = ["date", "distinct_user_count"]
 
         # Sum nutrients per day and divide by distinct user count for averages
@@ -246,8 +255,17 @@ class DuckDBAggregation:
     """
 
     def __init__(self, dataframe=None, food_type_data=None):
-        """Initializes the data by loading the main dataset and food type data and sets
-        up DuckDB connection.
+        """
+        Initializes the data by loading the main dataset and food type data.
+        
+        Args:
+            dataframe (pd.DataFrame, optional): Pre-loaded meal data DataFrame.
+                If None, data will be loaded from S3.
+            food_type_data (pd.DataFrame, optional): Pre-loaded food type reference data.
+                If None, data will be loaded from S3.
+                
+        Raises:
+            FileNotFoundError: If required files cannot be downloaded from S3
         """
         self.conn = duckdb.connect(database=":memory:")
         self.s3 = S3Manager()
@@ -279,7 +297,7 @@ class DuckDBAggregation:
                 if os.path.exists(temp_food_file):
                     os.remove(temp_food_file)
 
-        # Fusion des informations de type d'aliment avec le dataset principal
+        # Merge food type data with the main dataset
         self.dataframe = self.dataframe.merge(
             self.food_type_data[["Aliment", "Type"]], on="Aliment", how="left"
         )

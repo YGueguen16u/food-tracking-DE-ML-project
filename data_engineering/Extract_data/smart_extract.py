@@ -1,3 +1,20 @@
+# data_engineering/Extract_data/smart_extract.py
+
+"""
+Smart Data Extraction Module for Food Tracking Project
+
+This module provides a smart data extraction script that:
+    - Determines the latest date in S3
+    - Starts extraction from the next month
+    - Handles progress tracking and logging
+    - Includes error handling and logging
+    
+Typical usage:
+    python smart_extract.py
+
+The script will output the extraction progress to the console and exit with
+status code 1 if any errors occur.  
+"""
 import sys
 import os
 from datetime import datetime
@@ -8,22 +25,25 @@ from aws_s3.connect_s3 import S3Manager
 
 def get_latest_date_from_s3():
     """
-    Parcourt les fichiers dans S3 pour trouver la date la plus récente
-    Retourne un tuple (année, mois) ou None si aucun fichier trouvé
+    Gets the latest date from S3 (in YYYY_MM format) if available
+
+    Returns:
+        tuple: (year, month) if a file is found, None otherwise
     """
+
     try:
         s3 = S3Manager()
         files = s3.list_files("raw_data_ingestion/")
         
         if not files:
-            print("Aucun fichier trouvé dans S3. Démarrage depuis le début...")
+            print("No files found in S3. Starting from the beginning...")
             return None
             
-        # Extraction des dates (YYYY_MM) des noms de fichiers
+        # Extract the dates (YYYY_MM) from the file names
         dates = []
         for file in files:
             try:
-                # Le nom du fichier est le dernier élément après '/'
+                # The file name is the last element after '/'
                 filename = file.split('/')[-1]
                 year, month = map(int, filename.split('_')[:2])
                 dates.append((year, month))
@@ -33,49 +53,66 @@ def get_latest_date_from_s3():
         if not dates:
             return None
             
-        # Trouve la date la plus récente
+        # Find the latest date
         latest_date = max(dates)
-        print(f"Date la plus récente trouvée : {latest_date[0]}-{latest_date[1]:02d}")
+        print(f"Latest date found: {latest_date[0]}-{latest_date[1]:02d}")
         return latest_date
         
     except Exception as e:
-        print(f"Erreur lors de la recherche de la dernière date : {str(e)}")
+        print(f"Error while searching for the latest date: {str(e)}")
         return None
 
 def get_start_date():
     """
-    Détermine la date de départ pour l'extraction
+    Determine the starting date for data extraction.
+    
+    Returns:
+        str: Start date in YYYY-MM-DD format
+        
+    The function either:
+    - Uses the month following the latest date found in S3
+    - Or starts one year before current date if no data exists
     """
     latest_date = get_latest_date_from_s3()
     
     if latest_date is None:
-        # Si aucune date trouvée, commence un an avant aujourd'hui
+        # If no date found, start one year ago
         start_date = datetime.now() - relativedelta(years=1)
-        print(f"Aucune date trouvée. Démarrage depuis : {start_date.strftime('%Y-%m-%d')}")
+        print(f"No date found. Starting from: {start_date.strftime('%Y-%m-%d')}")
     else:
-        # Prend le premier jour du mois suivant
+        # Take the first day of the next month
         year, month = latest_date
         start_date = datetime(year, month, 1) + relativedelta(months=1)
-        print(f"Reprise de l'extraction à partir du : {start_date.strftime('%Y-%m-%d')}")
+        print(f"Resuming extraction from: {start_date.strftime('%Y-%m-%d')}")
     
     return start_date.strftime("%Y-%m-%d")
 
 def run_extract_data(start_date):
     """
-    Lance le script extract_data.py avec la date de départ
+    Run the extract_data.py script with the given start date.
+    
+    Args:
+        start_date (str): Start date in YYYY-MM-DD format
+        
+    Raises:
+        SystemExit: If the extract_data.py script fails
     """
     script_path = os.path.join(os.path.dirname(__file__), 'extract_data.py')
-    print(f"Lancement de l'extraction depuis {start_date}...")
+    print(f"Starting extraction from {start_date}...")
     
     try:
         subprocess.run([sys.executable, script_path, start_date], check=True)
     except subprocess.CalledProcessError as e:
-        print(f"Erreur lors de l'exécution de extract_data.py : {str(e)}")
+        print(f"Error running extract_data.py: {str(e)}")
         sys.exit(1)
 
 def main():
     """
-    Fonction principale pour l'extraction des données
+    Main function for smart data extraction.
+    
+    This function:
+    1. Gets the appropriate start date
+    2. Runs the data extraction process
     """
     start_date = get_start_date()
     run_extract_data(start_date)

@@ -1,3 +1,12 @@
+# AI/anomaly_detection/training/train_model.py
+
+"""
+Script for training the anomaly detection model.
+
+This script loads meal data, prepares it for training, and trains the anomaly detection model.
+It also provides functions for loading and saving the model, as well as for making predictions.
+"""
+
 import os
 import sys
 import pandas as pd
@@ -7,7 +16,7 @@ from sklearn.model_selection import train_test_split
 import json
 import tempfile
 
-# Ajouter le chemin racine au PYTHONPATH
+# Add parent directory to sys.path
 root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(root_dir)
 
@@ -17,17 +26,17 @@ from aws_s3.connect_s3 import S3Manager
 
 def prepare_training_data(filtered_data, daily_stats, food_proportions):
     """
-    Prépare les données pour l'entraînement
+    Prepare the data for training
     
     Args:
-        filtered_data (pd.DataFrame): Données filtrées des repas
-        daily_stats (pd.DataFrame): Statistiques quotidiennes
-        food_proportions (pd.DataFrame): Proportions par type d'aliment
+        filtered_data (pd.DataFrame): Filtered meal data
+        daily_stats (pd.DataFrame): Daily statistics
+        food_proportions (pd.DataFrame): Food proportions
         
     Returns:
-        pd.DataFrame: Données préparées pour l'entraînement
+        pd.DataFrame: Prepared data for training
     """
-    # Fusionner avec les statistiques quotidiennes
+    # Merge with daily statistics
     merged_data = pd.merge(
         filtered_data,
         daily_stats[['date', 'rolling_avg_total_calories', 'rolling_avg_total_lipids',
@@ -43,7 +52,7 @@ def prepare_training_data(filtered_data, daily_stats, food_proportions):
     for col in numeric_columns:
         merged_data[col] = pd.to_numeric(merged_data[col], errors='coerce')
     
-    # Calculer les écarts par rapport aux moyennes mobiles
+    # Calculate deviations from rolling averages
     merged_data['calories_deviation'] = (
         merged_data['total_calories'] - merged_data['rolling_avg_total_calories']
     ) / merged_data['rolling_avg_total_calories']
@@ -63,18 +72,29 @@ def prepare_training_data(filtered_data, daily_stats, food_proportions):
     return merged_data
 
 def calculate_model_statistics(detector, train_data, test_data, results_df):
-    """Calcule les statistiques détaillées du modèle."""
+    """
+    Calculate detailed model statistics.
     
-    # Statistiques générales
+    Args:
+        detector (MealAnomalyDetector): Trained anomaly detector
+        train_data (pd.DataFrame): Training data
+        test_data (pd.DataFrame): Test data
+        results_df (pd.DataFrame): Results DataFrame
+        
+    Returns:
+        dict: Detailed model statistics
+    """
+    
+    # General statistics
     total_samples = len(results_df)
     anomaly_samples = results_df['is_anomaly'].sum()
     normal_samples = total_samples - anomaly_samples
     
-    # Statistiques par type de nutriment pour les anomalies
+    # Nutrient statistics for anomalies
     anomaly_df = results_df[results_df['is_anomaly']]
     normal_df = results_df[~results_df['is_anomaly']]
     
-    # Calcul des moyennes et écarts-types
+    # Calculate means and standard deviations
     stats = {
         "general_statistics": {
             "total_samples": int(total_samples),
@@ -153,69 +173,72 @@ def calculate_model_statistics(detector, train_data, test_data, results_df):
     return stats
 
 def train_and_save_model():
-    """Entraîne et sauvegarde le modèle de détection d'anomalies"""
+    """
+    Train and save the anomaly detection model
+    """
     
-    # Initialiser S3Manager
+    # Initialize S3Manager
     s3_manager = S3Manager()
     
-    # Créer un dossier temporaire
+    # Create a temporary directory
     temp_dir = tempfile.mkdtemp()
     
-    print("Chargement des données...")
+    print("Loading data...")
     loader = DataLoader()
     filtered_data, daily_stats, food_proportions = loader.load_training_data()
     
+    # Check if data was loaded successfully
     if filtered_data is None or daily_stats is None or food_proportions is None:
-        print("Erreur lors du chargement des données")
+        print("Error loading data")
         return
     
-    print("Préparation des données...")
+    print("Preparing data...")
     training_data = prepare_training_data(filtered_data, daily_stats, food_proportions)
     
-    # Diviser en ensembles d'entraînement et de test
+    # Split into training and test sets
     train_data, test_data = train_test_split(
         training_data,
         test_size=0.2,
         random_state=42
     )
     
-    print("Entraînement du modèle...")
+    print("Training model...")
     detector = MealAnomalyDetector(contamination=0.1)
     detector.fit(train_data)
     
-    print("Évaluation du modèle...")
+    print("Evaluating model...")
     test_predictions = detector.predict(test_data)
     
-    # Calculer quelques métriques
+    # Calculate metrics
     anomaly_rate = (test_predictions['is_anomaly'].sum() / len(test_predictions)) * 100
-    print(f"Taux d'anomalies détectées: {anomaly_rate:.2f}%")
+    print(f"Anomaly detection rate: {anomaly_rate:.2f}%")
     
-    # Analyser quelques anomalies
+    # Analyze anomalies
     analyzer = AnomalyAnalyzer()
     anomalies = test_predictions[test_predictions['is_anomaly']]
     
-    print("\nExemples d'anomalies détectées:")
+    print("\nExamples of detected anomalies:")
     for _, anomaly in anomalies.head().iterrows():
         reasons = analyzer.analyze_anomaly(anomaly)
-        print(f"\nRepas du {anomaly['date']} à {anomaly['heure']}:")
+        print(f"\nMeal on {anomaly['date']} at {anomaly['heure']}:")
         print(f"- Calories: {anomaly['total_calories']:.0f}")
-        print(f"- Score d'anomalie: {anomaly['anomaly_score']:.3f}")
-        print("Raisons possibles:")
+        print(f"- Anomaly score: {anomaly['anomaly_score']:.3f}")
+        print("Possible reasons:")
         for reason in reasons:
             print(f"  * {reason}")
     
-    # Sauvegarder les résultats dans S3
-    print("\nSauvegarde des résultats dans S3...")
+    # Save results to S3
+    print("\nSaving results to S3...")
     
     try:
-        # 1. Sauvegarder les prédictions
+        # 1. Save predictions
         predictions_key = "AI/anomaly_detection/results/anomalies_detected.xlsx"
         temp_predictions = os.path.join(temp_dir, "predictions.xlsx")
         with pd.ExcelWriter(temp_predictions) as writer:
             test_predictions.to_excel(writer, index=False)
         s3_manager.upload_with_overwrite(temp_predictions, predictions_key)
         
-        # 2. Sauvegarder les statistiques
+        # 2. Save statistics
         stats = calculate_model_statistics(detector, train_data, test_data, test_predictions)
         stats_key = "AI/anomaly_detection/results/model_statistics.json"
         temp_stats = os.path.join(temp_dir, "stats.json")
@@ -223,27 +246,27 @@ def train_and_save_model():
             json.dump(stats, f, indent=4, ensure_ascii=False)
         s3_manager.upload_with_overwrite(temp_stats, stats_key)
         
-        # 3. Sauvegarder le modèle
+        # 3. Save model
         model_key = "AI/anomaly_detection/models/trained_model.joblib"
         temp_model = os.path.join(temp_dir, "model.joblib")
         detector.save(temp_model)
         s3_manager.upload_with_overwrite(temp_model, model_key)
         
-        print("\nFichiers sauvegardés dans S3:")
-        print(f"- Prédictions: {predictions_key}")
-        print(f"- Statistiques: {stats_key}")
-        print(f"- Modèle: {model_key}")
+        print("\nFiles saved to S3:")
+        print(f"- Predictions: {predictions_key}")
+        print(f"- Statistics: {stats_key}")
+        print(f"- Model: {model_key}")
         
     finally:
-        # Nettoyage : supprimer les fichiers temporaires
+        # Clean up temporary files
         import shutil
         shutil.rmtree(temp_dir, ignore_errors=True)
     
-    # Affichage de quelques statistiques clés
-    print(f"\nStatistiques clés:")
-    print(f"- Nombre total d'échantillons: {stats['general_statistics']['total_samples']}")
-    print(f"- Taux d'anomalies: {stats['general_statistics']['anomaly_rate']}%")
-    print(f"- Score moyen d'anomalie: {stats['anomaly_statistics']['mean_anomaly_score']}")
+    # Display some key statistics
+    print(f"\nKey statistics:")
+    print(f"- Total samples: {stats['general_statistics']['total_samples']}")
+    print(f"- Anomaly rate: {stats['general_statistics']['anomaly_rate']}%")
+    print(f"- Mean anomaly score: {stats['anomaly_statistics']['mean_anomaly_score']}")
 
 if __name__ == "__main__":
     train_and_save_model()

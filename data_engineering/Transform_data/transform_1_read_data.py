@@ -1,6 +1,21 @@
+# data_engineering/Transform_data/transform_1_read_data.py
+
 """
+Data Reading and Validation Module
+
 This module reads the combined meal data from S3 and performs initial data validation.
+It includes checks for:
+    - Required columns presence
+    - Date and time format validation
+    - Null value detection
+    - Basic statistics calculation
+
+Typical usage:
+    python transform_1_read_data.py
+
+The script will load the data from S3, perform validations, and display summary statistics.
 """
+
 
 import os
 import sys
@@ -13,10 +28,21 @@ from aws_s3.connect_s3 import S3Manager
 
 def read_combined_data_from_s3():
     """
-    Read the combined meal data from S3.
+    Read the combined meal data from S3 and perform initial validation.
+    
+    This function:
+        1. Downloads the combined meal data Excel file from S3
+        2. Validates the presence of required columns
+        3. Converts date and time columns to proper formats
+        4. Performs basic data validation checks
+        5. Sorts data by date and time
     
     Returns:
-        pd.DataFrame: Combined meal data with nutritional values
+        pd.DataFrame: Combined meal data with nutritional values, sorted by date and time
+        
+    Raises:
+        ValueError: If required columns are missing
+        FileNotFoundError: If the S3 file cannot be downloaded
     """
     s3 = S3Manager()
     s3_key = "transform/folder_1_combine/combined_meal_data.xlsx"
@@ -69,7 +95,20 @@ def read_combined_data_from_s3():
 
 def main():
     """
-    Main function to read and validate the combined meal data
+    Main function to read and validate the combined meal data.
+    
+    This function:
+        1. Reads the combined meal data from S3
+        2. Displays the total number of records
+        3. Shows the date range of the data
+        4. Reports the number of unique users and meals
+        5. Provides summary statistics for nutritional values
+    
+    Returns:
+        pd.DataFrame: The validated and processed DataFrame
+        
+    Raises:
+        Exception: If any error occurs during data reading or processing
     """
     try:
         print("Reading combined meal data from S3...")

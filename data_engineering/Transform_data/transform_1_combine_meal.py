@@ -1,3 +1,5 @@
+# data_engineering/Transform_data/transform_1_combine_meal.py
+
 """
 This module processes and combines multiple CSV files containing meal data from S3,
 merges them with a reference aliment table, and calculates total nutritional
@@ -12,7 +14,12 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 from aws_s3.connect_s3 import S3Manager
 
 def download_and_process_s3_files():
-    """Download and process CSV files from S3"""
+    """
+    Download and process CSV files from S3
+    
+    Returns:
+        list: List of DataFrames containing the processed data
+    """
     s3 = S3Manager()
     dataframes = []
     
@@ -37,6 +44,9 @@ def download_and_process_s3_files():
 def main():
     """
     Main function to combine meal data
+    
+    Raises:
+        SystemExit: If any error occurs during the process
     """
     try:
         print("Combining meal data...")

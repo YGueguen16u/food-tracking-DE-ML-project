@@ -1,3 +1,27 @@
+# aws_s3/connect_s3.py
+
+"""
+AWS S3 Manager Module
+
+This module provides a comprehensive interface for interacting with AWS S3 storage.
+It implements a flexible authentication system supporting multiple credential sources
+and provides a complete set of operations for file management in S3 buckets.
+
+Features:
+    - Multi-source authentication (Streamlit secrets, env vars, .env file)
+    - Complete file operations (upload, download, list, delete)
+    - JSON data handling
+    - AI results storage
+    - Comprehensive error handling and logging
+    - File overwrite capabilities
+
+Typical usage:
+    s3 = S3Manager()
+    s3.upload_file('local_file.txt', 's3_key.txt')
+    files = s3.list_files()
+    s3.download_file('s3_key.txt', 'local_copy.txt')
+"""
+
 import os
 import configparser
 import boto3
@@ -277,17 +301,17 @@ class S3Manager:
             bool: True if file was uploaded, else False
         """
         try:
-            # Vérifier si le fichier existe
+            # Check if the file exists
             try:
                 self.s3_client.head_object(Bucket=self.bucket_name, Key=s3_key)
-                logger.info(f"Le fichier {s3_key} existe déjà dans S3 et sera écrasé")
+                logger.info(f"The file {s3_key} already exists in S3 and will be overwritten")
             except ClientError as e:
                 if e.response['Error']['Code'] == '404':
                     logger.info(f"Le fichier {s3_key} n'existe pas encore dans S3")
                 else:
                     raise e
                     
-            # Upload le fichier (écrase si existe)
+            # Upload the file (overwrites if exists)
             self.s3_client.upload_file(file_path, self.bucket_name, s3_key)
             logger.info(f"Successfully uploaded {file_path} to {self.bucket_name}/{s3_key}")
             return True

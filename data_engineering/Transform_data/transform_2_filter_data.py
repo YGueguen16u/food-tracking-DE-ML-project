@@ -1,6 +1,13 @@
+# data_engineering/Transform_data/transform_2_filter_data.py
+
 """
 This module contains functions for cleaning and filtering meal data.
 It also handles S3 operations for input and output data.
+
+Typical usage:
+    python transform_2_filter_data.py
+
+The script will load the data from S3, perform validations, and display summary statistics.
 """
 
 import os
@@ -8,6 +15,7 @@ import sys
 import pandas as pd
 from typing import Optional
 
+# Add parent directory to sys.path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 from aws_s3.connect_s3 import S3Manager
 
@@ -23,6 +31,7 @@ def load_from_s3() -> Optional[pd.DataFrame]:
     temp_input = "temp_input.xlsx"
     
     try:
+        # Download file temporarily
         if s3.download_file(input_key, temp_input):
             return pd.read_excel(temp_input)
         return None
@@ -30,6 +39,7 @@ def load_from_s3() -> Optional[pd.DataFrame]:
         print(f"Error loading data from S3: {str(e)}")
         return None
     finally:
+        # Clean up temporary file
         if os.path.exists(temp_input):
             os.remove(temp_input)
 
@@ -57,6 +67,7 @@ def save_to_s3(df: pd.DataFrame) -> bool:
         print(f"Error saving data to S3: {str(e)}")
         return False
     finally:
+        # Clean up temporary file
         if os.path.exists(temp_output):
             os.remove(temp_output)
 
@@ -80,17 +91,18 @@ def clean_meal_data(df: pd.DataFrame) -> pd.DataFrame:
     critical_columns = [
         "aliment_id",
         "quantity",
-        "Valeur calorique",  # Original column name
-        "Lipides",           # Original column name
-        "Glucides",          # Original column name
-        "Protein"            # Original column name
+        "Valeur calorique",  
+        "Lipides",           
+        "Glucides",          
+        "Protein"            
     ]
     
     # Verify all critical columns exist
     missing_columns = [col for col in critical_columns if col not in df.columns]
     if missing_columns:
         raise ValueError(f"Missing critical columns: {missing_columns}")
-        
+    
+    # Remove records with null values in critical columns
     df_cleaned = df.dropna(subset=critical_columns)
     print(f"\nRows removed due to null values: {len(df) - len(df_cleaned)}")
     
@@ -117,7 +129,11 @@ def clean_meal_data(df: pd.DataFrame) -> pd.DataFrame:
 
     # Remove rows marked as "High"
     high_values_mask = df_cleaned["quantity_status"] == "High"
+
+    # Log deleted rows for this step
     deleted_rows_log.append(df_cleaned[high_values_mask])
+
+    # Remove rows marked as "High"
     df_cleaned = df_cleaned[~high_values_mask]
     print(f"Rows removed due to high values: {high_values_mask.sum()}")
 
@@ -154,6 +170,8 @@ def main():
         
         if input_df is not None:
             print("Applying cleaning filters...")
+            
+            # Clean the data
             filtered_df = clean_meal_data(input_df)
             print("Saving filtered data to S3...")
             if save_to_s3(filtered_df):

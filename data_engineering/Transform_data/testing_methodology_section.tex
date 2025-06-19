@@ -1,0 +1,183 @@
+\section{Testing Methodology}
+
+\subsection{Overview}
+The data pipeline employs a rigorous testing methodology that follows Test-Driven Development (TDD) principles. Each transformation module is thoroughly tested with synthetic data designed to validate specific functionalities and edge cases.
+
+\subsection{Testing Philosophy}
+\begin{itemize}
+    \item \textbf{Test-First Development:}
+    \begin{itemize}
+        \item Tests written before implementation
+        \item Synthetic data created with known outcomes
+        \item Edge cases identified and tested
+    \end{itemize}
+    
+    \item \textbf{Dual Implementation Validation:}
+    \begin{itemize}
+        \item Parallel testing of Pandas and DuckDB
+        \item Identical results required from both
+        \item Performance comparison enabled
+    \end{itemize}
+\end{itemize}
+
+\subsection{Test Suites}
+
+\subsubsection{Meal Data Validation (test\_1\_combine\_meal\_data.py)}
+Comprehensive validation of nutritional calculations:
+
+\begin{lstlisting}[style=pythonstyle, caption=Nutritional Calculation Tests]
+def test_calculated_values(load_dataframe):
+    """Test that calculated nutritional values are correct."""
+    df_filtered = load_dataframe.dropna(subset=[
+        "total_calories", "Valeur calorique",
+        "total_lipids", "Lipides",
+        "total_carbs", "Glucides",
+        "total_protein", "Protein"
+    ])
+    
+    # Verify calculations with tolerance
+    calories_match = np.isclose(
+        df_filtered["total_calories"],
+        df_filtered["Valeur calorique"] * df_filtered["quantity"],
+        rtol=1e-5
+    )
+    assert calories_match.all(), "Mismatch in calculations!"
+\end{lstlisting}
+
+Key test cases:
+\begin{itemize}
+    \item Nutritional value calculations
+    \item Date and time format validation
+    \item Unique record ID verification
+    \item Missing data handling
+\end{itemize}
+
+\subsubsection{Data Aggregation Testing (test\_3\_group\_data.py)}
+Comprehensive test data structure:
+
+\begin{lstlisting}[style=pythonstyle, caption=Test Data Setup]
+@classmethod
+def setUpClass(cls):
+    cls.test_dataframe = pd.DataFrame({
+        "meal_record_id": [1, 2, 3, 4...],
+        "user_id": [1, 1, 2, 2...],
+        "date": ["2024-04-01", "2024-04-01"...],
+        "Aliment": ["Cacahuètes", "Amandes"...],
+        "Valeur calorique": [828, 600...]
+    })
+\end{lstlisting}
+
+Test scenarios:
+\begin{itemize}
+    \item Daily aggregations
+    \item User-specific totals
+    \item Food type grouping
+    \item Statistical calculations
+\end{itemize}
+
+\subsubsection{Window Function Testing (test\_4\_*\_window\_function\_*.py)}
+Three specialized test suites:
+
+\paragraph{Daily Windows (test\_4\_1)}
+\begin{itemize}
+    \item 4-week rolling averages
+    \item Weekday-specific calculations
+    \item Date handling validation
+\end{itemize}
+
+\begin{lstlisting}[style=pythonstyle, caption=Window Function Test Data]
+cls.test_data = pd.DataFrame({
+    "date": ["2024-01-04", "2024-01-11"...],
+    "total_calories": [2000, 2200...],
+    "total_lipids": [20, 22...],
+    # Pre-calculated expected results
+    "rolling_avg_total_calories": [2000.0, 2100.0...]
+})
+\end{lstlisting}
+
+\paragraph{User Windows (test\_4\_2)}
+\begin{itemize}
+    \item User-specific patterns
+    \item Time-based aggregations
+    \item Rolling calculations
+\end{itemize}
+
+\paragraph{Food Type Analysis (test\_4\_3)}
+\begin{itemize}
+    \item Category-based calculations
+    \item Nutritional proportions
+    \item Food type patterns
+\end{itemize}
+
+\subsection{Test Data Design}
+
+\subsubsection{Synthetic Data Generation}
+Carefully crafted test data:
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|l|l|p{8cm}|}
+        \hline
+        \textbf{Data Type} & \textbf{Example} & \textbf{Purpose} \\
+        \hline
+        Meals & Cacahuètes, Amandes & Test different food categories \\
+        Nutrients & 828 kcal, 20g protein & Validate calculations \\
+        Dates & 2024-04-01 & Test temporal patterns \\
+        Users & ID: 1,2,3,4 & Test user grouping \\
+        \hline
+    \end{tabular}
+    \caption{Test Data Categories}
+\end{table}
+
+\subsubsection{Edge Cases}
+Specific scenarios tested:
+\begin{itemize}
+    \item Missing nutrient values
+    \item Zero quantities
+    \item Duplicate records
+    \item Invalid dates/times
+    \item Boundary dates
+\end{itemize}
+
+\subsection{Testing Infrastructure}
+
+\subsubsection{Test Base Classes}
+Common test infrastructure:
+\begin{itemize}
+    \item TestDataSetup for shared data
+    \item Fixture-based data loading
+    \item Cleanup procedures
+    \item Error tolerance settings
+\end{itemize}
+
+\subsubsection{Assertion Strategies}
+Specialized comparisons:
+\begin{itemize}
+    \item DataFrame equality checks
+    \item Floating-point tolerances
+    \item Date format validation
+    \item Null handling
+\end{itemize}
+
+\subsection{Development Workflow}
+
+\subsubsection{TDD Process}
+Step-by-step approach:
+\begin{enumerate}
+    \item Create test data with known outcomes
+    \item Write test cases for new functionality
+    \item Implement the feature
+    \item Verify against both implementations
+    \item Document test cases and data
+\end{enumerate}
+
+\subsubsection{Quality Gates}
+Testing requirements:
+\begin{itemize}
+    \item All tests must pass
+    \item Both implementations must match
+    \item Edge cases must be covered
+    \item Performance metrics collected
+\end{itemize}
+
+This comprehensive testing methodology ensures the reliability and accuracy of the nutritional data pipeline, with particular emphasis on data integrity, calculation accuracy, and implementation consistency between Pandas and DuckDB approaches.
